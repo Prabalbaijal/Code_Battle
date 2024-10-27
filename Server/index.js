@@ -19,7 +19,7 @@ app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 app.use(cookieParser())
 
-// app.use("/api/users",UserRoute)
+app.use("/api/users",UserRoute)
 
 app.listen(PORT,()=>{
     connectDB()

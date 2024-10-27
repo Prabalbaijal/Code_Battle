@@ -4,9 +4,10 @@ import './index.css'
 import App from './App.jsx'
 import Login from './Components/Login/Login.jsx'
 
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
-    <Login></Login>
+   <App></App>
+   <Login></Login>
   </StrictMode>,
 )

@@ -71,7 +71,7 @@ const userSchema = new mongoose.Schema({
 
 userSchema.methods.updateLevel = function() {
   if (this.coins >= 1000) this.level = 10;
-  else if (this.coins >= 500) this.level = 5;
+  else if (this.coins >= 500) this.level = 5+;
   else this.level = Math.floor(this.coins / 100) + 1;
 };
 

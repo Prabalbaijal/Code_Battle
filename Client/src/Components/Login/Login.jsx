@@ -84,7 +84,7 @@ export default function Login() {
                         <label className="form-control w-full max-w-xs">
                             <div className="flex flex-col md:flex-row justify-between">
                                 <span className="label-text">Avatar</span>
-                                <span className="label-text-alt">Alt label</span>
+                                {/* <span className="label-text-alt">Alt label</span> */}
                             </div>
                             <input
                                 type="file"
