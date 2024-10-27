@@ -100,16 +100,17 @@ export default function Login() {
                         </label>
 
                         <label className="form-control w-full max-w-xs">
-                            <div className="flex flex-col md:flex-row justify-between">
-                                <span className="label-text ">Avatar</span>
-                                {/* <span className="label-text-alt">Alt label</span> */}
-                            </div>
-                            <input
-                                type="file"
-                                className="file-input file-input-bordered w-full max-w-xs mt-2"
-                                accept="image/*"
-                            />
-                        </label>
+    <div className="flex flex-col md:flex-row justify-between">
+        <span className="label-text text-gray-700 text-lg ml-4">Avatar</span>
+    </div>
+    <input
+        type="file"
+        className="w-full mt-2 p-0 focus:outline-none cursor-pointer ml-4"
+        accept="image/*"
+    />
+</label>
+
+
 
                         <button className="btn btn-wide bg-green-500 text-white rounded-md p-2 mt-4 w-full">Sign Up</button>
                     </>
