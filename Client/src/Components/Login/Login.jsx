@@ -11,7 +11,24 @@ export default function Login() {
 
                 {isSignUp ? (
                     <>
-            
+
+                        <label className="flex items-center gap-2 mb-2 w-72">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className="h-5 w-5 opacity-70">
+                                <path
+                                    d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.866 0-7 3.134-7 7v1h14v-1c0-3.866-3.134-7-7-7z" />
+                            </svg>
+                            <input
+                                type="text"
+                                className="grow p-2 border-b border-gray-300 focus:outline-none"
+                                placeholder="FullName"
+                            />
+                        </label>
+
+
                         <label className="flex items-center gap-2 mb-2 w-72">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -84,7 +101,7 @@ export default function Login() {
 
                         <label className="form-control w-full max-w-xs">
                             <div className="flex flex-col md:flex-row justify-between">
-                                <span className="label-text">Avatar</span>
+                                <span className="label-text ">Avatar</span>
                                 {/* <span className="label-text-alt">Alt label</span> */}
                             </div>
                             <input
