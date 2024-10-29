@@ -1,0 +1,54 @@
+/* UserStatsSection.css */
+
+/* Background scrolling animation */
+@keyframes backgroundScroll {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 100% 100%;
+    }
+  }
+  .bg-graph-background {
+    background-image: url('/path/to/graph-background-image.jpg'); /* Add your own background image here */
+  }
+  .animate-backgroundScroll {
+    animation: backgroundScroll 20s linear infinite;
+  }
+  
+  /* Fade-in animation for individual stats */
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 1s ease-in-out forwards;
+  }
+  
+  /* Delay effect for sequential animations */
+  .animate-fadeIn.delay-100 {
+    animation-delay: 0.1s;
+  }
+  .animate-fadeIn.delay-200 {
+    animation-delay: 0.2s;
+  }
+  
+  /* Progress bar animation */
+  @keyframes progressBar {
+    0% {
+      width: 0;
+    }
+    100% {
+      width: 60%; /* Adjust to desired completion percentage */
+    }
+  }
+  .animate-progressBar .bg-purple-500 {
+    animation: progressBar 1.5s ease-in-out forwards;
+  }
+  
