@@ -83,7 +83,7 @@ export default function Login() {
             withCredentials: true
           });
           if (res.data.success) {
-            navigate("/dashboard");
+            navigate("/home");
             dispatch(setLoggedinUser(res.data));
             toast.error(`Welcome ${res.data.fullname}`, {
               icon: '👋'
