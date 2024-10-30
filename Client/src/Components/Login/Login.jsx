@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 export default function Login() {
-    const [isSignUp, setIsSignUp] = useState(false); // State to toggle between Login and Sign Up
+    const [isSignUp, setIsSignUp] = useState(false); 
 
     const [registeruser, setRegisterUser] = useState({
         fullname: "",
@@ -30,7 +30,9 @@ export default function Login() {
         if (registeruser.avatar) {
           formData.append('avatar', registeruser.avatar);
         }
-      
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
         const loadingToastId = toast.loading('Signing up...');
       
         try {
