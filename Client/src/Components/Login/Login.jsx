@@ -3,7 +3,8 @@ import './Login.css'; // Keep your existing styles if needed.
 import axios from "axios";
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import {useDispatch} from 'react-redux'
+import { useDispatch } from 'react-redux'
+import { setLoggedinUser } from '../../redux/userSlice.js';
 
 export default function Login() {
     const [isSignUp, setIsSignUp] = useState(false); 
@@ -84,7 +85,7 @@ export default function Login() {
           if (res.data.success) {
             navigate("/dashboard");
             dispatch(setLoggedinUser(res.data));
-            toast.error(`Welcome ${res.data.firstName} ${res.data.lastName}`, {
+            toast.error(`Welcome ${res.data.fullname}`, {
               icon: '👋'
             });
           }
@@ -95,7 +96,7 @@ export default function Login() {
             toast.error("Something went wrong!!");
         }
         setLoginUser({
-          email: "",
+          username: "",
           password: ""
         });
       };

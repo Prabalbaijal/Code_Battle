@@ -1,5 +1,5 @@
 import express from "express"
-import { register } from "../controllers/UserControllers.js"
+import { register,login } from "../controllers/UserControllers.js"
 import { upload } from "../middlewares/multer.js"
 import multer from "multer"
 

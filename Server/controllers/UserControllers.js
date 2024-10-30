@@ -106,9 +106,9 @@ export const login = async (req, res) => {
             .json({
                 _id: user._id,
                 email: user.email,
-                firstName: user.fullname,
-                lastName: user.username,
-                profilePicture:user.avatar,
+                fullname:user.fullname,
+                username:user.username,
+                avatar:user.avatar,
                 success: true
             })
 
