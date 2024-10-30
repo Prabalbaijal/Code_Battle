@@ -3,8 +3,7 @@ import './Login.css'; // Keep your existing styles if needed.
 import axios from "axios";
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-
-
+import {useDispatch} from 'react-redux'
 
 export default function Login() {
     const [isSignUp, setIsSignUp] = useState(false); 
@@ -17,6 +16,14 @@ export default function Login() {
         confirmPassword: "",
         avatar: null 
       });
+
+      const [loginuser, setLoginUser] = useState({
+        username: "",
+        password: ""
+      });
+      
+      const navigate = useNavigate();
+      const dispatch = useDispatch();
       
       const SignupSubmitHandler = async (e) => {
         e.preventDefault();
@@ -63,6 +70,34 @@ export default function Login() {
       
       const handleFileChange = (e) => {
         setRegisterUser({ ...registeruser, avatar: e.target.files[0] });
+      };
+
+      const LoginSubmitHandler = async (e) => {
+        e.preventDefault();
+        try {
+          const res = await axios.post('http://localhost:9000/api/users/login', loginuser, {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            withCredentials: true
+          });
+          if (res.data.success) {
+            navigate("/dashboard");
+            dispatch(setLoggedinUser(res.data));
+            toast.error(`Welcome ${res.data.firstName} ${res.data.lastName}`, {
+              icon: '👋'
+            });
+          }
+        } catch (error) {
+          if (error.response)
+            toast.error(error.response.data.message);
+          else
+            toast.error("Something went wrong!!");
+        }
+        setLoginUser({
+          email: "",
+          password: ""
+        });
       };
       
     return (
@@ -182,6 +217,7 @@ export default function Login() {
                     </>
                 ) : (
                     <>
+                    <form onSubmit={LoginSubmitHandler}>
                         <label className="flex items-center gap-2 mb-2 w-72">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -195,6 +231,7 @@ export default function Login() {
                                 type="text"
                                 className="p-2 border-b border-gray-300 grow focus:outline-none"
                                 placeholder="Username"
+                                value={loginuser.username} onChange={(e) => setLoginUser({ ...loginuser, username: e.target.value })}
                             />
                         </label>
 
@@ -213,10 +250,12 @@ export default function Login() {
                                 type="password"
                                 className="p-2 border-b border-gray-300 grow focus:outline-none"
                                 placeholder="Password"
+                                value={loginuser.password} onChange={(e) => setLoginUser({ ...loginuser, password: e.target.value })}
                             />
                         </label>
 
                         <button className="w-full p-2 mt-4 text-white bg-blue-500 rounded-md btn btn-wide">Login</button>
+                        </form>
                     </>
                 )}
 
