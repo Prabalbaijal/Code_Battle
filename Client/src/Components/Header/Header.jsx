@@ -66,9 +66,9 @@ const Header = () => {
             </div>
           </div>
           <ul tabIndex={0} className="p-2 mt-3 bg-gray-800 shadow dropdown-content rounded-box w-52">
-            <li><a href="/profile">Profile</a></li>
-            <li><a href="/settings">Settings</a></li>
-            <li onClick={logoutFunction} className='cursor-pointer'>Logout</li>
+            <li className='p-2'><a href="/profile">Profile</a></li>
+            <li className='p-2'><a href="/settings">Settings</a></li>
+            <li onClick={logoutFunction} className='p-2 cursor-pointer'>Logout</li>
           </ul>
         </div>
       </div>
