@@ -7,7 +7,9 @@ export const register = async (req, res) => {
     try {
         const { fullname, username, email, password, confirmPassword } = req.body
         const avatar = req.file ? req.file.path : null // Get the uploaded file path
-
+        if (!avatar) {
+            return res.status(400).json({ message: "Avatar is required. hai hi nhi" });
+        }
         if (!fullname || !username || !email || !password || !confirmPassword) {
             return res.status(400).json({ message: "All fields are required!!" })
         }
@@ -30,6 +32,9 @@ export const register = async (req, res) => {
             if (uploadResponse) {
                 avatarUrl = uploadResponse.secure_url;
             }
+        }
+        if (!avatarUrl) {
+            return res.status(400).json({ message: "Avatar is required." });
         }
         
         const user = await User.create({

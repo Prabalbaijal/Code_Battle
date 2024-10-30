@@ -23,11 +23,8 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   avatar: {
-    url: {
-      type: String,
-      default: 'default-avatar-url', 
-    },
-    publicId: String,
+    type:String,
+    required:true
   },
   coins: {
     type: Number,
