@@ -2,6 +2,7 @@ import {User} from '../models/Usermodel.js'
 import { uploadOnCloudinary } from '../config/cloudinary.js'
 import validator from 'validator'
 import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
 export const register = async (req, res) => {
     try {
@@ -67,3 +68,55 @@ export const register = async (req, res) => {
     }
 }
 
+export const login = async (req, res) => {
+    try {
+        const { username, password } = req.body
+        if (!username || !password) {
+            return res.status(400).json({ message: "Please fill all the required fields." })
+        }
+
+        const user = await User.findOne({ username })
+        if (!user) {
+            return res.status(400).json({
+                message: "Invalid user!!",
+                success: false
+            })
+        }
+
+        const matchPassword = await bcrypt.compare(password, user.password)
+        if (!matchPassword) {
+            return res.status(400).json({
+                message: "Incorrect Password!!",
+                success: false
+            })
+        }
+
+        const tokenData = {
+            userId: user._id
+        }
+        const token = await jwt.sign(tokenData, process.env.JWT_SECRET, {
+            expiresIn: '1d'
+        })
+
+        return res.status(200).cookie("token", token, {
+            maxAge: 1 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+            sameSite: 'strict'
+        })
+            .json({
+                _id: user._id,
+                email: user.email,
+                firstName: user.fullname,
+                lastName: user.username,
+                profilePicture:user.avatar,
+                success: true
+            })
+
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({
+            message: 'Server Error',
+            success: false
+        })
+    }
+}
