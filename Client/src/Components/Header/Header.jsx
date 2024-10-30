@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 const Header = () => {
+  const { loggedinUser } = useSelector(store => store.user);
+  
   const [isChallengesOpen, setIsChallengesOpen] = useState(false);
 
   const toggleChallenges = () => {
@@ -8,12 +11,12 @@ const Header = () => {
   };
 
   return (
-    <header className="navbar sticky top-0 bg-gradient-to-r from-purple-700 via-blue-700 to-indigo-700 text-white shadow-lg z-50">
+    <header className="sticky top-0 z-50 text-white shadow-lg navbar bg-gradient-to-r from-purple-700 via-blue-700 to-indigo-700">
       <div className="navbar-start">
-        <a href="/" className="btn btn-ghost text-2xl font-bold">Code Battle</a>
+        <a href="/" className="text-2xl font-bold btn btn-ghost">Code Battle</a>
       </div>
-      <div className="navbar-end flex items-center gap-4">
-        <ul className="menu menu-horizontal hidden lg:flex">
+      <div className="flex items-center gap-4 navbar-end">
+        <ul className="hidden menu menu-horizontal lg:flex">
           <li><a href="/">Home</a></li>
           <li><a href="/leaderboard">Leaderboard</a></li>
           <li><a href="/practice-mode">Practice Mode</a></li>
@@ -28,10 +31,10 @@ const Header = () => {
               </svg>
             </button>
             {isChallengesOpen && (
-              <ul className="absolute top-full left-0 mt-1 bg-gray-800 text-white p-2 rounded shadow-lg w-48">
-                <li><a href="/quick-match" className="hover:bg-gray-700 p-2 rounded">Quick Match</a></li>
-                <li><a href="/challenge-friend" className="hover:bg-gray-700 p-2 rounded">Challenge a Friend</a></li>
-                <li><a href="/daily-challenge" className="hover:bg-gray-700 p-2 rounded">Daily Challenge</a></li>
+              <ul className="absolute left-0 w-48 p-2 mt-1 text-white bg-gray-800 rounded shadow-lg top-full">
+                <li><a href="/quick-match" className="p-2 rounded hover:bg-gray-700">Quick Match</a></li>
+                <li><a href="/challenge-friend" className="p-2 rounded hover:bg-gray-700">Challenge a Friend</a></li>
+                <li><a href="/daily-challenge" className="p-2 rounded hover:bg-gray-700">Daily Challenge</a></li>
               </ul>
             )}
           </li>
@@ -42,10 +45,10 @@ const Header = () => {
         <div className="dropdown dropdown-end">
           <div tabIndex={0} className="btn btn-ghost btn-circle avatar">
             <div className="w-10 rounded-full">
-              <img alt="User Avatar" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+              <img alt="User Avatar" src={loggedinUser?.avatar} />
             </div>
           </div>
-          <ul tabIndex={0} className="dropdown-content bg-gray-800 rounded-box mt-3 w-52 p-2 shadow">
+          <ul tabIndex={0} className="p-2 mt-3 bg-gray-800 shadow dropdown-content rounded-box w-52">
             <li><a href="/profile">Profile</a></li>
             <li><a href="/settings">Settings</a></li>
             <li><a href="/logout">Logout</a></li>
