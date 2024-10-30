@@ -1,8 +1,25 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { setLoggedinUser } from '../../redux/userSlice.js'
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const Header = () => {
   const { loggedinUser } = useSelector(store => store.user);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
+  const logoutFunction = async () => {
+    try {
+        const res = await axios.get('http://localhost:9000/api/users/logout');
+        navigate("/");
+        toast.success(res.data.message);
+        dispatch(setLoggedinUser(null));
+    } catch (error) {
+        console.log(error);
+    }
+};
   
   const [isChallengesOpen, setIsChallengesOpen] = useState(false);
 
@@ -51,7 +68,7 @@ const Header = () => {
           <ul tabIndex={0} className="p-2 mt-3 bg-gray-800 shadow dropdown-content rounded-box w-52">
             <li><a href="/profile">Profile</a></li>
             <li><a href="/settings">Settings</a></li>
-            <li><a href="/logout">Logout</a></li>
+            <li onClick={logoutFunction} className='cursor-pointer'>Logout</li>
           </ul>
         </div>
       </div>
