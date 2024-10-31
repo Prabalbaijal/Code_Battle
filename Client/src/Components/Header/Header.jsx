@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,Link } from 'react-router-dom';
 import { setLoggedinUser } from '../../redux/userSlice.js'
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -49,7 +49,7 @@ const Header = () => {
             </button>
             {isChallengesOpen && (
               <ul className="absolute left-0 w-48 p-2 mt-1 text-white bg-gray-800 rounded shadow-lg top-full">
-                <li><a href="/quick-match" className="p-2 rounded hover:bg-gray-700">Quick Match</a></li>
+                <li><Link to = "/match">Quick Match</Link></li>
                 <li><a href="/challenge-friend" className="p-2 rounded hover:bg-gray-700">Challenge a Friend</a></li>
                 <li><a href="/daily-challenge" className="p-2 rounded hover:bg-gray-700">Daily Challenge</a></li>
               </ul>
