@@ -75,6 +75,10 @@ const Problem = () => {
             {/* Navbar */}
             <nav className={`sticky top-0 flex items-center justify-between p-4 ${darkMode ? 'bg-gray-800' : 'bg-white'} border-b-2 border-gray-300 shadow-md`}>
                 <div className="text-lg font-bold">Code Battle</div>
+                <div className="flex items-center">
+                    <span className="mr-2">Timer:</span>
+                    <Timer /> {/* Timer component here */}
+                </div>
                 <button
                     onClick={toggleDarkMode}
                     className={`px-4 py-2 rounded focus:outline-none transition duration-200 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'}`}
@@ -82,6 +86,7 @@ const Problem = () => {
                     {darkMode ? 'Light Mode' : 'Dark Mode'}
                 </button>
             </nav>
+
 
             <div className="flex flex-col w-full h-screen overflow-hidden lg:flex-row">
                 {/* Left Sidebar: Problem Description */}
