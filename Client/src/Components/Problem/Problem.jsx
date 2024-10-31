@@ -5,12 +5,19 @@ import { python } from '@codemirror/lang-python';
 import { cpp } from '@codemirror/lang-cpp';
 import { java } from '@codemirror/lang-java';
 import { FaComment } from 'react-icons/fa'; // Ensure you have react-icons installed
-// import '@uiw/react-codemirror/dist/codemirror.css';
+
 
 
 const Problem = () => {
     const [language, setLanguage] = useState('javascript');
-    const [code, setCode] = useState('// Write your code here');
+    const [code, setCode] = useState(`
+    class Solution {
+        main() {
+            // Write your code here
+        }
+    };
+`);
+
     const [darkMode, setDarkMode] = useState(false);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
@@ -25,7 +32,7 @@ const Problem = () => {
     const handleChange = (event) => {
         const selectedLanguage = event.target.value;
         setLanguage(selectedLanguage);
-    
+
         const templates = {
             javascript: `class Solution {
         main() {
@@ -52,7 +59,7 @@ const Problem = () => {
         }
     }`
         };
-    
+
         // Set default code for JavaScript
         if (selectedLanguage === 'javascript') {
             setCode(templates.javascript);
@@ -60,7 +67,7 @@ const Problem = () => {
             setCode(templates[selectedLanguage] || '// Write your code here');
         }
     };
-    
+
 
 
     const toggleDarkMode = () => {
