@@ -4,7 +4,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
 import { cpp } from '@codemirror/lang-cpp';
 import { java } from '@codemirror/lang-java';
-import { FaComment } from 'react-icons/fa'; // Ensure you have react-icons installed
+import { FaComment } from 'react-icons/fa'; 
 
 
 
@@ -95,7 +95,7 @@ const Problem = () => {
                 </button>
             </nav>
 
-            <div className="flex flex-col lg:flex-row w-full h-screen overflow-hidden">
+            <div className="flex flex-col w-full h-screen overflow-hidden lg:flex-row">
                 {/* Left Sidebar: Problem Description */}
                 <div className={`w-full lg:w-1/3 p-6 overflow-y-auto ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r shadow-lg flex flex-col`}>
                     <div className="flex-1 mb-6">
@@ -124,11 +124,11 @@ const Problem = () => {
 
                     {/* Discussion Section */}
                     <div className="mt-6">
-                        <h3 className="mb-2 text-xl font-semibold flex items-center">
+                        <h3 className="flex items-center mb-2 text-xl font-semibold">
                             <FaComment className="mr-1" />
                             Discussion ({comments.length})
                         </h3>
-                        <div className="border rounded-lg shadow-md p-4 bg-gray-100">
+                        <div className="p-4 bg-gray-100 border rounded-lg shadow-md">
                             <textarea
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
