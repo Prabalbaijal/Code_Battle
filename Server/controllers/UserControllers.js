@@ -4,6 +4,7 @@ import validator from 'validator'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import Question from '../models/QuestionModel.js'
+import axios from 'axios'
 
 export const register = async (req, res) => {
     try {
@@ -184,3 +185,74 @@ export const recordAttempt=async (req, res) => {
         res.status(500).json({ message: 'Error recording attempt', error });
     }
 }
+
+
+export const submitQuestion = async (req, res) => {
+    const { source_code, language_id, testCases } = req.body;
+    
+    try {
+        const results = [];
+
+        for (const testCase of testCases) {
+            console.log(`Running test case with input: ${testCase.input}, expected output: ${testCase.expectedOutput}`);
+            
+            // Send code to Judge0 for each test case
+            const submissionResponse = await axios.post(
+                'https://judge0-ce.p.rapidapi.com/submissions',
+                {
+                    source_code,
+                    language_id,
+                    stdin: testCase.input
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+                        'X-RapidAPI-Key': process.env.JUDGE0_API_KEY
+                    }
+                }
+            );
+
+            const token = submissionResponse.data.token;
+
+            // Poll for result after a short delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const resultResponse = await axios.get(
+                `https://judge0-ce.p.rapidapi.com/submissions/${token}`,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+                        'X-RapidAPI-Key': process.env.JUDGE0_API_KEY
+                    }
+                }
+            );
+
+            const { stdout, stderr, status, compile_output } = resultResponse.data;
+            const actualOutput = stdout ? stdout.trim() : null;
+
+            console.log(`Test case result: expected: ${testCase.expectedOutput}, actual: ${actualOutput}, status: ${status.description}`);
+
+            results.push({
+                expected: testCase.expectedOutput,
+                actual: actualOutput,
+                isCorrect: actualOutput === testCase.expectedOutput,
+                status,
+                compile_output,
+                error: stderr
+            });
+        }
+
+        // Check if all test cases passed
+        const allPassed = results.every(result => result.isCorrect);
+
+        res.json({
+            allPassed,
+            results
+        });
+    } catch (error) {
+        console.error('Error in code submission:', error);
+        res.status(500).json({ error: 'Error submitting code for evaluation' });
+    }
+};
