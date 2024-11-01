@@ -1,0 +1,55 @@
+/* ProfileHeader.css */
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2d3748; /* Dark gray background */
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.profile-photo {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    border: 0.25rem solid #1a202c; /* Border around photo */
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-info h1 {
+    font-size: 1.875rem; /* 3xl */
+    font-weight: 700; /* bold */
+}
+
+.profile-info p {
+    font-size: 1.125rem; /* lg */
+    color: #a0aec0; /* light gray text */
+}
+
+.friends-options {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #48bb78; /* Green */
+    color: #fff;
+}
+
+.btn-secondary {
+    background-color: #63b3ed; /* Blue */
+    color: #fff;
+}

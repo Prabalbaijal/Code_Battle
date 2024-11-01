@@ -1,0 +1,26 @@
+/* Stats.css */
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.stat-box {
+    background-color: #2d3748; /* Dark gray background */
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.stat-box h3 {
+    font-size: 1.25rem; /* xl */
+    font-weight: 600;
+    color: #a0aec0; /* Light gray */
+}
+
+.stat-box p {
+    font-size: 1.5rem; /* 2xl */
+    font-weight: 700;
+    color: #e2e8f0; /* Light color */
+}
