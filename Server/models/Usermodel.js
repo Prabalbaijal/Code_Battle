@@ -68,6 +68,10 @@ const userSchema = new mongoose.Schema({
     enum: ['online', 'offline', 'in-game'],
     default: 'offline',
   },
+  questionsAttempted: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Question',
+  }],
 }, { timestamps: true });
 
 userSchema.methods.updateLevel = function() {

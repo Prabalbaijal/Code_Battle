@@ -3,6 +3,7 @@ import { uploadOnCloudinary } from '../config/cloudinary.js'
 import validator from 'validator'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import Question from '../models/QuestionModel.js'
 
 export const register = async (req, res) => {
     try {
@@ -138,29 +139,31 @@ export const logout = async (req, res) => {
     }
 }
 
-export const getQuestion=async (req, res) => {
+export const getQuestion = async (req, res) => {
     try {
-      const userId = req.user.id; // assuming authenticated user
-      const user = await User.findById(userId).populate('questionsAttempted');
-  
-      // Get difficulty based on user's level
-      let difficulty;
-      if (user.level === 0 || user.level === 1) difficulty = 'easy';
-      else if (user.level === 2 || user.level === 3) difficulty = 'medium';
-      else difficulty = 'hard';
-  
-      // Exclude attempted questions
-      const question = await Question.findOne({
-        difficulty,
-        _id: { $nin: user.questionsAttempted }
-      });
-  
-      if (!question) return res.status(404).json({ message: 'No questions available' });
-      res.json(question);
+        const userId = req.user.id; // User ID from decoded token
+        const user = await User.findById(userId).populate('questionsAttempted');
+        if(!user) console.log("User not found ")
+        
+        // Determine difficulty based on user's level
+        let difficulty;
+        if (user.level === 0 || user.level === 1) difficulty = 'Easy';
+        else if (user.level === 2 || user.level === 3) difficulty = 'Medium';
+        else difficulty = 'Hard';
+
+        // Fetch a question not yet attempted by the user
+        const question = await Question.findOne({
+            difficulty,
+            _id: { $nin: user.questionsAttempted }
+        });
+
+        if (!question) return res.status(404).json({ message: 'No questions available' });
+        res.json(question);
     } catch (error) {
-      res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error' });
     }
-  }
+};
+
 
 export const recordAttempt=async (req, res) => {
     const { userId, questionId } = req.body;
