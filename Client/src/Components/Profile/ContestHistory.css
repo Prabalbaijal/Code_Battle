@@ -1,0 +1,34 @@
+/* ContestHistory.css */
+
+.recent-contests {
+    background-color: #2d3748; /* Dark gray background */
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+}
+
+.recent-contests h2 {
+    font-size: 1.5rem; /* 2xl */
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #edf2f7; /* Very light gray */
+}
+
+.contest-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.contest-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background-color: #4a5568; /* Gray item background */
+    border-radius: 0.25rem;
+    color: #cbd5e0; /* Light gray */
+}
+
+.contest-item span {
+    font-size: 1rem;
+    font-weight: 500;
+}

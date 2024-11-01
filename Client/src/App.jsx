@@ -5,7 +5,7 @@ import HomePage from './Components/HomePage/HomePage.jsx'
 import {RouterProvider,createBrowserRouter} from 'react-router-dom'
 import Match from './Components/Matching/Match.jsx'
 import Problem from './Components/Problem/Problem.jsx'
-
+import Profile from './Components/Profile/Profile.jsx'
 const router=createBrowserRouter([
   {
       path:"/",
@@ -22,7 +22,12 @@ const router=createBrowserRouter([
   {
     path:"/problem",
     element:<Problem/>
+  },
+  {
+    path:"/profile",
+    element:<Profile/>
   }
+  
 ]
 )
 

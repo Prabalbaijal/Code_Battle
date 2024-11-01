@@ -1,4 +1,3 @@
-// Header.jsx
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
@@ -6,7 +5,7 @@ import { setLoggedinUser } from '../../redux/userSlice.js';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const Header = () => {
+const ProfileHeader = () => {
   const { loggedinUser } = useSelector(store => store.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -29,7 +28,7 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 text-white shadow-lg navbar bg-gradient-to-r from-purple-700 via-blue-700 to-indigo-700">
+    <header className="sticky top-0 z-50 text-white shadow-lg navbar bg-gradient-to-r from-purple-700 via-blue-700 to-indigo-700 m-0 p-0">
       <div className="navbar-start">
         <Link to="/" className="text-2xl font-bold btn btn-ghost">Code Battle</Link>
       </div>
@@ -77,4 +76,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default ProfileHeader;
