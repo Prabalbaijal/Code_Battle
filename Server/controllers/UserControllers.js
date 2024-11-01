@@ -106,15 +106,29 @@ export const login = async (req, res) => {
             .json({
                 _id: user._id,
                 email: user.email,
-                firstName: user.fullname,
-                lastName: user.username,
-                profilePicture:user.avatar,
+                fullname:user.fullname,
+                username:user.username,
+                avatar:user.avatar,
                 success: true
             })
 
     } catch (error) {
         console.error(error)
         return res.status(500).json({
+            message: 'Server Error',
+            success: false
+        })
+    }
+}
+
+export const logout = async (req, res) => {
+    try {
+        return res.status(200).cookie("token", "", { maxAge: 0 }).json({
+            message: "Logged Out Successfully."
+        })
+    } catch (error) {
+        console.error('Error during logout:', error)
+        res.status(500).json({
             message: 'Server Error',
             success: false
         })
