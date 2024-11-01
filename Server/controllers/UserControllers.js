@@ -25,6 +25,9 @@ export const register = async (req, res) => {
         if (user1) {
             return res.status(400).json({ message: "Email already exists! Try a different one." })
         }
+        if(await User.findOne({username})){
+            return res.status(400).json({message:"Username already exists! Try another one."})
+        }
 
         const hashedPass = await bcrypt.hash(password, 10)
         let avatarUrl = null;
@@ -132,5 +135,49 @@ export const logout = async (req, res) => {
             message: 'Server Error',
             success: false
         })
+    }
+}
+
+export const getQuestion=async (req, res) => {
+    try {
+      const userId = req.user.id; // assuming authenticated user
+      const user = await User.findById(userId).populate('questionsAttempted');
+  
+      // Get difficulty based on user's level
+      let difficulty;
+      if (user.level === 0 || user.level === 1) difficulty = 'easy';
+      else if (user.level === 2 || user.level === 3) difficulty = 'medium';
+      else difficulty = 'hard';
+  
+      // Exclude attempted questions
+      const question = await Question.findOne({
+        difficulty,
+        _id: { $nin: user.questionsAttempted }
+      });
+  
+      if (!question) return res.status(404).json({ message: 'No questions available' });
+      res.json(question);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  }
+
+export const recordAttempt=async (req, res) => {
+    const { userId, questionId } = req.body;
+
+    try {
+        // Check if the attempt already exists to avoid duplicates
+        const existingAttempt = await Attempt.findOne({ userId, questionId });
+        if (existingAttempt) {
+            return res.status(200).json({ message: 'Attempt already recorded' });
+        }
+
+        // Record new attempt
+        const newAttempt = new Attempt({ userId, questionId });
+        await newAttempt.save();
+
+        res.json({ message: 'Attempt recorded successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error recording attempt', error });
     }
 }
