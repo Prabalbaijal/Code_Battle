@@ -7,6 +7,7 @@
     import { java } from '@codemirror/lang-java';
     import { useSelector } from 'react-redux';
     import Cookies from 'js-cookie'; // Import js-cookie
+    import toast from 'react-hot-toast';
 
     const Problem = () => {
         const [question, setQuestion] = useState(null);
@@ -72,6 +73,7 @@
         };
 
         const runCode = async () => {
+            const loadingToastId = toast.loading("Judging your code...");
             const submissionData = {
                 source_code: code,
                 language_id: getLanguageId(language),
@@ -85,7 +87,7 @@
                     },
                 });
                 console.log('Judge0 response:', response.data);
-                if(response.data.status!="Accepted") toast.error("Wrong answer!! Try Again.")
+                toast.dismiss(loadingToastId);
                 if(response.data.allPassed==true) toast.success("Accepted");
                 else if(response.data.allPassed==false) toast.error("Wrong answer!! Try Again.")
             } catch (error) {
@@ -202,10 +204,10 @@
 
                         {/* Buttons for Running and Submitting Code */}
                         <div className="flex justify-end space-x-4">
-                            <button onClick={runCode} className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600">
+                            {/* <button  className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600">
                                 Run
-                            </button>
-                            <button className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
+                            </button> */}
+                            <button onClick={runCode} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
                                 Submit
                             </button>
                         </div>
