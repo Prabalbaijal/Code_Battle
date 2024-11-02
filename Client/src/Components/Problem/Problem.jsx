@@ -88,9 +88,13 @@
                 });
                 console.log('Judge0 response:', response.data);
                 toast.dismiss(loadingToastId);
-                if(response.data.allPassed==true) toast.success("Accepted");
+                if(response.data.allPassed==false && response.data.results[0].status.description=='Compilation Error')
+                    toast.error("Compilation Error")
+                else if(response.data.allPassed==true) toast.success("Accepted");
                 else if(response.data.allPassed==false) toast.error("Wrong answer!! Try Again.")
             } catch (error) {
+                toast.dismiss(loadingToastId);
+                toast.error("Compilation or runtime error!!")
                 console.error('Error running code:', error);
             }
         };
