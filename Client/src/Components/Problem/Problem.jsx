@@ -7,6 +7,7 @@ import { cpp } from '@codemirror/lang-cpp';
 import { java } from '@codemirror/lang-java';
 import { useSelector } from 'react-redux';
 import Cookies from 'js-cookie'; // Import js-cookie
+import toast from 'react-hot-toast';
 
 const Problem = () => {
     const [question, setQuestion] = useState(null);
@@ -17,16 +18,17 @@ const Problem = () => {
     useEffect(() => {
         const fetchQuestion = async () => {
             try {
-                    const response = await axios.get('http://localhost:9000/api/users/question', {
-                        headers: {
-                            'Content-Type': 'application/json'
-                          },
-                          withCredentials: true
-                    });
-                    console.log(response)
-                    setQuestion(response.data);
-                }
-            catch (error) {
+                const response = await axios.get('http://localhost:9000/api/users/question', {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                });
+                console.log(response);
+                setQuestion(response.data);
+                // Set initial code template based on the selected language
+                handleChange({ target: { value: language } }); // Set initial code
+            } catch (error) {
                 console.error('Error fetching question:', error);
             }
         };
@@ -40,27 +42,27 @@ const Problem = () => {
 
         const templates = {
             javascript: `class Solution {
-        main() {
-            // Write your code here
-        }
-    };`,
+                main() {
+                    // Write your code here
+                }
+            };`,
             python: `class Solution:
-        def main(self):
-            # Write your code here`,
+                def main(self):
+                    # Write your code here`,
             cpp: `#include <iostream>
-    using namespace std;
+            using namespace std;
 
-    class Solution {
-    public:
-        void main() {
-            // Write your code here
-        }
-    };`,
+            class Solution {
+            public:
+                void main() {
+                    // Write your code here
+                }
+            };`,
             java: `public class Solution {
-        public static void main(String[] args) {
-            // Write your code here
-        }
-    }`
+                public static void main(String[] args) {
+                    // Write your code here
+                }
+            }`
         };
 
         setCode(templates[selectedLanguage] || '// Write your code here');
@@ -70,15 +72,53 @@ const Problem = () => {
         setDarkMode((prevMode) => !prevMode);
     };
 
+    const runCode = async () => {
+        const loadingToastId = toast.loading("Judging your code...");
+        const submissionData = {
+            source_code: code,
+            language_id: getLanguageId(language),
+            testCases: question.testCases
+        };
+    
+        try {
+            const response = await axios.post('http://localhost:9000/api/users/submit', submissionData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            console.log('Judge0 response:', response.data);
+            toast.dismiss(loadingToastId);
+            if(response.data.allPassed==false && response.data.results[0].status.description=='Compilation Error')
+                toast.error("Compilation Error")
+            else if(response.data.allPassed==true) toast.success("Accepted");
+            else if(response.data.allPassed==false) toast.error("Wrong answer!! Try Again.")
+        } catch (error) {
+            toast.dismiss(loadingToastId);
+            toast.error("Compilation or runtime error!!")
+            console.error('Error running code:', error);
+        }
+    };
+
+    const getLanguageId = (language) => {
+        switch (language) {
+            case 'javascript':
+                return 63; // Example language ID for JavaScript
+            case 'python':
+                return 71; // Example language ID for Python
+            case 'cpp':
+                return 54; // Example language ID for C++
+            case 'java':
+                return 62; // Example language ID for Java
+            default:
+                return 63; // Default to JavaScript
+        }
+    };
+
     return (
         <div className={`${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'} min-h-screen flex flex-col`}>
             {/* Navbar */}
             <nav className={`sticky top-0 flex items-center justify-between p-4 ${darkMode ? 'bg-gray-800' : 'bg-white'} border-b-2 border-gray-300 shadow-md`}>
                 <div className="text-lg font-bold">Code Battle</div>
-                <div className="flex items-center">
-                    <span className="mr-2">Timer:</span>
-                    <Timer /> {/* Timer component here */}
-                </div>
                 <button
                     onClick={toggleDarkMode}
                     className={`px-4 py-2 rounded focus:outline-none transition duration-200 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'}`}
@@ -86,7 +126,6 @@ const Problem = () => {
                     {darkMode ? 'Light Mode' : 'Dark Mode'}
                 </button>
             </nav>
-
 
             <div className="flex flex-col w-full h-screen overflow-hidden lg:flex-row">
                 {/* Left Sidebar: Problem Description */}
@@ -169,10 +208,10 @@ const Problem = () => {
 
                     {/* Buttons for Running and Submitting Code */}
                     <div className="flex justify-end space-x-4">
-                        <button  className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600">
+                        {/* <button  className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600">
                             Run
-                        </button>
-                        <button  className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
+                        </button> */}
+                        <button onClick={runCode} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
                             Submit
                         </button>
                     </div>
