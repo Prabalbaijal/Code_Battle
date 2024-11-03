@@ -8,7 +8,7 @@ import { java } from '@codemirror/lang-java';
 import { useSelector } from 'react-redux';
 import Cookies from 'js-cookie'; // Import js-cookie
 import toast from 'react-hot-toast';
-
+import Timer from '../Timer/Timer';
 const Problem = () => {
     const [question, setQuestion] = useState(null);
     const [language, setLanguage] = useState('javascript');
@@ -79,7 +79,7 @@ const Problem = () => {
             language_id: getLanguageId(language),
             testCases: question.testCases
         };
-    
+
         try {
             const response = await axios.post('http://localhost:9000/api/users/submit', submissionData, {
                 headers: {
@@ -88,10 +88,10 @@ const Problem = () => {
             });
             console.log('Judge0 response:', response.data);
             toast.dismiss(loadingToastId);
-            if(response.data.allPassed==false && response.data.results[0].status.description=='Compilation Error')
+            if (response.data.allPassed == false && response.data.results[0].status.description == 'Compilation Error')
                 toast.error("Compilation Error")
-            else if(response.data.allPassed==true) toast.success("Accepted");
-            else if(response.data.allPassed==false) toast.error("Wrong answer!! Try Again.")
+            else if (response.data.allPassed == true) toast.success("Accepted");
+            else if (response.data.allPassed == false) toast.error("Wrong answer!! Try Again.")
         } catch (error) {
             toast.dismiss(loadingToastId);
             toast.error("Compilation or runtime error!!")
@@ -119,6 +119,13 @@ const Problem = () => {
             {/* Navbar */}
             <nav className={`sticky top-0 flex items-center justify-between p-4 ${darkMode ? 'bg-gray-800' : 'bg-white'} border-b-2 border-gray-300 shadow-md`}>
                 <div className="text-lg font-bold">Code Battle</div>
+
+                <span className="flex items-center text-lg font-bold">
+                    <span className={`${darkMode ? 'text-white' : 'text-black'} mr-1`}>Timer:</span>
+                    <Timer />
+                </span>
+
+
                 <button
                     onClick={toggleDarkMode}
                     className={`px-4 py-2 rounded focus:outline-none transition duration-200 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'}`}
@@ -190,10 +197,10 @@ const Problem = () => {
                             theme={darkMode ? 'dark' : 'light'}
                             extensions={[
                                 language === 'javascript' ? javascript() :
-                                language === 'python' ? python() :
-                                language === 'cpp' ? cpp() :
-                                language === 'java' ? java() :
-                                null
+                                    language === 'python' ? python() :
+                                        language === 'cpp' ? cpp() :
+                                            language === 'java' ? java() :
+                                                null
                             ]}
                             value={code}
                             onChange={(value) => setCode(value)}

@@ -1,7 +1,5 @@
-
-
 import React, { useState, useEffect } from 'react';
-import { FaPlay, FaPause } from 'react-icons/fa'; // Import the icons for play and pause
+import { FaPlay, FaPause, FaRedo } from 'react-icons/fa'; // Import icons for play, pause, and reset
 
 const Timer = () => {
     const [isActive, setIsActive] = useState(false);
@@ -23,6 +21,11 @@ const Timer = () => {
         setIsActive(!isActive);
     };
 
+    const handleReset = () => {
+        setIsActive(false);  // Pause the timer
+        setTime(0);          // Reset the time to 0
+    };
+
     const formatTime = (time) => {
         const minutes = String(Math.floor(time / 60)).padStart(2, '0');
         const seconds = String(time % 60).padStart(2, '0');
@@ -36,9 +39,11 @@ const Timer = () => {
             <button onClick={handleStartPause} className="flex items-center">
                 {isActive ? <FaPause /> : <FaPlay />}
             </button>
+            <button onClick={handleReset} className="flex items-center text-red-500 hover:text-red-600">
+                <FaRedo />
+            </button>
         </div>
     );
 };
 
 export default Timer;
-
