@@ -14,6 +14,22 @@
         const [language, setLanguage] = useState('javascript');
         const [code, setCode] = useState('');
         const [darkMode, setDarkMode] = useState(false);
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { python } from '@codemirror/lang-python';
+import { cpp } from '@codemirror/lang-cpp';
+import { java } from '@codemirror/lang-java';
+import { useSelector } from 'react-redux';
+import Cookies from 'js-cookie'; // Import js-cookie
+import toast from 'react-hot-toast';
+import Timer from '../Timer/Timer';
+const Problem = () => {
+    const [question, setQuestion] = useState(null);
+    const [language, setLanguage] = useState('javascript');
+    const [code, setCode] = useState('');
+    const [darkMode, setDarkMode] = useState(false);
 
         useEffect(() => {
             const fetchQuestion = async () => {
