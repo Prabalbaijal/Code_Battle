@@ -79,7 +79,7 @@ const Problem = () => {
             language_id: getLanguageId(language),
             testCases: question.testCases
         };
-
+    
         try {
             const response = await axios.post('http://localhost:9000/api/users/submit', submissionData, {
                 headers: {
@@ -88,13 +88,16 @@ const Problem = () => {
             });
             console.log('Judge0 response:', response.data);
             toast.dismiss(loadingToastId);
-            if (response.data.allPassed == false && response.data.results[0].status.description == 'Compilation Error')
-                toast.error("Compilation Error")
-            else if (response.data.allPassed == true) toast.success("Accepted");
-            else if (response.data.allPassed == false) toast.error("Wrong answer!! Try Again.")
+            if(response.data.results[0].status.description=='Accepted'){
+                if(response.data.allPassed==true) toast.success("Accepted");
+                else  toast.error("Wrong answer!! Try Again.");
+            }else{  
+             toast.error(response.data.results[0].status.description);
+            }
+            
         } catch (error) {
             toast.dismiss(loadingToastId);
-            toast.error("Compilation or runtime error!!")
+            toast.error("Compilation error!!")
             console.error('Error running code:', error);
         }
     };
@@ -124,7 +127,6 @@ const Problem = () => {
                     <span className={`${darkMode ? 'text-white' : 'text-black'} mr-1`}>Timer:</span>
                     <Timer />
                 </span>
-
 
                 <button
                     onClick={toggleDarkMode}
@@ -197,10 +199,10 @@ const Problem = () => {
                             theme={darkMode ? 'dark' : 'light'}
                             extensions={[
                                 language === 'javascript' ? javascript() :
-                                    language === 'python' ? python() :
-                                        language === 'cpp' ? cpp() :
-                                            language === 'java' ? java() :
-                                                null
+                                language === 'python' ? python() :
+                                language === 'cpp' ? cpp() :
+                                language === 'java' ? java() :
+                                null
                             ]}
                             value={code}
                             onChange={(value) => setCode(value)}
