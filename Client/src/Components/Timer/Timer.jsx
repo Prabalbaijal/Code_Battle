@@ -1,47 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlay, FaPause, FaRedo } from 'react-icons/fa'; // Import icons for play, pause, and reset
 
 const Timer = () => {
-    const [isActive, setIsActive] = useState(false);
-    const [time, setTime] = useState(0);
+    const [time, setTime] = useState(30 * 60 * 1000); // 30 minutes in milliseconds
 
     useEffect(() => {
-        let interval = null;
-        if (isActive) {
-            interval = setInterval(() => {
-                setTime((time) => time + 1);
-            }, 1000);
-        } else if (!isActive && time !== 0) {
-            clearInterval(interval);
-        }
+        const interval = setInterval(() => {
+            setTime((prevTime) => (prevTime > 0 ? prevTime - 1000 : 0));
+        }, 1000);
+
+        if (time === 0) clearInterval(interval);
+
         return () => clearInterval(interval);
-    }, [isActive, time]);
+    }, [time]);
 
-    const handleStartPause = () => {
-        setIsActive(!isActive);
-    };
-
-    const handleReset = () => {
-        setIsActive(false);  // Pause the timer
-        setTime(0);          // Reset the time to 0
-    };
-
-    const formatTime = (time) => {
-        const minutes = String(Math.floor(time / 60)).padStart(2, '0');
-        const seconds = String(time % 60).padStart(2, '0');
-        return `${minutes}:${seconds}`;
+    const formatTime = (milliseconds) => {
+        const minutes = Math.floor(milliseconds / 60000);
+        const seconds = ((milliseconds % 60000) / 1000).toFixed(0);
+        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
     return (
-        <div className="flex items-center space-x-2">
-            <i className="fi fi-rr-stopwatch"></i>
-            <span>{formatTime(time)}</span>
-            <button onClick={handleStartPause} className="flex items-center">
-                {isActive ? <FaPause /> : <FaPlay />}
-            </button>
-            <button onClick={handleReset} className="flex items-center text-red-500 hover:text-red-600">
-                <FaRedo />
-            </button>
+        <div className="flex items-center px-4 py-2 bg-gray-100 rounded-lg shadow-md dark:bg-gray-700">
+            <span className="mr-2 text-sm font-semibold text-gray-500 dark:text-gray-300">Time Left:</span>
+            <span className="font-mono text-lg font-bold text-red-500 dark:text-red-400">
+                {formatTime(time)}
+            </span>
         </div>
     );
 };
