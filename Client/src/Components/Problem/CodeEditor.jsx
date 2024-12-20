@@ -6,6 +6,7 @@ import { python } from '@codemirror/lang-python';
 import { cpp } from '@codemirror/lang-cpp';
 import { java } from '@codemirror/lang-java';
 import { autocompletion, CompletionContext } from '@codemirror/autocomplete';
+import '..//..//..//src/index.css'
 
 const cppKeywords = [
     { label: 'int', type: 'keyword' },
@@ -53,7 +54,7 @@ const CodeEditor = ({ code, setCode, language, darkMode }) => (
         ]}
         onChange={(value) => setCode(value)}
         theme={darkMode ? 'dark' : 'light'}
-        className="flex-1 mb-4 overflow-y-auto border rounded"
+        className="flex-1 mb-4 overflow-y-auto border rounded custom-codemirror"
         height="100%"
     />
 );

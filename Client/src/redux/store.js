@@ -2,17 +2,19 @@ import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import userReducer from './userSlice';
+import socketReducer from './socketSlice'; // Add this line to import the socket reducer
 
 const persistConfig = {
   key: 'root',
   storage,
 };
 
-const persistedReducer = persistReducer(persistConfig, userReducer);
+const persistedUserReducer = persistReducer(persistConfig, userReducer);
 
 const store = configureStore({
   reducer: {
-    user: persistedReducer,
+    user: persistedUserReducer,
+    socket: socketReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -23,4 +25,5 @@ const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+
 export default store;

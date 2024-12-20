@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
 import { setLoggedinUser } from '../../redux/userSlice.js';
+import { io } from 'socket.io-client'
+import { setSocket } from '../../redux/socketSlice.js';
 
 export default function Login() {
     const [isSignUp, setIsSignUp] = useState(false); 
@@ -73,34 +75,56 @@ export default function Login() {
         setRegisterUser({ ...registeruser, avatar: e.target.files[0] });
       };
 
-      const LoginSubmitHandler = async (e) => {
-        e.preventDefault();
-        try {
-          const res = await axios.post('http://localhost:9000/api/users/login', loginuser, {
+const LoginSubmitHandler = async (e) => {
+    e.preventDefault();
+    try {
+        const res = await axios.post('http://localhost:9000/api/users/login', loginuser, {
             headers: {
-              'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            withCredentials: true
-          });
-          if (res.data.success) {
+            withCredentials: true,
+        });
+
+        if (res.data.success) {
             navigate("/home");
             dispatch(setLoggedinUser(res.data));
-            toast.error(`Welcome ${res.data.fullname}`, {
-              icon: '👋'
+
+            toast.success(`Welcome ${res.data.fullname}`, {
+                icon: '👋',
             });
-          }
-        } catch (error) {
-          if (error.response)
+
+            // Establish socket connection with userId in query
+            const socket = io('http://localhost:9000', {
+                query: { userId: res.data._id }, // Pass the logged-in user's ID
+            });
+            
+            dispatch(setSocket(socket))
+            
+            // Confirm socket connection
+            // socket.on('connect', () => {
+            //     console.log(`Socket connected: ${socket.id}`);
+            // });
+
+            // Handle error if any
+            socket.on('connect_error', (err) => {
+                console.error('Socket connection error:', err.message);
+            });
+        }
+    } catch (error) {
+        if (error.response) {
             toast.error(error.response.data.message);
-          else
+        } else {
             toast.error("Something went wrong!!");
         }
-        setLoginUser({
-          username: "",
-          password: ""
-        });
-      };
-      
+    }
+
+    // Reset login form
+    setLoginUser({
+        username: "",
+        password: "",
+    });
+};
+
     return (
         <div className="flex items-center justify-center min-h-screen">
             <div className="flex flex-col items-center p-6 bg-white border border-gray-300 rounded-lg shadow-md">

@@ -9,4 +9,7 @@
 :root{
     font-family: 'Segoe UI', sans-serif;
 }
+.custom-codemirror .cm-content {
+  font-size: 1.125rem; /* This is equivalent to text-lg in Tailwind */
+}
   

@@ -1,27 +1,40 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { io } from 'socket.io-client';
 
-export default function Match() {
+const Match = () => {
+  const { loggedinUser } = useSelector((store) => store.user);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+
+  useEffect(() => {
+    // Initialize socket connection with the logged-in user's ID
+    const socket = io('http://localhost:9000', {
+      query: { userId: loggedinUser?._id }, // Replace with dynamic userId
+    });
+
+    // Listen for the list of online users (userNames)
+    socket.on('getOnlineUsers', (users) => {
+      console.log('Online users:', users); // users will be an array of user names
+      setOnlineUsers(users);
+    });
+
+    // Clean up the socket connection on component unmount
+    return () => {
+      socket.off('getOnlineUsers');
+      socket.disconnect();
+    };
+  }, [loggedinUser?._id]); // Reconnect socket on userId change
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-md space-y-6"> {/* Increased space-y for more margin between cards */}
-
-        {/* Card for "Finding another player" */}
-        <Link to="/finding-player">
-          <div className="p-4 bg-blue-500 rounded-lg text-center cursor-pointer hover:bg-blue-600 transition duration-200 mb-4">
-            <p className="text-lg font-bold text-white">Finding another player...</p>
-          </div>
-        </Link>
-
-        {/* Card for "Start Battle" */}
-        <Link to="/problem">
-          <div className="p-4 bg-green-500 rounded-lg text-center cursor-pointer hover:bg-green-600 transition duration-200">
-            <p className="text-lg font-bold text-white">Start Battle</p>
-          </div>
-        </Link>
-
-
-      </div>
+    <div>
+      <h3>Online Users</h3>
+      <ul>
+        {onlineUsers.map((userName, index) => (
+          <li key={index}>{userName}</li> // Display userName instead of userId
+        ))}
+      </ul>
     </div>
   );
-}
+};
+
+export default Match;

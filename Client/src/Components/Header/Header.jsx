@@ -5,18 +5,24 @@ import { useNavigate, Link } from 'react-router-dom';
 import { setLoggedinUser } from '../../redux/userSlice.js';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { disconnectSocket } from '../../redux/socketSlice.js';
 
 const Header = () => {
   const { loggedinUser } = useSelector(store => store.user);
+  const { socket }=useSelector(store=>store.socket);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const logoutFunction = async () => {
     try {
       const res = await axios.get('http://localhost:9000/api/users/logout');
+      if (socket) {
+        socket.disconnect();
+        console.log('User disconnected from socket');
+    }
+      dispatch(setLoggedinUser(null));
       navigate("/");
       toast.success(res.data.message);
-      dispatch(setLoggedinUser(null));
     } catch (error) {
       console.log(error);
     }

@@ -1,28 +1,29 @@
-import express from 'express'
-import cors from 'cors'
-import dotenv from 'dotenv'
-import connectDB from './config/database.js'
-import cookieParser from 'cookie-parser'
-import UserRoute from './routes/UserRoutes.js'
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import connectDB from './config/database.js';
+import cookieParser from 'cookie-parser';
+import UserRoute from './routes/UserRoutes.js';
+import { server, app } from './socket/socket.js'; // Import server from socket.js
 
-dotenv.config({})
+dotenv.config();
 
-const app=express()
-const PORT=process.env.PORT || 2000
+const PORT = process.env.PORT || 2000;
 
-const corsOptions={
-    origin:'http://localhost:5173',
-    credentials:true,
-}
+// CORS Configuration
+const corsOptions = {
+    origin: 'http://localhost:5173',
+    credentials: true,
+};
 
-app.use(cors(corsOptions))
-app.use(express.urlencoded({extended:true}))    
-app.use(express.json())
-app.use(cookieParser())
+app.use(cors(corsOptions));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(cookieParser());
 
-app.use("/api/users",UserRoute)
+app.use('/api/users', UserRoute);
 
-app.listen(PORT,()=>{
-    connectDB()
-    console.log(`Server Detected ${PORT}`)
-})
+server.listen(PORT, () => {
+    connectDB();
+    console.log(`Server is running on port ${PORT}`);
+});

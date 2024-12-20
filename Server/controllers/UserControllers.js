@@ -240,14 +240,14 @@ export const submitQuestion = async (req, res) => {
                 attempt++;
             }
 
-            const { stdout, stderr, status, compile_output } = resultResponse.data;
+            const { stdout, stderr, status, compile_output,time } = resultResponse.data;
             const actualOutput = stdout ? stdout.trim() : null;
-
             results.push({
                 expected: testCase.expectedOutput,
                 actual: actualOutput,
                 isCorrect: actualOutput === testCase.expectedOutput,
                 status,
+                time,
                 compile_output,
                 error: stderr
             });
@@ -264,4 +264,3 @@ export const submitQuestion = async (req, res) => {
         res.status(500).json({ error: 'Error submitting code for evaluation' });
     }
 };
-

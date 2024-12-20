@@ -1,4 +1,4 @@
-// Problem.js
+// Problem.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -61,9 +61,11 @@ const Problem = () => {
             });
             console.log(response)
             toast.dismiss(loadingToastId);
+            console.log()
             if (response.data.results[0].status.description === 'Accepted') {
                 response.data.allPassed ? toast.success("Accepted") : toast.error("Wrong answer!! Try Again.");
             } else {
+                toast.error(response.data.results[0].compile_output);
                 toast.error(response.data.results[0].status.description);
             }
         } catch (error) {

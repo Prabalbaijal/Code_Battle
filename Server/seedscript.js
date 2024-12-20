@@ -28,9 +28,9 @@ connectDB()
     // Add any additional fields if needed
     constraints: ["2 <= nums.length <= 10^4", "-10^9 <= nums[i] <= 10^9", "-10^9 <= target <= 10^9", "Only one valid answer exists."],
   
-    testCases : [
-      {
-        "input": "16\n" +
+    testCases: [
+        {
+          "input": "17\n" +
             "2\n1 2\n3\n" +                            // Test Case 1
             "4\n-3 4 3 90\n0\n" +                      // Test Case 2
             "4\n1000000000 -1000000000 3 4\n0\n" +     // Test Case 3
@@ -46,9 +46,9 @@ connectDB()
             "4\n-999999999 1000000000 -100000000 999999999\n0\n" +      // Test Case 13
             "4\n-100000000 -99999999 -1000000000 -999999998\n-200000000\n" + // Test Case 14
             "4\n1000000000 1000000000 -1000000000 -999999999\n0\n" +    // Test Case 15
-            "3\n1000000000 -1000000000 1000000000\n-1\n",               // Test Case 16
-    
-        "expectedOutput": 
+            "3\n1000000000 -1000000000 1000000000\n-1\n" +               // Test Case 16
+            "100000\n" + Array.from({ length: 100000 }, (_, i) => i + 1).join(" ") + "\n199999\n", // Test Case 17
+          "expectedOutput": 
             "0 1\n" +   // Test Case 1: Sum 1 + 2 = 3
             "0 2\n" +   // Test Case 2: Sum -3 + 3 = 0
             "0 1\n" +   // Test Case 3: Sum 10^9 + (-10^9) = 0
@@ -64,12 +64,11 @@ connectDB()
             "0 3\n" +   // Test Case 13: Sum -999999999 + 1000000000 = 0
             "-1 -1\n" + // Test Case 14: No valid pair exists
             "0 2\n" +   // Test Case 15: Sum 1000000000 + (-1000000000) = 0
-            "-1 -1"     // Test Case 16: No pair sums to -1
-    }
+            "-1 -1\n" + // Test Case 16: No pair sums to -1
+            "99998 99999\n" // Test Case 17: Sum 99998 + 99999 = 199999
+        }
+      ]    
     
-          
-      
-  ]
   
   };
   
