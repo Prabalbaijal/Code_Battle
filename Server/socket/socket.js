@@ -23,7 +23,7 @@ io.on('connection', (socket) => {
   if (userId) {
     User.findById(userId).then((user) => {
       if (user) {
-        const userName = user.fullname; 
+        const userName = user.username; 
 
         // Store the user's socket ID and name
         userSocketMap[userId] = { socketId: socket.id, userName };

@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import Question from '../models/QuestionModel.js'
 import axios from 'axios'
+import { FriendRequest } from '../models/friendRequest.js'
 
 export const register = async (req, res) => {
     try {
@@ -264,3 +265,90 @@ export const submitQuestion = async (req, res) => {
         res.status(500).json({ error: 'Error submitting code for evaluation' });
     }
 };
+
+
+export const sendrequest= async (req, res) => {
+    const { senderUsername, receiverUsername } = req.body;
+  
+    try {
+        console.log(senderUsername,receiverUsername)
+      const receiver = await User.findOne({ username: receiverUsername });
+      if (!receiver) {
+        return res.status(404).json({ message: 'User not found!' });
+      }
+      const sender=await User.findOne({username:senderUsername});
+      if(!sender){
+        return res.status(404).json({message:'Some Error Occured login again!'})
+      }
+      // Check if a request already exists
+      const existingRequest = await FriendRequest.findOne({
+        sender: senderUsername,
+        receiver: receiverUsername,
+        status: "pending",
+      });
+  
+      if (existingRequest) {
+        return res.status(400).json({ message: 'Friend request already sent!' });
+      }
+  
+      // Create a new friend request
+      const friendRequest = new FriendRequest({
+        sender: senderUsername,
+        receiver: receiverUsername,
+      });
+  
+      await friendRequest.save();
+  
+      // Notify receiver via WebSocket (optional)
+      req.app.get('socketio')
+        .to(receiver._id.toString())
+        .emit('notification', { type: 'friend_request', from: senderUsername });
+  
+      res.status(200).json({ message: 'Friend request sent!' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Failed to send friend request.' });
+    }
+  };
+
+  export const handleRequest=async (req, res) => {
+    const { requestId, action } = req.body; // `action` can be "accept" or "reject"
+  
+    try {
+      const friendRequest = await FriendRequest.findById(requestId).populate('sender receiver');
+  
+      if (!friendRequest || friendRequest.status !== "pending") {
+        return res.status(400).json({ message: 'Invalid or expired friend request.' });
+      }
+  
+      if (action === "accept") {
+        // Add both users as friends
+        friendRequest.sender.friends.push(friendRequest.receiver._id);
+        friendRequest.receiver.friends.push(friendRequest.sender._id);
+  
+        await friendRequest.sender.save();
+        await friendRequest.receiver.save();
+  
+        friendRequest.status = "accepted";
+        await friendRequest.save();
+  
+        // Notify sender via WebSocket (optional)
+        req.app.get('socketio')
+          .to(friendRequest.sender._id.toString())
+          .emit('notification', { type: 'friend_request_accepted', from: friendRequest.receiver.username });
+  
+        res.status(200).json({ message: 'Friend request accepted!' });
+      } else if (action === "reject") {
+        friendRequest.status = "rejected";
+        await friendRequest.save();
+  
+        res.status(200).json({ message: 'Friend request rejected!' });
+      } else {
+        res.status(400).json({ message: 'Invalid action.' });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Failed to handle friend request.' });
+    }
+  }
+  
