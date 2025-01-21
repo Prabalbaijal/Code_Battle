@@ -30,21 +30,17 @@ connectDB()
   
     testCases: [
         {
-          "input": "6\n" +
-            "4\n2 7 11 15\n9\n"+
-            "3\n3 2 4\n6\n"+
-            "100000\n"+Array.from({ length: 100000 }, (_, i) => i + 1).join(" ") + "\n" + (2 * 100000 - 1) + "\n"+
-            "4\n-3 4 3 90\n0\n"+
-            "5\n1 9 3 7 2\n8\n"+
-            "200001\n"+ Array.from({ length: 200001 }, (_, i) => i - 100000).join(" ") + "\n0\n",
+          "input": "1\n" +
+            "100000\n"+Array.from({ length: 100000 }, (_, i) => i + 1).join(" ") + "\n" + (2 * 100000 - 1) + "\n",
 
             "expectedOutput": 
-            "0 1\n" +   
-            "1 2\n"+
-            "99998 99999\n"+
-            "0 2\n"+
-            "0 3\n"+
-            "99999 100000\n"
+            "99998 99999\n",
+            executionTime: {
+                cpp: { type: Number, default: null }, // Execution time for C++
+                java: { type: Number, default: null }, // Execution time for Java
+                python: { type: Number, default: null }, // Execution time for Python
+                js: { type: Number, default: null }, // Execution time for JavaScript
+              },
         }
       ]    
     

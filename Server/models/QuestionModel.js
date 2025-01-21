@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 const testCaseSchema = new mongoose.Schema({
   input: String,
   expectedOutput: String,
+  executionTime: { type: Number, default: null },
 });
 
 const questionSchema = new mongoose.Schema({
@@ -19,6 +20,7 @@ const questionSchema = new mongoose.Schema({
   ],
   constraints: [String],
   testCases: [testCaseSchema], // Array of test cases
+
 });
 
 const Question = mongoose.model('Question', questionSchema);
