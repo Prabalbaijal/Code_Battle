@@ -7,6 +7,7 @@ import Question from '../models/QuestionModel.js'
 import axios from 'axios'
 import { FriendRequest } from '../models/friendRequest.js'
 
+
 export const register = async (req, res) => {
     try {
         const { fullname, username, email, password, confirmPassword } = req.body
@@ -267,88 +268,151 @@ export const submitQuestion = async (req, res) => {
 };
 
 
-export const sendrequest= async (req, res) => {
+import { userSocketMap } from '../socket/socket.js'
+
+export const sendrequest = async (req, res) => {
     const { senderUsername, receiverUsername } = req.body;
   
     try {
-        console.log(senderUsername,receiverUsername)
+      console.log(senderUsername, receiverUsername);
+  
+      // Find the receiver in the database
       const receiver = await User.findOne({ username: receiverUsername });
       if (!receiver) {
-        return res.status(404).json({ message: 'User not found!' });
+        return res.status(404).json({ message: 'Receiver not found!' });
       }
-      const sender=await User.findOne({username:senderUsername});
-      if(!sender){
-        return res.status(404).json({message:'Some Error Occured login again!'})
+  
+      // Find the sender in the database
+      const sender = await User.findOne({ username: senderUsername });
+      if (!sender) {
+        return res.status(404).json({ message: 'Sender not found. Please log in again!' });
       }
-      // Check if a request already exists
-      const existingRequest = await FriendRequest.findOne({
-        sender: senderUsername,
-        receiver: receiverUsername,
-        status: "pending",
-      });
+  
+      // Check if a friend request already exists in the receiver's schema
+      const existingRequest = receiver.friendRequests.find(
+        (request) => request.sender === sender._id.toString()
+      );
   
       if (existingRequest) {
         return res.status(400).json({ message: 'Friend request already sent!' });
       }
   
-      // Create a new friend request
-      const friendRequest = new FriendRequest({
-        sender: senderUsername,
-        receiver: receiverUsername,
+      // Add the friend request to the receiver's friendRequests array
+      receiver.friendRequests.push({
+        sender: sender._id,
+        status: 'pending',
       });
   
-      await friendRequest.save();
+      await receiver.save();
   
-      // Notify receiver via WebSocket (optional)
-      req.app.get('socketio')
-        .to(receiver._id.toString())
-        .emit('notification', { type: 'friend_request', from: senderUsername });
-  
-      res.status(200).json({ message: 'Friend request sent!' });
+      res.status(200).json({ message: 'Friend request sent successfully!' });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Failed to send friend request.' });
     }
   };
 
-  export const handleRequest=async (req, res) => {
-    const { requestId, action } = req.body; // `action` can be "accept" or "reject"
+
+
+  export const getFriendRequests = async (req, res) => {
+    try {
+      // Get the logged-in user's ID from the `req.user` object (set by `isAuthenticated`)
+      const userId = req.user._id;
+  
+      // Find the user and populate the friendRequests with the sender's details
+      const user = await User.findById(userId)
+        .populate('friendRequests.sender', 'fullname username avatar')  // Populate sender's details
+        .select('friendRequests');
+  
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found.' });
+      }
+  
+      // Send the populated friendRequests as the response
+      res.status(200).json({ success: true, friendRequests: user.friendRequests });
+    } catch (error) {
+      console.error('Error fetching friend requests:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch friend requests.' });
+    }
+  };
+  
+
+  export const handleFriendRequest = async (req, res) => {
+    const { senderUsername, receiverUsername, action } = req.body; // action can be 'accept' or 'reject'
   
     try {
-      const friendRequest = await FriendRequest.findById(requestId).populate('sender receiver');
+      // Find both users
+      const sender = await User.findOne({ username: senderUsername });
+      const receiver = await User.findOne({ username: receiverUsername });
   
-      if (!friendRequest || friendRequest.status !== "pending") {
-        return res.status(400).json({ message: 'Invalid or expired friend request.' });
+      if (!sender || !receiver) {
+        return res.status(404).json({ message: 'User not found!' });
       }
   
-      if (action === "accept") {
-        // Add both users as friends
-        friendRequest.sender.friends.push(friendRequest.receiver._id);
-        friendRequest.receiver.friends.push(friendRequest.sender._id);
+      // Find the friend request in the receiver's friendRequests array
+      const friendRequest = receiver.friendRequests.find(
+        (request) => request.sender.toString() === sender._id.toString()
+      );
   
-        await friendRequest.sender.save();
-        await friendRequest.receiver.save();
+      if (!friendRequest) {
+        return res.status(404).json({ message: 'Friend request not found!' });
+      }
   
-        friendRequest.status = "accepted";
-        await friendRequest.save();
+      if (friendRequest.status !== 'pending') {
+        return res.status(400).json({ message: 'Friend request already processed!' });
+      }
   
-        // Notify sender via WebSocket (optional)
-        req.app.get('socketio')
-          .to(friendRequest.sender._id.toString())
-          .emit('notification', { type: 'friend_request_accepted', from: friendRequest.receiver.username });
+      // Handle the action
+      if (action === 'accept') {
+        // Add sender to receiver's friends and vice versa
+        receiver.friends.push(sender._id);
+        sender.friends.push(receiver._id);
   
-        res.status(200).json({ message: 'Friend request accepted!' });
-      } else if (action === "reject") {
-        friendRequest.status = "rejected";
-        await friendRequest.save();
-  
-        res.status(200).json({ message: 'Friend request rejected!' });
+        // Update friend request status to accepted
+        friendRequest.status = 'accepted';
+      } else if (action === 'reject') {
+        // Reject the request by updating the status
+        friendRequest.status = 'ignored';
       } else {
-        res.status(400).json({ message: 'Invalid action.' });
+        return res.status(400).json({ message: 'Invalid action!' });
       }
+  
+      // Remove the friend request from receiver's friendRequests array
+      receiver.friendRequests = receiver.friendRequests.filter(
+        (request) => request.sender.toString() !== sender._id.toString()
+      );
+  
+      // Save both users after modification
+      await sender.save();
+      await receiver.save();
+  
+      return res.status(200).json({ message: `Friend request ${action}ed successfully!` });
+  
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Failed to handle friend request.' });
+      console.error('Error handling friend request:', error);
+      return res.status(500).json({ message: 'Server Error' });
     }
-  }
+  };
+  
+  
+  export const getFriends = async (req, res) => {
+    try {
+      // Get the logged-in user
+      const userId = req.user._id;
+  
+      // Find the user and populate the friends field with friend details
+      const user = await User.findById(userId).populate('friends', 'username fullname avatar');
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Return the list of friends
+      return res.status(200).json({ friends: user.friends });
+    } catch (error) {
+      console.error('Error fetching friends:', error);
+      return res.status(500).json({ message: 'Server Error' });
+    }
+  };
+  
   

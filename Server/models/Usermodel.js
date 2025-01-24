@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  fullname:{
+  fullname: {
     type: String,
     required: true,
   },
@@ -23,8 +23,8 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   avatar: {
-    type:String,
-    required:true
+    type: String,
+    required: true,
   },
   coins: {
     type: Number,
@@ -34,19 +34,39 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
-  friends: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  }],
+  friends: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  friendRequests: [
+    {
+      sender: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      status: {
+        type: String,
+        enum: ["pending", "accepted", "ignored"],
+        default: "pending",
+      },
+      date: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
   matchHistory: [
     {
       opponent: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: "User",
       },
       result: {
         type: String,
-        enum: ['win', 'lose', 'draw'],
+        enum: ["win", "lose", "draw"],
         required: true,
       },
       score: {
@@ -65,19 +85,21 @@ const userSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['online', 'offline', 'in-game'],
-    default: 'offline',
+    enum: ["online", "offline", "in-game"],
+    default: "offline",
   },
-  questionsAttempted: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Question',
-  }],
+  questionsAttempted: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Question",
+    },
+  ],
 }, { timestamps: true });
 
-userSchema.methods.updateLevel = function() {
+userSchema.methods.updateLevel = function () {
   if (this.coins >= 1000) this.level = 10;
   else if (this.coins >= 500) this.level = 5;
   else this.level = Math.floor(this.coins / 100) + 1;
 };
 
-export const User = mongoose.model("User",userSchema)
+export const User = mongoose.model("User", userSchema);

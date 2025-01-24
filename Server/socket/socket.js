@@ -50,5 +50,5 @@ io.on('connection', (socket) => {
     }
   });
 });
-
-export { app, io, server };
+app.set('io', io);
+export { app, io, server, userSocketMap };
