@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 const testCaseSchema = new mongoose.Schema({
   input: String,
   expectedOutput: String,
-  executionTime: { type: Number, default: null },
+  // executionTime: { type: Number, default: null },
 });
 
 const questionSchema = new mongoose.Schema({

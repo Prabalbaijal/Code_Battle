@@ -34,13 +34,13 @@ connectDB()
             "100000\n"+Array.from({ length: 100000 }, (_, i) => i + 1).join(" ") + "\n" + (2 * 100000 - 1) + "\n",
 
             "expectedOutput": 
-            "99998 99999\n",
-            executionTime: {
-                cpp: { type: Number, default: null }, // Execution time for C++
-                java: { type: Number, default: null }, // Execution time for Java
-                python: { type: Number, default: null }, // Execution time for Python
-                js: { type: Number, default: null }, // Execution time for JavaScript
-              },
+            "99998 99999",
+            // executionTime: {
+            //     cpp: { type: Number, default: null }, // Execution time for C++
+            //     java: { type: Number, default: null }, // Execution time for Java
+            //     python: { type: Number, default: null }, // Execution time for Python
+            //     js: { type: Number, default: null }, // Execution time for JavaScript
+            //   },
         }
       ]    
     
