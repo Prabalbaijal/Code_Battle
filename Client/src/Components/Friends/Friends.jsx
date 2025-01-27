@@ -10,8 +10,10 @@ const Friends = () => {
   useEffect(() => {
     const fetchFriends = async () => {
       try {
-        // Send user ID as a query parameter
-        const response = await axios.get(`http://localhost:9000/api/users/getfriends?id=${loggedinUser._id}`);
+        const response = await axios.get('http://localhost:9000/api/users/getfriends', {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+      });
         setFriends(response.data.friends);
       } catch (error) {
         console.error('Error fetching friends:', error);

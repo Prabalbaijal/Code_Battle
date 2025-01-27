@@ -15,6 +15,6 @@
     router.route("/getfriendrequests").get(isAuthenticated,getFriendRequests)
     router.route("/sendfriendrequest").post(sendrequest)
     router.route("/handleRequest").post(handleFriendRequest)
-    router.route("/getfriends").get(getFriends)
+    router.route("/getfriends").get(isAuthenticated,getFriends)
     
     export default router
