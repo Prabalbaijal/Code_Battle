@@ -338,7 +338,7 @@ export const sendrequest = async (req, res) => {
   
 
   export const handleFriendRequest = async (req, res) => {
-    const { senderUsername, receiverUsername, action } = req.body; // action can be 'accept' or 'reject'
+    const { senderUsername, receiverUsername, action } = req.body; // action: 'accept' or 'reject'
   
     try {
       // Find both users
@@ -349,7 +349,7 @@ export const sendrequest = async (req, res) => {
         return res.status(404).json({ message: 'User not found!' });
       }
   
-      // Find the friend request in the receiver's friendRequests array
+      // Check for the friend request
       const friendRequest = receiver.friendRequests.find(
         (request) => request.sender.toString() === sender._id.toString()
       );
@@ -364,30 +364,26 @@ export const sendrequest = async (req, res) => {
   
       // Handle the action
       if (action === 'accept') {
-        // Add sender to receiver's friends and vice versa
         receiver.friends.push(sender._id);
         sender.friends.push(receiver._id);
   
-        // Update friend request status to accepted
-        friendRequest.status = 'accepted';
+        friendRequest.status = 'accepted'; // Optional: update status before filtering
       } else if (action === 'reject') {
-        // Reject the request by updating the status
-        friendRequest.status = 'ignored';
+        friendRequest.status = 'ignored'; // Optional: update status before filtering
       } else {
         return res.status(400).json({ message: 'Invalid action!' });
       }
   
-      // Remove the friend request from receiver's friendRequests array
+      // Remove processed request from friendRequests array
       receiver.friendRequests = receiver.friendRequests.filter(
         (request) => request.sender.toString() !== sender._id.toString()
       );
   
-      // Save both users after modification
+      // Save both users
       await sender.save();
       await receiver.save();
   
       return res.status(200).json({ message: `Friend request ${action}ed successfully!` });
-  
     } catch (error) {
       console.error('Error handling friend request:', error);
       return res.status(500).json({ message: 'Server Error' });
@@ -395,10 +391,11 @@ export const sendrequest = async (req, res) => {
   };
   
   
+  
   export const getFriends = async (req, res) => {
     try {
       // Get the logged-in user
-      const userId = req.user._id;
+      const userId = req.query.id;
   
       // Find the user and populate the friends field with friend details
       const user = await User.findById(userId).populate('friends', 'username fullname avatar');

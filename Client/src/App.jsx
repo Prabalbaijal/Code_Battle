@@ -9,6 +9,7 @@ import Profile from './Components/Profile/Profile.jsx';
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 import FriendRequests from './Components/FriendRequest/FriendRequest.jsx';
+import Friends from './Components/Friends/Friends.jsx';
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
   {
     path: '/friendrequests',
     element: <FriendRequests />
+  },
+  {
+    path: '/friends',
+    element: <Friends />
   }
 ]);
 

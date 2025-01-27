@@ -1,4 +1,3 @@
-// FriendRequests.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
@@ -6,18 +5,23 @@ import toast from 'react-hot-toast';
 
 const FriendRequests = () => {
   const [friendRequests, setFriendRequests] = useState([]);
-  const { loggedinUser }= useSelector((store)=>store.user);
+  const { loggedinUser } = useSelector((store) => store.user);
 
   useEffect(() => {
     // Fetch friend requests
     const fetchFriendRequests = async () => {
       try {
-        console.log(loggedinUser.username)
+        console.log(loggedinUser.username);
         const response = await axios.get('http://localhost:9000/api/users/getfriendrequests', {
-            withCredentials: true,
-          });
-          
-        setFriendRequests(response.data.friendRequests);
+          withCredentials: true,
+        });
+
+        setFriendRequests(
+          response.data.friendRequests.map((request) => ({
+            ...request,
+            status: 'pending', // Add default 'pending' status to each request
+          }))
+        );
       } catch (error) {
         console.error('Error fetching friend requests:', error);
         toast.error('Failed to fetch friend requests.');
@@ -27,37 +31,26 @@ const FriendRequests = () => {
     fetchFriendRequests();
   }, [loggedinUser.username]);
 
-  
-  const handleAccept = async (senderUsername) => {
+  const handleAction = async (senderUsername, action) => {
     try {
       await axios.post('http://localhost:9000/api/users/handleRequest', {
         senderUsername,
         receiverUsername: loggedinUser.username,
-        action: 'accept',
+        action,
       });
-      toast.success('Friend request accepted!');
-      setFriendRequests(friendRequests.filter((req) => req.sender.username !== senderUsername));
+      toast.success(`Friend request ${action}ed!`);
+
+      // Update the status of the processed friend request
+      setFriendRequests((prevRequests) =>
+        prevRequests.map((req) =>
+          req.sender.username === senderUsername ? { ...req, status: action } : req
+        )
+      );
     } catch (error) {
-      console.error('Error accepting friend request:', error);
-      toast.error('Failed to accept friend request.');
+      console.error(`Error ${action}ing friend request:`, error);
+      toast.error(`Failed to ${action} friend request.`);
     }
   };
-  
-  const handleReject = async (senderUsername) => {
-    try {
-      await axios.post('http://localhost:9000/api/users/handleReject', {
-        senderUsername,
-        receiverUsername: loggedinUser.username,
-        action: 'reject',
-      });
-      toast.success('Friend request rejected.');
-      setFriendRequests(friendRequests.filter((req) => req.sender.username !== senderUsername));
-    } catch (error) {
-      console.error('Error rejecting friend request:', error);
-      toast.error('Failed to reject friend request.');
-    }
-  };
-  
 
   return (
     <div className="friend-requests-container">
@@ -77,18 +70,26 @@ const FriendRequests = () => {
                 <span>{request.sender.fullname} (@{request.sender.username})</span>
               </div>
               <div className="request-actions">
-                <button
-                  className="btn btn-success"
-                  onClick={() => handleAccept(request.sender.username)}
-                >
-                  Accept
-                </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => handleReject(request.sender.username)}
-                >
-                  Reject
-                </button>
+                {request.status === 'pending' ? (
+                  <>
+                    <button
+                      className="btn btn-success"
+                      onClick={() => handleAction(request.sender.username, 'accept')}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleAction(request.sender.username, 'reject')}
+                    >
+                      Reject
+                    </button>
+                  </>
+                ) : (
+                  <span className={`status-label ${request.status}`}>
+                    {request.status === 'accept' ? 'Accepted' : 'Rejected'}
+                  </span>
+                )}
               </div>
             </li>
           ))}

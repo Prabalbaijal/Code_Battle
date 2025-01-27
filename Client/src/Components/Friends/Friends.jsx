@@ -5,13 +5,13 @@ import toast from 'react-hot-toast';
 
 const Friends = () => {
   const [friends, setFriends] = useState([]);
-  const { loggedinUser } = useSelector((store) => store.user);
+  const { loggedinUser } = useSelector((store) => store.user); // Assuming `loggedinUser` includes `_id`.
 
   useEffect(() => {
-    // Fetch friends list
     const fetchFriends = async () => {
       try {
-        const response = await axios.get('http://localhost:9000/api/users/getfriends');
+        // Send user ID as a query parameter
+        const response = await axios.get(`http://localhost:9000/api/users/getfriends?id=${loggedinUser._id}`);
         setFriends(response.data.friends);
       } catch (error) {
         console.error('Error fetching friends:', error);
@@ -19,8 +19,8 @@ const Friends = () => {
       }
     };
 
-    fetchFriends();
-  }, [loggedinUser.username]);
+    if (loggedinUser && loggedinUser._id) fetchFriends();
+  }, [loggedinUser]);
 
   return (
     <section className="friends-section">
