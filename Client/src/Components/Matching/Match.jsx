@@ -3,6 +3,9 @@ import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
+
+let socket; // Ensure a single instance of the socket connection
 
 const Match = () => {
   const { loggedinUser } = useSelector((store) => store.user);
@@ -10,61 +13,57 @@ const Match = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const socket = io('http://localhost:9000', {
-      query: { userId: loggedinUser?._id },
-    });
+    if (loggedinUser?._id) {
+      socket = io('http://localhost:9000', {
+        query: { userId: loggedinUser._id },
+      });
 
-    socket.on('getOnlineUsers', (users) => {
-      console.log('Online users:', users);
-      setOnlineUsers(users);
-    });
+      socket.on('getOnlineUsers', (users) => {
+        setOnlineUsers(users);
+      });
 
-    return () => {
-      socket.off('getOnlineUsers');
-      socket.disconnect();
-    };
-  }, [loggedinUser?._id]);
+      socket.on('playNotification', ({ roomName, initiator }) => {
+        if (initiator !== loggedinUser.username) {
+          const accept = window.confirm(`${initiator} has challenged you to a match. Do you accept?`);
+          if (accept) {
+            socket.emit('joinRoom', roomName);
+            navigate(`/problem`, { state: { roomName } });
+          }
+        }
+      });
 
-  // Filter out the logged-in user from the list of online users
+      socket.on('opponentOffline', ({ message }) => {
+        toast.error(message);
+      });
+
+      return () => {
+        socket.disconnect();
+        socket = null;
+      };
+    }
+  }, [loggedinUser?._id, navigate]);
+
   const filteredUsers = onlineUsers.filter(
     (userName) => userName !== loggedinUser?.username
   );
 
   const handlePlay = (opponentUsername) => {
-    const socket = io('http://localhost:9000', {
-      query: { userId: loggedinUser?._id },
-    });
-  
-    socket.emit('playRequest', { opponentUsername });
-  
-    socket.on('playNotification', ({ roomName, initiator }) => {
-      if (initiator !== loggedinUser.username) {
-        const accept = window.confirm(`${initiator} has challenged you to a match. Do you accept?`);
-        if (accept) {
-          socket.emit('joinRoom', roomName);
-          navigate(`/problem`, { state: { roomName } });
-        }
-      }
-    });
-  
-    socket.on('opponentOffline', ({ message }) => {
-      alert(message);
-    });
-  };
-  
+    if (!socket) return;
 
-  // Handle "Add Friend" button click
+    socket.emit('playRequest', { opponentUsername });
+    toast.success(`Play request sent to ${opponentUsername}`);
+  };
+
   const handleAddFriend = async (friendUsername) => {
     try {
-      console.log(loggedinUser.username)
       const response = await axios.post('http://localhost:9000/api/users/sendfriendrequest', {
         senderUsername: loggedinUser.username,
         receiverUsername: friendUsername,
       });
-      alert(response.data.message);
+      toast.success(response.data.message);
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.message || 'Failed to send friend request.');
+      toast.error(error.response?.data?.message || 'Failed to send friend request.');
     }
   };
 
