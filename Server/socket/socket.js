@@ -1,29 +1,10 @@
-// socket.js
-import { Server } from 'socket.io';
-import http from 'http';
-import express from 'express';
-import { User } from '../models/Usermodel.js'; // Assuming you have a User model to fetch user details
-
-const app = express();
-const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: ['http://localhost:5173'], // Replace with your frontend URL if needed
-    methods: ['GET', 'POST'],
-  },
-});
-
-const userSocketMap = {}; // Maps userId -> { socketId, userName }
-
-// Handle new socket connections
 io.on('connection', (socket) => {
   const userId = socket.handshake.query.userId;
 
   if (userId) {
     User.findById(userId).then((user) => {
       if (user) {
-        const userName = user.username; 
+        const userName = user.username;
 
         // Store the user's socket ID and name
         userSocketMap[userId] = { socketId: socket.id, userName };
@@ -33,6 +14,45 @@ io.on('connection', (socket) => {
         // Send updated online users list to all clients
         const onlineUserNames = Object.values(userSocketMap).map((user) => user.userName);
         io.emit('getOnlineUsers', onlineUserNames);
+
+        // Handle Play request
+        socket.on('playRequest', ({ opponentUsername }) => {
+          const opponent = Object.values(userSocketMap).find(
+            (user) => user.userName === opponentUsername
+          );
+
+          if (opponent) {
+            const roomName = `${userName}-${opponentUsername}`;
+            socket.join(roomName); // Current user joins the room
+            io.to(opponent.socketId).emit('playNotification', {
+              roomName,
+              initiator: userName,
+            });
+          } else {
+            socket.emit('opponentOffline', { message: 'Opponent is offline.' });
+          }
+        });
+
+        socket.on('solveProblem', ({ roomName, userName }) => {
+          if (contestTimers[roomName]) {
+              clearTimeout(contestTimers[roomName].timer); // Stop the contest timer
+              delete contestTimers[roomName];
+      
+              // Notify the winner
+              io.to(roomName).emit('contestEnded', {
+                  winner: userName,
+                  message: `${userName} is the winner!`,
+              });
+      
+              console.log(`Contest ended for room: ${roomName}, winner: ${userName}`);
+          }
+      });
+
+        // Handle opponent joining the room
+        socket.on('joinRoom', (roomName) => {
+          socket.join(roomName);
+          io.to(roomName).emit('startContest', { message: 'Both players are in. Starting the contest.' });
+        });
       }
     }).catch((err) => console.log('Error fetching user:', err));
   }
@@ -50,5 +70,3 @@ io.on('connection', (socket) => {
     }
   });
 });
-app.set('io', io);
-export { app, io, server, userSocketMap };

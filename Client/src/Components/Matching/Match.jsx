@@ -30,10 +30,28 @@ const Match = () => {
     (userName) => userName !== loggedinUser?.username
   );
 
-  // Handle "Play" button click
   const handlePlay = (opponentUsername) => {
-    navigate(`/problem`, { state: { opponent: opponentUsername } });
+    const socket = io('http://localhost:9000', {
+      query: { userId: loggedinUser?._id },
+    });
+  
+    socket.emit('playRequest', { opponentUsername });
+  
+    socket.on('playNotification', ({ roomName, initiator }) => {
+      if (initiator !== loggedinUser.username) {
+        const accept = window.confirm(`${initiator} has challenged you to a match. Do you accept?`);
+        if (accept) {
+          socket.emit('joinRoom', roomName);
+          navigate(`/problem`, { state: { roomName } });
+        }
+      }
+    });
+  
+    socket.on('opponentOffline', ({ message }) => {
+      alert(message);
+    });
   };
+  
 
   // Handle "Add Friend" button click
   const handleAddFriend = async (friendUsername) => {
