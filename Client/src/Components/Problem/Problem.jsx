@@ -6,6 +6,8 @@ import ProblemDescription from './ProblemDescription.jsx';
 import LanguageSelector from './LanguageSelector.jsx';
 import CodeEditor from './CodeEditor.jsx';
 import { io } from 'socket.io-client';
+import { useSelector } from 'react-redux';
+import { useLocation, Navigate } from 'react-router-dom';
 
 const Problem = () => {
     const [question, setQuestion] = useState(null);
@@ -15,6 +17,13 @@ const Problem = () => {
     const [contestStarted, setContestStarted] = useState(false);
     const [roomName, setRoomName] = useState('');
     const socket = useRef(null);
+    const { loggedinUser } = useSelector((store) => store.user);
+    const location = useLocation();  // Get the state passed via navigation
+
+    // If roomName is not present in the state, redirect to /match
+    if (!location.state?.roomName) {
+        return <Navigate to="/match" replace />;
+    }
 
     useEffect(() => {
         // Fetch question data
@@ -31,29 +40,34 @@ const Problem = () => {
             }
         };
         fetchQuestion();
-
+    
         // Connect to socket server
         socket.current = io('http://localhost:9000', {
-            query: { userId: 'userId' }, // You should replace 'userId' dynamically
+            query: { userId: loggedinUser._id },
         });
-
+    
         // Listen for contest start
         socket.current.on('startContest', () => {
             setContestStarted(true);
             toast.success('Contest started!');
         });
-
+    
         // Listen for contest end
         socket.current.on('contestEnded', (message) => {
             setContestStarted(false);
             toast(message);
         });
-
+    
+        // Listen for when someone solves the problem
+        socket.current.on('solveProblem', ({ userName }) => {
+            toast.success(`${userName} solved the problem first! 🎉`);
+        });
+    
         return () => {
             socket.current.disconnect();
         };
     }, []);
-
+    
     const handleChange = (event) => {
         const selectedLanguage = event.target.value;
         setLanguage(selectedLanguage);
@@ -88,7 +102,7 @@ const Problem = () => {
                     toast.success("Accepted");
                     // Emit the solveProblem event when the solution is accepted
                     if (roomName && contestStarted) {
-                        socket.current.emit('solveProblem', { roomName, userName: 'User' }); // Replace 'User' dynamically
+                        socket.current.emit('solveProblem', { roomName, userName: loggedinUser.username }); // Replace 'User' dynamically
                     }
                 } else {
                     toast.error("Wrong answer!! Try Again.");
@@ -102,7 +116,6 @@ const Problem = () => {
             toast.error("Compilation error!!");
         }
     };
-    
 
     const getLanguageId = (language) => {
         switch (language) {
@@ -125,7 +138,7 @@ const Problem = () => {
 
     const solveProblem = () => {
         if (roomName && contestStarted) {
-            socket.current.emit('solveProblem', { roomName, userName: 'User' }); // Replace 'User' dynamically with actual user name
+            socket.current.emit('solveProblem', { roomName, userName: loggedinUser.username }); // Replace 'User' dynamically with actual user name
         } else {
             toast.error('Join a contest first!');
         }

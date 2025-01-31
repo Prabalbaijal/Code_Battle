@@ -17,31 +17,36 @@ const Match = () => {
       socket = io('http://localhost:9000', {
         query: { userId: loggedinUser._id },
       });
-
+  
       socket.on('getOnlineUsers', (users) => {
         setOnlineUsers(users);
       });
-
+  
       socket.on('playNotification', ({ roomName, initiator }) => {
         if (initiator !== loggedinUser.username) {
           const accept = window.confirm(`${initiator} has challenged you to a match. Do you accept?`);
           if (accept) {
-            socket.emit('joinRoom', roomName);
+            socket.emit('acceptRequest', roomName); // Notify the server
             navigate(`/problem`, { state: { roomName } });
           }
         }
       });
-
+  
+      socket.on('startContest', ({ roomName }) => {
+        navigate(`/problem`, { state: { roomName } });
+      });
+  
       socket.on('opponentOffline', ({ message }) => {
         toast.error(message);
       });
-
+  
       return () => {
         socket.disconnect();
         socket = null;
       };
     }
   }, [loggedinUser?._id, navigate]);
+  
 
   const filteredUsers = onlineUsers.filter(
     (userName) => userName !== loggedinUser?.username
