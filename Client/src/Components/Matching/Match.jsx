@@ -1,51 +1,49 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-let socket; // Ensure a single instance of the socket connection
-
 const Match = () => {
   const { loggedinUser } = useSelector((store) => store.user);
-  const [onlineUsers, setOnlineUsers] = useState([]);
+  const { onlineUsers } = useSelector((store) => store.user);
   const navigate = useNavigate();
+  const { socket } = useSelector((store) => store.socket);
 
   useEffect(() => {
     if (loggedinUser?._id) {
-      socket = io('http://localhost:9000', {
-        query: { userId: loggedinUser._id },
-      });
+      console.log("Setting up socket listeners");
   
-      socket.on('getOnlineUsers', (users) => {
-        setOnlineUsers(users);
-      });
-  
-      socket.on('playNotification', ({ roomName, initiator }) => {
+      socket.on("playNotification", ({ roomName, initiator }) => {
+        console.log("Received playNotification from", initiator);
+        
         if (initiator !== loggedinUser.username) {
           const accept = window.confirm(`${initiator} has challenged you to a match. Do you accept?`);
+          
           if (accept) {
-            socket.emit('acceptRequest', roomName); // Notify the server
-            navigate(`/problem`, { state: { roomName } });
+            console.log("Accepted challenge. Emitting joinRoom with roomName:", roomName);
+            socket.emit("joinRoom", roomName);
           }
         }
       });
   
-      socket.on('startContest', ({ roomName }) => {
-        navigate(`/problem`, { state: { roomName } });
+      socket.on("startContest", ({ roomName }) => {
+        console.log("startContest received. Navigating to problem page:", roomName);
+        navigate("/problem", { state: { roomName } });
       });
   
-      socket.on('opponentOffline', ({ message }) => {
+      socket.on("opponentOffline", ({ message }) => {
+        console.log("Opponent offline:", message);
         toast.error(message);
       });
   
       return () => {
-        socket.disconnect();
-        socket = null;
+        socket.off("playNotification");
+        socket.off("startContest");
+        socket.off("opponentOffline");
       };
     }
-  }, [loggedinUser?._id, navigate]);
+  }, [loggedinUser?._id]);
   
 
   const filteredUsers = onlineUsers.filter(

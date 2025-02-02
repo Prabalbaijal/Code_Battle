@@ -15,8 +15,7 @@ const Problem = () => {
     const [code, setCode] = useState('');
     const [darkMode, setDarkMode] = useState(false);
     const [contestStarted, setContestStarted] = useState(false);
-    const [roomName, setRoomName] = useState('');
-    const socket = useRef(null);
+    const { socket } = useSelector((store)=>store.socket)
     const { loggedinUser } = useSelector((store) => store.user);
     const location = useLocation();  // Get the state passed via navigation
 
@@ -41,30 +40,14 @@ const Problem = () => {
         };
         fetchQuestion();
     
-        // Connect to socket server
-        socket.current = io('http://localhost:9000', {
-            query: { userId: loggedinUser._id },
-        });
-    
-        // Listen for contest start
-        socket.current.on('startContest', () => {
-            setContestStarted(true);
-            toast.success('Contest started!');
-        });
-    
         // Listen for contest end
-        socket.current.on('contestEnded', (message) => {
-            setContestStarted(false);
-            toast(message);
-        });
-    
-        // Listen for when someone solves the problem
-        socket.current.on('solveProblem', ({ userName }) => {
-            toast.success(`${userName} solved the problem first! 🎉`);
+        socket.on('contestEnded', (data) => {
+            console.log()
+            toast.success(data.message);
         });
     
         return () => {
-            socket.current.disconnect();
+            socket.off('contestEnded'); // Cleanup to avoid multiple listeners
         };
     }, []);
     
@@ -101,9 +84,9 @@ const Problem = () => {
                 if (response.data.allPassed) {
                     toast.success("Accepted");
                     // Emit the solveProblem event when the solution is accepted
-                    if (roomName && contestStarted) {
-                        socket.current.emit('solveProblem', { roomName, userName: loggedinUser.username }); // Replace 'User' dynamically
-                    }
+                     console.log(location.state.roomName)
+                     const roomName=location.state.roomName;
+                        socket.emit('solveProblem', { roomName, userName: loggedinUser.username }); // Replace 'User' dynamically
                 } else {
                     toast.error("Wrong answer!! Try Again.");
                 }
@@ -154,11 +137,6 @@ const Problem = () => {
                     <CodeEditor code={code} setCode={setCode} language={language} darkMode={darkMode} />
                     <div className="flex justify-end space-x-4">
                         <button onClick={runCode} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">Submit</button>
-                        {!contestStarted ? (
-                            <button onClick={() => joinContest('room1')} className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600">Join Contest</button>
-                        ) : (
-                            <button onClick={solveProblem} className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600">Solve</button>
-                        )}
                     </div>
                 </div>
             </div>

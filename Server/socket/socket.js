@@ -61,28 +61,28 @@ io.on('connection', (socket) => {
           // Handle opponent joining the room
           socket.on('joinRoom', (roomName) => {
             socket.join(roomName);
-          
             const roomUsers = [...(io.sockets.adapter.rooms.get(roomName) || [])];
+            console.log(`Room: ${roomName}, Users:`, Array.from(roomUsers));
             if (roomUsers.length === 2) {
-              // Notify both players that the contest is starting
-              io.to(roomName).emit('startContest', {
-                message: 'Both players are in. Starting the contest.',
-              });
+              // Emit only when both players are actually present
+              io.to(roomName).emit('startContest', {roomName});
           
               // Start the contest timer
               const contestDuration = 300000; // 5 minutes
-              const contestTimer = setTimeout(() => {
-                io.to(roomName).emit('contestEnded', {
-                  winner: null,
-                  message: 'Contest ended. No one solved the problem.',
-                });
-                console.log(`Contest ended with no winner in room: ${roomName}`);
-                delete contestTimers[roomName];
-              }, contestDuration);
-          
-              contestTimers[roomName] = { timer: contestTimer, winner: null };
+              contestTimers[roomName] = {
+                timer: setTimeout(() => {
+                  io.to(roomName).emit('contestEnded', {
+                    winner: null,
+                    message: 'Contest ended. No one solved the problem.',
+                  });
+                  console.log(`Contest ended with no winner in room: ${roomName}`);
+                  delete contestTimers[roomName];
+                }, contestDuration),
+                winner: null,
+              };
             }
           });
+          
           
           socket.on('acceptRequest', (roomName) => {
             socket.join(roomName);
@@ -92,22 +92,33 @@ io.on('connection', (socket) => {
 
           // Handle problem-solving
           socket.on('solveProblem', ({ roomName, userName }) => {
+            console.log(`Received solveProblem event: roomName=${roomName}, userName=${userName}`);
+        
             const contest = contestTimers[roomName];
+            const roomUsers = [...(io.sockets.adapter.rooms.get(roomName) || [])];
+        
+            console.log(`Current users in room "${roomName}":`, roomUsers);
+            console.log(`Contest exists? ${contest !== undefined}, Contest winner: ${contest?.winner}`);
+        
             if (contest && !contest.winner) {
-              clearTimeout(contest.timer); // Stop the contest timer
-              contest.winner = userName;
-
-              // Notify both users about the winner
-              io.to(roomName).emit('contestEnded', {
-                winner: userName,
-                message: `${userName} solved the problem first and won the contest!`,
-              });
-
-              console.log(`Contest ended for room: ${roomName}, winner: ${userName}`);
-              delete contestTimers[roomName];
+                clearTimeout(contest.timer); // Stop the contest timer
+                contest.winner = userName;
+        
+                console.log(`Emitting contestEnded for room: ${roomName}, winner: ${userName}`);
+        
+                // Notify both users about the winner
+                io.to(roomName).emit('contestEnded', {
+                    winner: userName,
+                    message: `${userName} solved the problem first and won the contest!`,
+                });
+        
+                console.log(`Contest ended for room: ${roomName}, winner: ${userName}`);
+                delete contestTimers[roomName];
+            } else {
+                console.log(`Contest does not exist or already has a winner.`);
             }
-          });
-
+        });
+        
           // Handle disconnection
           socket.on('disconnect', () => {
             if (userId) {
