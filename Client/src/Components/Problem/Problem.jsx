@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import Navbar from './Navbar.jsx';
 import ProblemDescription from './ProblemDescription.jsx';
 import LanguageSelector from './LanguageSelector.jsx';
 import CodeEditor from './CodeEditor.jsx';
-import { io } from 'socket.io-client';
 import { useSelector } from 'react-redux';
-import { useLocation, Navigate } from 'react-router-dom';
+import { useLocation, Navigate, useNavigate } from 'react-router-dom';
 
 const Problem = () => {
     const [question, setQuestion] = useState(null);
@@ -15,17 +14,20 @@ const Problem = () => {
     const [code, setCode] = useState('');
     const [darkMode, setDarkMode] = useState(false);
     const [contestStarted, setContestStarted] = useState(false);
-    const { socket } = useSelector((store)=>store.socket)
+    
+    const { socket } = useSelector((store) => store.socket);
     const { loggedinUser } = useSelector((store) => store.user);
-    const location = useLocation();  // Get the state passed via navigation
+    const location = useLocation();
+    const roomName = location.state?.roomName;
+    const navigate=useNavigate()
+    const [isContestEndedModalOpen, setIsContestEndedModalOpen] = useState(false);
+    const [contestEndMessage, setContestEndMessage] = useState('');
 
-    // If roomName is not present in the state, redirect to /match
-    if (!location.state?.roomName) {
-        return <Navigate to="/match" replace />;
-    }
+
+    if (!roomName) return <Navigate to="/match" replace />;
 
     useEffect(() => {
-        // Fetch question data
+        if(!socket) return;
         const fetchQuestion = async () => {
             try {
                 const response = await axios.get('http://localhost:9000/api/users/question', {
@@ -39,18 +41,42 @@ const Problem = () => {
             }
         };
         fetchQuestion();
-    
-        // Listen for contest end
-        socket.on('contestEnded', (data) => {
-            console.log()
-            toast.success(data.message);
-        });
-    
-        return () => {
-            socket.off('contestEnded'); // Cleanup to avoid multiple listeners
+
+        const handleContestEnd = (data) => {
+            console.log("Contest Ended event received:", data);
+            setContestEndMessage(data.message);
+            setIsContestEndedModalOpen(true);
         };
-    }, []);
-    
+        
+        socket.on('contestEnded', handleContestEnd);
+
+        return () => {
+            socket.off('contestEnded');
+        };
+    }, [roomName, socket]);
+
+    useEffect(() => {
+        if(!socket) return;
+        const handleBeforeUnload = (event) => {
+            const confirmationMessage = "Are you sure? Your opponent will win if you leave!";
+            event.returnValue = confirmationMessage;
+            return confirmationMessage;
+        };
+
+        const handleUnload = () => {
+            socket.emit("leaveContest", { roomName, userName: loggedinUser.username });
+            navigate('/profile')
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        window.addEventListener("unload", handleUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+            window.removeEventListener("unload", handleUnload);
+        };
+    }, [socket, roomName, loggedinUser.username]);
+
     const handleChange = (event) => {
         const selectedLanguage = event.target.value;
         setLanguage(selectedLanguage);
@@ -70,23 +96,19 @@ const Problem = () => {
         const submissionData = {
             source_code: code,
             language_id: getLanguageId(language),
-            testCases: question.testCases,
+            testCases: question?.testCases,
         };
-    
+
         try {
             const response = await axios.post('http://localhost:9000/api/users/submit', submissionData, {
                 headers: { 'Content-Type': 'application/json' },
             });
             toast.dismiss(loadingToastId);
-    
-            // Check if the solution is accepted
+
             if (response.data.results[0].status.description === 'Accepted') {
                 if (response.data.allPassed) {
                     toast.success("Accepted");
-                    // Emit the solveProblem event when the solution is accepted
-                     console.log(location.state.roomName)
-                     const roomName=location.state.roomName;
-                        socket.emit('solveProblem', { roomName, userName: loggedinUser.username }); // Replace 'User' dynamically
+                    socket.emit('solveProblem', { roomName, userName: loggedinUser.username });
                 } else {
                     toast.error("Wrong answer!! Try Again.");
                 }
@@ -110,25 +132,22 @@ const Problem = () => {
         }
     };
 
-    const joinContest = (room) => {
-        if (room) {
-            socket.current.emit('joinRoom', room);
-            setRoomName(room);
-        } else {
-            toast.error("Please provide a valid contest room name.");
-        }
-    };
-
-    const solveProblem = () => {
-        if (roomName && contestStarted) {
-            socket.current.emit('solveProblem', { roomName, userName: loggedinUser.username }); // Replace 'User' dynamically with actual user name
-        } else {
-            toast.error('Join a contest first!');
-        }
-    };
-
     return (
         <div className={`${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'} min-h-screen flex flex-col`}>
+            {isContestEndedModalOpen && (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="p-6 text-center bg-white rounded-lg shadow-lg">
+            <h2 className="mb-4 text-xl font-semibold">Contest Ended</h2>
+            <p className="text-gray-600">{contestEndMessage}</p>
+            <button
+                onClick={() => navigate('/profile')}
+                className="px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600"
+            >
+                OK
+            </button>
+        </div>
+    </div>
+)}
             <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
             <div className="flex flex-col w-full h-screen overflow-hidden lg:flex-row">
                 <ProblemDescription question={question} darkMode={darkMode} />

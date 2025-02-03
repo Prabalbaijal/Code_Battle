@@ -75,55 +75,55 @@ export default function Login() {
         setRegisterUser({ ...registeruser, avatar: e.target.files[0] });
       };
 
-const LoginSubmitHandler = async (e) => {
-    e.preventDefault();
-    try {
-        const res = await axios.post('http://localhost:9000/api/users/login', loginuser, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            withCredentials: true,
+      const LoginSubmitHandler = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.post('http://localhost:9000/api/users/login', loginuser, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                withCredentials: true,
+            });
+    
+            if (res.data.success) {
+                dispatch(setLoggedinUser(res.data));
+    
+                toast.success(`Welcome ${res.data.fullname}`, { icon: '👋' });
+    
+                // Connect socket
+                const newSocket = io('http://localhost:9000', {
+                    query: { userId: res.data._id },
+                    reconnection: true,
+                });
+    
+                dispatch(setSocket(newSocket));
+    
+                // ✅ Fix: Use newSocket instead of undefined socket
+                newSocket.on('connect_error', (err) => {
+                    console.error('Socket connection error:', err.message);
+                });
+    
+                // ✅ Navigate only once after setting up everything
+                navigate("/home");
+            } else {
+                toast.error("Login failed! Please try again.");
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            if (error.response) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error("Something went wrong!!");
+            }
+        }
+    
+        // Reset login form
+        setLoginUser({
+            username: "",
+            password: "",
         });
-
-        if (res.data.success) {
-            navigate("/home");
-            dispatch(setLoggedinUser(res.data));
-
-            toast.success(`Welcome ${res.data.fullname}`, {
-                icon: '👋',
-            });
-
-            // Establish socket connection with userId in query
-            const socket = io('http://localhost:9000', {
-                query: { userId: res.data._id }, // Pass the logged-in user's ID
-            });
-            
-            dispatch(setSocket(socket))
-            
-            // Confirm socket connection
-            // socket.on('connect', () => {
-            //     console.log(`Socket connected: ${socket.id}`);
-            // });
-
-            // Handle error if any
-            socket.on('connect_error', (err) => {
-                console.error('Socket connection error:', err.message);
-            });
-        }
-    } catch (error) {
-        if (error.response) {
-            toast.error(error.response.data.message);
-        } else {
-            toast.error("Something went wrong!!");
-        }
-    }
-
-    // Reset login form
-    setLoginUser({
-        username: "",
-        password: "",
-    });
-};
+    };
+    
 
     return (
         <div className="flex items-center justify-center min-h-screen">

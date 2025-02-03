@@ -30,36 +30,53 @@ export default function App() {
 
   // EFFECT 1: Create socket when user logs in.
   useEffect(() => {
-    if (loggedinUser && !socket) {
-      const newSocket = io('http://localhost:9000', {
+    if (!loggedinUser) return; // No user? Skip effect.
+
+    console.log("🔌 Checking existing socket before creating a new one...");
+
+    // ✅ Disconnect old socket if it exists
+    if (socket) {
+        console.log("⚠️ Disconnecting old socket before creating a new one...");
+        socket.off('getOnlineUsers');
+        socket.off('notification');
+        socket.close(); // Properly close old connection
+        dispatch(disconnectSocket()); // Clear from Redux
+    }
+
+    // ✅ Create a new socket
+    console.log("✅ Creating a new socket connection...");
+    const newSocket = io('http://localhost:9000', {
         query: { userId: loggedinUser._id },
         reconnection: false,
-      });
-      dispatch(setSocket(newSocket));
+    });
 
-      newSocket.on('getOnlineUsers', (onlineUsers) => {
+    // ✅ Store new socket in Redux
+    dispatch(setSocket(newSocket));
+
+    // ✅ Handle incoming events
+    newSocket.on('getOnlineUsers', (onlineUsers) => {
         dispatch(setOnlineUsers(onlineUsers));
-      });
+    });
 
-      newSocket.on('notification', (notification) => {
+    newSocket.on('notification', (notification) => {
         if (notification.type === 'friend_request') {
-          alert(`Friend request from ${notification.from}`);
+            alert(`Friend request from ${notification.from}`);
         } else if (notification.type === 'friend_request_accepted') {
-          alert(`${notification.from} accepted your friend request!`);
+            alert(`${notification.from} accepted your friend request!`);
         }
-      });
+    });
 
-      // Cleanup when this effect is cleaned up (if loggedinUser changes or component unmounts)
-      return () => {
+    // ✅ Cleanup: Disconnect socket when user logs out or refreshes
+    return () => {
+        console.log("🧹 Cleaning up socket before unmount...");
         newSocket.off('getOnlineUsers');
         newSocket.off('notification');
         newSocket.close();
         dispatch(disconnectSocket());
-      };
-    }
-    // We intentionally do not include socket in the dependency array here
-    // so that this effect runs only when loggedinUser changes.
-  }, [loggedinUser, dispatch]);
+    };
+
+}, [loggedinUser, dispatch]); // ✅ Runs only when loggedinUser changes
+
 
   // EFFECT 2: Cleanup socket when user logs out.
   useEffect(() => {

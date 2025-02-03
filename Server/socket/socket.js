@@ -118,6 +118,35 @@ io.on('connection', (socket) => {
                 console.log(`Contest does not exist or already has a winner.`);
             }
         });
+
+        // Handle user leaving the contest
+socket.on("leaveContest", ({ roomName, userName }) => {
+  console.log(`${userName} left the contest in room: ${roomName}`);
+
+  if (contestTimers[roomName]) {
+      const roomUsers = [...(io.sockets.adapter.rooms.get(roomName) || [])];
+      const opponentSocketId = roomUsers.find((id) => id !== socket.id);
+
+      if (opponentSocketId) {
+          const opponent = Object.values(userSocketMap).find(
+              (user) => user.socketId === opponentSocketId
+          );
+
+          if (opponent) {
+              io.to(roomName).emit("contestEnded", {
+                  winner: opponent.userName,
+                  message: `${userName} left the contest. ${opponent.userName} wins! 🎉`,
+              });
+
+              console.log(`${opponent.userName} is declared the winner in room: ${roomName}`);
+          }
+      }
+
+      clearTimeout(contestTimers[roomName]?.timer);
+      delete contestTimers[roomName];
+  }
+});
+
         
           // Handle disconnection
           socket.on('disconnect', () => {
