@@ -62,13 +62,13 @@ io.on('connection', (socket) => {
           socket.on('joinRoom', (roomName) => {
             socket.join(roomName);
             const roomUsers = [...(io.sockets.adapter.rooms.get(roomName) || [])];
-            console.log(`Room: ${roomName}, Users:`, Array.from(roomUsers));
-            if (roomUsers.length === 2) {
-              // Emit only when both players are actually present
-              io.to(roomName).emit('startContest', {roomName});
+            console.log(`Room: ${roomName}, Users:`, roomUsers);
+          
+            if (roomUsers.length === 2 && !contestTimers[roomName]) {
+              const contestDuration = 300000; // 5 minutes
+              const endTime = Date.now() + contestDuration;
           
               // Start the contest timer
-              const contestDuration = 300000; // 5 minutes
               contestTimers[roomName] = {
                 timer: setTimeout(() => {
                   io.to(roomName).emit('contestEnded', {
@@ -79,9 +79,13 @@ io.on('connection', (socket) => {
                   delete contestTimers[roomName];
                 }, contestDuration),
                 winner: null,
+                endTime,
               };
+          
+              io.to(roomName).emit('startContest', { roomName, endTime });
             }
           });
+          
           
           
           socket.on('acceptRequest', (roomName) => {

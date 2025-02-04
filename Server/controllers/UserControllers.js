@@ -396,7 +396,7 @@ export const sendrequest = async (req, res) => {
     try {
       // Get the logged-in user
       const userId = req.user._id;
-  
+        console.log("called")
       // Find the user and populate the friends field with friend details
       const user = await User.findById(userId).populate('friends', 'username fullname avatar');
   

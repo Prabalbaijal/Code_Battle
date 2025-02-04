@@ -13,9 +13,27 @@ const Match = () => {
   const [isChallengeModalOpen, setIsChallengeModalOpen] = useState(false);
   const [waitingMessage, setWaitingMessage] = useState('');
   const [isRequestSentModalOpen, setIsRequestSentModalOpen] = useState(false);
+  const [friends, setFriends] = useState([]);
+  const [otherUsers, setOtherUsers] = useState([]);
 
   useEffect(() => {
     if (!loggedinUser?._id || !socket) return;
+
+    // Fetch friends list
+    const fetchFriends = async () => {
+      try {
+        const response = await axios.get('http://localhost:9000/api/users/getfriends', {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+      });
+        setFriends(response.data.friends);
+      } catch (error) {
+        console.error('Error fetching friends:', error);
+        toast.error('Failed to fetch friends');
+      }
+    };
+
+    fetchFriends();
 
     // Opponent ne challenge bheja
     socket.on('playNotification', ({ roomName, initiator }) => {
@@ -28,9 +46,9 @@ const Match = () => {
     });
 
     // Match start hone par problem page par navigate
-    socket.on('startContest', ({ roomName }) => {
+    socket.on('startContest', ({ roomName, endTime }) => {
       console.log("startContest received. Navigating to problem page:", roomName);
-      navigate('/problem', { state: { roomName } });
+      navigate('/problem', { state: { roomName, endTime } });
     });
 
     // Opponent left
@@ -53,11 +71,25 @@ const Match = () => {
     };
   }, [loggedinUser?._id, socket, navigate]);
 
+  useEffect(() => {
+    if (onlineUsers) {
+      // Separate friends from other users
+      const friendsUsernames = friends.map(friend => friend.username);
+      const filteredFriends = onlineUsers.filter(user => friendsUsernames.includes(user));
+  
+      // Filter out the logged-in user from the other users list
+      const filteredOthers = onlineUsers.filter(user => !friendsUsernames.includes(user) && user !== loggedinUser.username);
+  
+      setOtherUsers(filteredOthers);
+    }
+  }, [onlineUsers, friends, loggedinUser.username]);
+  
+
   // Accept Challenge
   const acceptChallenge = () => {
     if (challengeDetails) {
       console.log("Accepted challenge. Emitting joinRoom with roomName:", challengeDetails.roomName);
-      socket.emit("joinRoom", challengeDetails.roomName );
+      socket.emit("joinRoom", challengeDetails.roomName);
       setIsChallengeModalOpen(false);
     }
   };
@@ -89,20 +121,35 @@ const Match = () => {
     }
   };
 
-  const filteredUsers = onlineUsers?.filter(
-    (userName) => userName !== loggedinUser?.username
-  );
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 text-gray-100 bg-gray-900">
       <h3 className="mb-6 text-3xl font-bold">Online Users</h3>
 
-      {filteredUsers?.length === 0 ? (
-        <p className="text-lg text-gray-400">No other users online.</p>
-      ) : (
-        <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-lg">
+      {/* Friends Section */}
+      {friends.length > 0 && (
+        <div className="w-full max-w-md mb-6 bg-gray-800 rounded-lg shadow-lg">
+          <h4 className="px-4 py-2 text-lg font-semibold text-gray-300">Friends</h4>
           <ul className="divide-y divide-gray-700">
-            {filteredUsers.map((userName, index) => (
+            {friends.map((friend, index) => (
+              <li key={index} className="flex items-center justify-between px-4 py-3 hover:bg-gray-700">
+                <span className="font-medium text-gray-100">{friend.username}</span>
+                <div className="flex space-x-2">
+                  <button className="btn btn-success btn-sm" onClick={() => handlePlay(friend.username)}>
+                    Play
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Other Users Section */}
+      {otherUsers.length > 0 ? (
+        <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-lg">
+          <h4 className="px-4 py-2 text-lg font-semibold text-gray-300">Other Users</h4>
+          <ul className="divide-y divide-gray-700">
+            {otherUsers.map((userName, index) => (
               <li key={index} className="flex items-center justify-between px-4 py-3 hover:bg-gray-700">
                 <span className="font-medium text-gray-100">{userName}</span>
                 <div className="flex space-x-2">
@@ -117,6 +164,8 @@ const Match = () => {
             ))}
           </ul>
         </div>
+      ) : (
+        <p className="text-lg text-gray-400">No other users online.</p>
       )}
 
       {/* Challenge Modal */}

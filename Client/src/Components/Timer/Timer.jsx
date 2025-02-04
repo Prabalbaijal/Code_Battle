@@ -1,31 +1,38 @@
+// components/Timer/Timer.js
 import React, { useState, useEffect } from 'react';
 
-const Timer = () => {
-    const [time, setTime] = useState(30 * 60 * 1000); // 30 minutes in milliseconds
+const Timer = ({ endTime }) => {
+    const [timeLeft, setTimeLeft] = useState(null);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setTime((prevTime) => (prevTime > 0 ? prevTime - 1000 : 0));
-        }, 1000);
+        const updateTimeLeft = () => {
+            if (endTime) {
+                const now = new Date().getTime();
+                const timeRemaining = endTime - now;
 
-        if (time === 0) clearInterval(interval);
+                if (timeRemaining <= 0) {
+                    setTimeLeft(0);
+                } else {
+                    setTimeLeft(timeRemaining);
+                }
+            }
+        };
 
-        return () => clearInterval(interval);
-    }, [time]);
+        const timerInterval = setInterval(updateTimeLeft, 1000);
 
-    const formatTime = (milliseconds) => {
-        const minutes = Math.floor(milliseconds / 60000);
-        const seconds = ((milliseconds % 60000) / 1000).toFixed(0);
+        return () => clearInterval(timerInterval);
+    }, [endTime]);
+
+    const formatTime = (time) => {
+        const minutes = Math.floor(time / 60000);
+        const seconds = Math.floor((time % 60000) / 1000);
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
     return (
-        <div className="flex items-center px-4 py-2 bg-gray-100 rounded-lg shadow-md dark:bg-gray-700">
-            <span className="mr-2 text-sm font-semibold text-gray-500 dark:text-gray-300">Time Left:</span>
-            <span className="font-mono text-lg font-bold text-red-500 dark:text-red-400">
-                {formatTime(time)}
-            </span>
-        </div>
+        <span className="text-gray-500">
+            {timeLeft !== null ? formatTime(timeLeft) : 'Loading...'}
+        </span>
     );
 };
 

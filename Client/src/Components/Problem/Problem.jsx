@@ -18,7 +18,7 @@ const Problem = () => {
     const { socket } = useSelector((store) => store.socket);
     const { loggedinUser } = useSelector((store) => store.user);
     const location = useLocation();
-    const roomName = location.state?.roomName;
+    const {roomName,endTime} = location.state || {};
     const navigate=useNavigate()
     const [isContestEndedModalOpen, setIsContestEndedModalOpen] = useState(false);
     const [contestEndMessage, setContestEndMessage] = useState('');
@@ -148,7 +148,7 @@ const Problem = () => {
         </div>
     </div>
 )}
-            <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+            <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} endTime={endTime}/>
             <div className="flex flex-col w-full h-screen overflow-hidden lg:flex-row">
                 <ProblemDescription question={question} darkMode={darkMode} />
                 <div className={`w-full lg:w-2/3 p-6 overflow-y-auto ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-l shadow-lg flex flex-col h-full`}>
