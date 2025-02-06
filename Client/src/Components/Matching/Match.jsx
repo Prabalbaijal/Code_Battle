@@ -15,6 +15,7 @@ const Match = () => {
   const [isRequestSentModalOpen, setIsRequestSentModalOpen] = useState(false);
   const [friends, setFriends] = useState([]);
   const [otherUsers, setOtherUsers] = useState([]);
+  const [onlineFriends, setOnlineFriends] = useState([]);
 
   useEffect(() => {
     if (!loggedinUser?._id || !socket) return;
@@ -72,18 +73,16 @@ const Match = () => {
   }, [loggedinUser?._id, socket, navigate]);
 
   useEffect(() => {
-    if (onlineUsers) {
-      // Separate friends from other users
-      const friendsUsernames = friends.map(friend => friend.username);
-      const filteredFriends = onlineUsers.filter(user => friendsUsernames.includes(user));
+    if (onlineUsers.length > 0 && friends.length > 0) {
+      const friendsOnline = friends.filter(friend => onlineUsers.includes(friend.username));
+      const filteredOthers = onlineUsers.filter(user => 
+        !friendsOnline.some(friend => friend.username === user) && user !== loggedinUser.username
+      );
   
-      // Filter out the logged-in user from the other users list
-      const filteredOthers = onlineUsers.filter(user => !friendsUsernames.includes(user) && user !== loggedinUser.username);
-  
+      setOnlineFriends(friendsOnline);
       setOtherUsers(filteredOthers);
     }
   }, [onlineUsers, friends, loggedinUser.username]);
-  
 
   // Accept Challenge
   const acceptChallenge = () => {
@@ -126,23 +125,23 @@ const Match = () => {
       <h3 className="mb-6 text-3xl font-bold">Online Users</h3>
 
       {/* Friends Section */}
-      {friends.length > 0 && (
-        <div className="w-full max-w-md mb-6 bg-gray-800 rounded-lg shadow-lg">
-          <h4 className="px-4 py-2 text-lg font-semibold text-gray-300">Friends</h4>
-          <ul className="divide-y divide-gray-700">
-            {friends.map((friend, index) => (
-              <li key={index} className="flex items-center justify-between px-4 py-3 hover:bg-gray-700">
-                <span className="font-medium text-gray-100">{friend.username}</span>
-                <div className="flex space-x-2">
-                  <button className="btn btn-success btn-sm" onClick={() => handlePlay(friend.username)}>
-                    Play
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+{onlineFriends.length > 0 && (
+  <div className="w-full max-w-md mb-6 bg-gray-800 rounded-lg shadow-lg">
+    <h4 className="px-4 py-2 text-lg font-semibold text-gray-300">Friends (Online)</h4>
+    <ul className="divide-y divide-gray-700">
+      {onlineFriends.map((friend, index) => (
+        <li key={index} className="flex items-center justify-between px-4 py-3 hover:bg-gray-700">
+          <span className="font-medium text-gray-100">{friend.username}</span>
+          <div className="flex space-x-2">
+            <button className="btn btn-success btn-sm" onClick={() => handlePlay(friend.username)}>
+              Play
+            </button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
 
       {/* Other Users Section */}
       {otherUsers.length > 0 ? (

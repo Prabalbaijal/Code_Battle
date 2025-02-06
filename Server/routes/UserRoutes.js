@@ -1,5 +1,5 @@
     import express from "express"
-    import { register,login, logout, getQuestion, submitQuestion, sendrequest, handleFriendRequest, getFriendRequests, getFriends } from "../controllers/UserControllers.js"
+    import { register,login, logout, getQuestion, submitQuestion, sendrequest, handleFriendRequest, getFriendRequests, getFriends, getUserProfile } from "../controllers/UserControllers.js"
     import { upload } from "../middlewares/multer.js"
     import multer from "multer"
     import isAuthenticated from "../middlewares/check-auth.js"
@@ -16,5 +16,6 @@
     router.route("/sendfriendrequest").post(sendrequest)
     router.route("/handleRequest").post(handleFriendRequest)
     router.route("/getfriends").get(isAuthenticated,getFriends)
+    router.route("/updateprofile").get(isAuthenticated,getUserProfile)
     
     export default router

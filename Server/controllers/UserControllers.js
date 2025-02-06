@@ -116,6 +116,8 @@ export const login = async (req, res) => {
                 fullname:user.fullname,
                 username:user.username,
                 avatar:user.avatar,
+                level:user.level,
+                coins:user.coins,
                 success: true
             })
 
@@ -411,5 +413,28 @@ export const sendrequest = async (req, res) => {
       return res.status(500).json({ message: 'Server Error' });
     }
   };
+
+  export const getUserProfile = async (req, res) => {
+    try {
+        // Assuming user ID is available in req.user from authentication middleware
+        const userId = req.user.id;
+
+        // Fetch user data
+        const user = await User.findById(userId, "level coins matchHistory");
+        
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json({
+            level: user.level,
+            coins: user.coins,
+            matchHistory: user.matchHistory
+        });
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
   
   

@@ -3,6 +3,7 @@ import http from 'http';
 import express from 'express';
 import { User } from '../models/Usermodel.js';
 import mongoose from 'mongoose';
+import { updateUserData, updateUserDataOnNoWinner } from '../controllers/UserUpdate.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -63,28 +64,34 @@ io.on('connection', (socket) => {
             socket.join(roomName);
             const roomUsers = [...(io.sockets.adapter.rooms.get(roomName) || [])];
             console.log(`Room: ${roomName}, Users:`, roomUsers);
-          
+        
             if (roomUsers.length === 2 && !contestTimers[roomName]) {
-              const contestDuration = 300000; // 5 minutes
-              const endTime = Date.now() + contestDuration;
-          
-              // Start the contest timer
-              contestTimers[roomName] = {
-                timer: setTimeout(() => {
-                  io.to(roomName).emit('contestEnded', {
+                const contestDuration = 300000; // 5 minutes
+                const endTime = Date.now() + contestDuration;
+        
+                // Start the contest timer
+                contestTimers[roomName] = {
+                    timer: setTimeout(async () => {  // ✅ Make this async
+                        console.log(`Contest ended with no winner in room: ${roomName}`);
+        
+                        const [user1, user2] = roomName.split('-');
+                        const loserName = userName === user1 ? user2 : user1;
+        
+                        io.to(roomName).emit('contestEnded', {
+                            winner: null,
+                            message: 'Contest ended. No one solved the problem.',
+                        });
+        
+                        delete contestTimers[roomName];
+                    }, contestDuration),
                     winner: null,
-                    message: 'Contest ended. No one solved the problem.',
-                  });
-                  console.log(`Contest ended with no winner in room: ${roomName}`);
-                  delete contestTimers[roomName];
-                }, contestDuration),
-                winner: null,
-                endTime,
-              };
-          
-              io.to(roomName).emit('startContest', { roomName, endTime });
+                    endTime,
+                };
+        
+                io.to(roomName).emit('startContest', { roomName, endTime });
             }
-          });
+        });
+        
           
           
           
@@ -109,6 +116,9 @@ io.on('connection', (socket) => {
                 contest.winner = userName;
         
                 console.log(`Emitting contestEnded for room: ${roomName}, winner: ${userName}`);
+                const [user1, user2] = roomName.split('-');
+                const loserName = userName === user1 ? user2 : user1;
+                updateUserData(userName,loserName);
         
                 // Notify both users about the winner
                 io.to(roomName).emit('contestEnded', {

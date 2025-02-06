@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
   },
   coins: {
     type: Number,
-    default: 0,
+    default: 400,
   },
   level: {
     type: Number,
@@ -79,15 +79,7 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
-  lastOnline: {
-    type: Date,
-    default: Date.now,
-  },
-  status: {
-    type: String,
-    enum: ["online", "offline", "in-game"],
-    default: "offline",
-  },
+  
   questionsAttempted: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -96,10 +88,5 @@ const userSchema = new mongoose.Schema({
   ],
 }, { timestamps: true });
 
-userSchema.methods.updateLevel = function () {
-  if (this.coins >= 1000) this.level = 10;
-  else if (this.coins >= 500) this.level = 5;
-  else this.level = Math.floor(this.coins / 100) + 1;
-};
 
 export const User = mongoose.model("User", userSchema);
