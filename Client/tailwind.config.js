@@ -1,4 +1,6 @@
-import daisyui from './node_modules/daisyui'
+
+import daisyui from 'daisyui';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -6,9 +8,11 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        lightblue: '#ADD8E6', // Add your preferred light blue color
+      },
+    },
   },
   plugins: [daisyui],
-}
-
-
+};
