@@ -7,7 +7,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Settings, LogOut } from 'lucide-react';
 
-const Stats = () => {
+const Stats = ({ level, coins }) => {
   const { loggedinUser } = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -34,13 +34,16 @@ const Stats = () => {
           className="w-24 h-24 rounded-full border-4 border-gray-200 shadow-md"
         />
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800">{loggedinUser?.fullName}</h2>
-          <p className="text-gray-500 text-sm">@{loggedinUser?.userName}</p>
+          <h2 className="text-2xl font-bold text-gray-800">{loggedinUser?.fullname}</h2>
+          <p className="text-gray-500 text-sm">@{loggedinUser?.username}</p>
         </div>
         <div className="w-full flex flex-col space-y-2 px-6 py-4 bg-gray-100 rounded-lg shadow-inner">
           <p className="text-gray-600 font-medium">📧 Email: <span className="font-normal text-gray-700">{loggedinUser?.email}</span></p>
-          <p className="text-gray-600 font-medium">🎮 Level: <span className="font-normal text-gray-700">{loggedinUser?.levels}</span></p>
-          <p className="text-gray-600 font-medium">💰 Coins: <span className="font-normal text-gray-700">{loggedinUser?.coins}</span></p>
+          <p className="text-gray-600 font-medium">🎮 Level: <span className="font-normal text-gray-700">{level}</span></p>
+          <p className="text-gray-600 font-medium">💰 Coins: <span className="font-normal text-gray-700">{coins}</span></p>
+
+          {/* <p className="text-gray-600 font-medium">Full Name: <span className="font-normal text-gray-700">{loggedinUser?.fullName}</span></p> */}
+          {/* <p className="text-gray-600 font-medium">Usernam: <span className="font-normal text-gray-700">{loggedinUser?.userName}</span></p> */}
         </div>
       </div>
 
