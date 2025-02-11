@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { Settings, LogOut } from 'lucide-react';
 
 const Stats = () => {
-  const { loggedinUser } = useSelector(store => store.user);
+  const { loggedinUser } = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -16,7 +16,7 @@ const Stats = () => {
   const logoutFunction = async () => {
     try {
       const res = await axios.get('http://localhost:9000/api/users/logout');
-      navigate("/");
+      navigate('/');
       toast.success(res.data.message);
       dispatch(setLoggedinUser(null));
     } catch (error) {
@@ -25,9 +25,9 @@ const Stats = () => {
   };
 
   return (
-    <div className="h-full flex flex-col justify-between p-6 bg-white border-r border-gray-300 shadow-lg">
+    <div className="h-full flex flex-col p-6 bg-white border-r border-gray-300 shadow-lg">
       {/* Profile Section */}
-      <div className="flex flex-col items-center space-y-4">
+      <div className="flex flex-col items-center space-y-4 flex-grow">
         <img
           src={loggedinUser?.avatar}
           alt="Profile Pic"
@@ -44,20 +44,21 @@ const Stats = () => {
         </div>
       </div>
 
-      {/* Settings Button */}
-
-      <div className="relative mt-6">
+      {/* Settings Button (Only for Large Screens) */}
+      <div className="mt-auto relative lg:block hidden">
         <button
           onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-          className="w-full flex items-center justify-center py-2 text-gray-600 hover:text-gray-800 focus:outline-none relative"
+          className="w-full flex items-center justify-center py-2 text-gray-600 hover:text-gray-800 focus:outline-none"
         >
           <div className="flex items-center justify-center space-x-2 w-full py-2 bg-gray-200 rounded-lg shadow-md hover:bg-gray-300 transition-all">
             <Settings size={20} />
             <span className="text-sm font-medium">Settings</span>
           </div>
         </button>
+
+        {/* Dropdown Menu for Logout */}
         {isSettingsOpen && (
-          <div className="absolute bottom-14 left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
+          <div className="absolute left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 top-[-30px]">
             <button
               onClick={logoutFunction}
               className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 flex items-center"
@@ -68,8 +69,6 @@ const Stats = () => {
           </div>
         )}
       </div>
-
-
     </div>
   );
 };
