@@ -58,7 +58,7 @@ const ContestHistory = ({ contests }) => {
             if (contest.result === 'win') {
               resultClass = 'text-green-500'; // Win: Green
               resultText = `+50`; // You can replace with the actual result value
-            } else if (contest.result === 'loss') {
+            } else if (contest.result === 'lose') {
               resultClass = 'text-red-500'; // Loss: Red
               resultText = `-50`; // You can replace with the actual result value
             } else if (contest.result === 'draw') {
