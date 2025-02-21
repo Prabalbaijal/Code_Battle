@@ -1,6 +1,4 @@
 
-
-
 import React, { useEffect, useState } from 'react';
 import ProfileHeader from './ProfileHeader';
 import Stats from './Stats';
@@ -68,12 +66,10 @@ const Profile = () => {
 
   return (
     <div className="profile-page min-h-screen flex flex-col">
-      {/* Header */}
       <ProfileHeader />
-
       {/* Main Content */}
-      <div className="flex flex-col lg:flex-row flex-grow max-h-screen overflow-hidden">
-        {/* Stats (Sidebar on large, Full-width on small) */}
+      <div className="flex flex-col lg:flex-row flex-grow max-h-screen overflow-hidden pt-12">
+
         <div className="w-full lg:w-1/4 bg-gray-100 border-b lg:border-r border-gray-300 p-4">
           {/* Pass level and coins as props to Stats */}
           <Stats level={level} coins={coins} />
