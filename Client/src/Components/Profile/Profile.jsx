@@ -65,22 +65,22 @@
 //   };
 
 //   return (
-//     <div className="profile-page min-h-screen flex flex-col">
+//     <div className="flex flex-col min-h-screen profile-page">
 //       {/* Header */}
 //       <ProfileHeader />
 
 //       {/* Main Content */}
-//       <div className="flex flex-col lg:flex-row flex-grow">
+//       <div className="flex flex-col flex-grow lg:flex-row">
 //         {/* Stats (Sidebar on large, Full-width on small) */}
-//         <div className="w-full lg:w-1/4 bg-gray-100 border-b lg:border-r border-gray-300 p-4">
+//         <div className="w-full p-4 bg-gray-100 border-b border-gray-300 lg:w-1/4 lg:border-r">
 //           {/* Pass level and coins as props to Stats */}
 //           <Stats level={level} coins={coins} />
 //         </div>
 
 //         {/* Main Section */}
-//         <div className="w-full lg:w-3/4 flex flex-col p-4 space-y-4">
+//         <div className="flex flex-col w-full p-4 space-y-4 lg:w-3/4">
 //           {/* Performance Graph */}
-//           <div className="bg-white shadow p-4 rounded-lg">
+//           <div className="p-4 bg-white rounded-lg shadow">
 //             <PerformanceGraph />
 //           </div>
 
@@ -95,10 +95,10 @@
 
 //           {/* Settings Button at Bottom on Small Screens */}
 //           {isSmallScreen && (
-//             <div className="mt-4 relative">
+//             <div className="relative mt-4">
 //               <button
 //                 onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-//                 className="w-full py-2 bg-gray-200 text-gray-800 rounded-lg flex items-center justify-center space-x-2 shadow-md hover:bg-gray-300 transition-all"
+//                 className="flex items-center justify-center w-full py-2 space-x-2 text-gray-800 transition-all bg-gray-200 rounded-lg shadow-md hover:bg-gray-300"
 //               >
 //                 <Settings size={20} />
 //                 <span className="text-sm font-medium">Settings</span>
@@ -109,7 +109,7 @@
 //                 <div className="absolute left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 top-[-37px]">
 //                   <button
 //                     onClick={logoutFunction}
-//                     className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 flex items-center"
+//                     className="flex items-center w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
 //                   >
 //                     <LogOut size={16} className="mr-2" />
 //                     Logout
@@ -161,6 +161,7 @@ const Profile = () => {
         setMatchHistory(response.data.matchHistory);
         setLevel(response.data.level);  // Set level
         setCoins(response.data.coins);    // Set coins
+
       } catch (error) {
         console.error("Error fetching profile data:", error);
       } finally {
@@ -193,27 +194,27 @@ const Profile = () => {
   };
 
   return (
-    <div className="profile-page min-h-screen flex flex-col">
+    <div className="flex flex-col min-h-screen profile-page">
       {/* Header */}
       <ProfileHeader />
 
       {/* Main Content */}
-      <div className="flex flex-col lg:flex-row flex-grow max-h-screen overflow-hidden">
+      <div className="flex flex-col flex-grow max-h-screen overflow-hidden lg:flex-row">
         {/* Stats (Sidebar on large, Full-width on small) */}
-        <div className="w-full lg:w-1/4 bg-gray-100 border-b lg:border-r border-gray-300 p-4">
+        <div className="w-full p-4 bg-gray-100 border-b border-gray-300 lg:w-1/4 lg:border-r">
           {/* Pass level and coins as props to Stats */}
           <Stats level={level} coins={coins} />
         </div>
 
         {/* Main Section */}
-        <div className="w-full lg:w-3/4 flex flex-col p-4 space-y-4 overflow-hidden">
+        <div className="flex flex-col w-full p-4 space-y-4 overflow-hidden lg:w-3/4">
           {/* Performance Graph */}
-          <div className="bg-white shadow p-4 rounded-lg">
+          <div className="p-4 bg-white rounded-lg shadow">
             <PerformanceGraph />
           </div>
 
           {/* Contest History */}
-          <div className="bg-white shadow p-4 rounded-lg flex-1 overflow-hidden">
+          <div className="flex-1 p-4 overflow-hidden bg-white rounded-lg shadow">
             {loading ? (
               <p className="text-center text-gray-500">Loading...</p>
             ) : (
@@ -223,10 +224,10 @@ const Profile = () => {
 
           {/* Settings Button at Bottom on Small Screens */}
           {isSmallScreen && (
-            <div className="mt-4 relative">
+            <div className="relative mt-4">
               <button
                 onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                className="w-full py-2 bg-gray-200 text-gray-800 rounded-lg flex items-center justify-center space-x-2 shadow-md hover:bg-gray-300 transition-all"
+                className="flex items-center justify-center w-full py-2 space-x-2 text-gray-800 transition-all bg-gray-200 rounded-lg shadow-md hover:bg-gray-300"
               >
                 <Settings size={20} />
                 <span className="text-sm font-medium">Settings</span>
@@ -237,7 +238,7 @@ const Profile = () => {
                 <div className="absolute left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 top-[-37px]">
                   <button
                     onClick={logoutFunction}
-                    className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 flex items-center"
+                    className="flex items-center w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
                   >
                     <LogOut size={16} className="mr-2" />
                     Logout

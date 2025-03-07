@@ -147,6 +147,10 @@ socket.on("leaveContest", ({ roomName, userName }) => {
           );
 
           if (opponent) {
+            const [user1, user2] = roomName.split('-');
+                const winner = userName === user1 ? user2 : user1;
+                updateUserData(winner,userName);
+        
               io.to(roomName).emit("contestEnded", {
                   winner: opponent.userName,
                   message: `${userName} left the contest. ${opponent.userName} wins! 🎉`,

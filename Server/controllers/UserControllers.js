@@ -5,7 +5,6 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import Question from '../models/QuestionModel.js'
 import axios from 'axios'
-import { FriendRequest } from '../models/friendRequest.js'
 
 
 export const register = async (req, res) => {
@@ -270,8 +269,6 @@ export const submitQuestion = async (req, res) => {
 };
 
 
-import { userSocketMap } from '../socket/socket.js'
-
 export const sendrequest = async (req, res) => {
     const { senderUsername, receiverUsername } = req.body;
   
@@ -435,6 +432,4 @@ export const sendrequest = async (req, res) => {
         console.error("Error fetching user profile:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
-};
-  
-  
+};  
