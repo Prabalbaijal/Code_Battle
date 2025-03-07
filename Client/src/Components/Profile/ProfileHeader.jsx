@@ -29,7 +29,7 @@ const ProfileHeader = () => {
 
   return (
     <header 
-      className="sticky top-0 z-50 text-white shadow-lg navbar bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600 m-0 p-0"
+    className="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600 shadow-lg"
     >
       <div className="flex items-center justify-between w-full px-4 py-2 lg:px-8">
         {/* Logo */}

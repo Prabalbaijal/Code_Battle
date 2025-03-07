@@ -23,24 +23,27 @@ const Stats = ({ level, coins }) => {
       console.log(error);
     }
   };
-
+  // flex flex-col items-center space-y-4 flex-grow mt-10
   return (
     <div className="h-full flex flex-col p-6 bg-white border-r border-gray-300 shadow-lg">
       {/* Profile Section */}
-      <div className="flex flex-col items-center space-y-4 flex-grow">
+      <div className="flex flex-col items-center space-y-4 flex-grow mt-10">
         <img
           src={loggedinUser?.avatar}
           alt="Profile Pic"
-          className="w-24 h-24 rounded-full border-4 border-gray-200 shadow-md"
+          className="w-40 h-40 rounded-full border-4 border-gray-200 shadow-md"
         />
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800">{loggedinUser?.fullname}</h2>
           <p className="text-gray-500 text-sm">@{loggedinUser?.username}</p>
         </div>
-        <div className="w-full flex flex-col space-y-2 px-6 py-4 bg-gray-100 rounded-lg shadow-inner">
-          <p className="text-gray-600 font-medium">📧 Email: <span className="font-normal text-gray-700">{loggedinUser?.email}</span></p>
-          <p className="text-gray-600 font-medium">🎮 Level: <span className="font-normal text-gray-700">{level}</span></p>
-          <p className="text-gray-600 font-medium">💰 Coins: <span className="font-normal text-gray-700">{coins}</span></p>
+        <div className="w-full flex flex-col space-y-2 px-6 py-4 rounded-lg border border-gray-300">
+          {/* <p className="text-gray-900 font-medium">📧 Email: <span className="font-normal text-gray-900">{loggedinUser?.email}</span></p> */}
+          <p className="text-gray-900 font-medium text-lg">
+            📧 Email: <span className="font-normal text-gray-900">{loggedinUser?.email}</span>
+          </p>
+          <p className="text-gray-600 font-medium">🎮 Level: <span className="font-normal text-lg text-gray-700">{level}</span></p>
+          <p className="text-gray-600 font-medium">💰 Coins: <span className="font-normal text-lg text-gray-700">{coins}</span></p>
 
           {/* <p className="text-gray-600 font-medium">Full Name: <span className="font-normal text-gray-700">{loggedinUser?.fullName}</span></p> */}
           {/* <p className="text-gray-600 font-medium">Usernam: <span className="font-normal text-gray-700">{loggedinUser?.userName}</span></p> */}
