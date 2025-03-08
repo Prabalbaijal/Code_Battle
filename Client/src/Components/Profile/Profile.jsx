@@ -1,5 +1,4 @@
 
-<<<<<<< HEAD
 // import React, { useEffect, useState } from 'react';
 // import ProfileHeader from './ProfileHeader';
 // import Stats from './Stats';
@@ -128,8 +127,9 @@
 // export default Profile;
 
 
-=======
->>>>>>> 108cb809e9531b340dea3e50e9c31be6ec07c460
+
+
+
 import React, { useEffect, useState } from 'react';
 import ProfileHeader from './ProfileHeader';
 import Stats from './Stats';
@@ -162,8 +162,8 @@ const Profile = () => {
         });
 
         setMatchHistory(response.data.matchHistory);
-        setLevel(response.data.level);  // Set level
-        setCoins(response.data.coins);    // Set coins
+        setLevel(response.data.level);
+        setCoins(response.data.coins);
 
       } catch (error) {
         console.error("Error fetching profile data:", error);
@@ -197,24 +197,14 @@ const Profile = () => {
   };
 
   return (
-<<<<<<< HEAD
     <div className="flex flex-col min-h-screen profile-page">
       {/* Header */}
-=======
-    <div className="profile-page min-h-screen flex flex-col">
->>>>>>> 108cb809e9531b340dea3e50e9c31be6ec07c460
       <ProfileHeader />
-      {/* Main Content */}
-<<<<<<< HEAD
-      <div className="flex flex-col flex-grow max-h-screen overflow-hidden lg:flex-row">
-        {/* Stats (Sidebar on large, Full-width on small) */}
-        <div className="w-full p-4 bg-gray-100 border-b border-gray-300 lg:w-1/4 lg:border-r">
-=======
-      <div className="flex flex-col lg:flex-row flex-grow max-h-screen overflow-hidden pt-12">
 
+      {/* Main Content */}
+      <div className="flex flex-col lg:flex-row flex-grow max-h-screen overflow-hidden pt-12">
+        {/* Sidebar (Stats) */}
         <div className="w-full lg:w-1/4 bg-gray-100 border-b lg:border-r border-gray-300 p-4">
->>>>>>> 108cb809e9531b340dea3e50e9c31be6ec07c460
-          {/* Pass level and coins as props to Stats */}
           <Stats level={level} coins={coins} />
         </div>
 
@@ -247,7 +237,7 @@ const Profile = () => {
 
               {/* Dropdown Menu for Logout */}
               {isSettingsOpen && (
-                <div className="absolute left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 top-[-37px]">
+                <div className="absolute left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 top-full mt-1">
                   <button
                     onClick={logoutFunction}
                     className="flex items-center w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"

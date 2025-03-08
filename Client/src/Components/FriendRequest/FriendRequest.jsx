@@ -1,30 +1,159 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import toast from 'react-hot-toast';
+
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import { useSelector } from "react-redux";
+// import toast from "react-hot-toast";
+// import ProfileHeader from "../Profile/ProfileHeader";
+
+// const FriendRequests = () => {
+//   const [friendRequests, setFriendRequests] = useState([]);
+//   const { loggedinUser } = useSelector((store) => store.user);
+
+//   useEffect(() => {
+//     const fetchFriendRequests = async () => {
+//       try {
+//         console.log(loggedinUser.username);
+//         const response = await axios.get("http://localhost:9000/api/users/getfriendrequests", {
+//           withCredentials: true,
+//         });
+
+//         // Remove duplicate requests by keeping only one request per sender
+//         const uniqueRequests = Object.values(
+//           response.data.friendRequests.reduce((acc, request) => {
+//             acc[request.sender.username] = request; // Store latest request from each sender
+//             return acc;
+//           }, {})
+//         );
+
+//         setFriendRequests(
+//           uniqueRequests.map((request) => ({
+//             ...request,
+//             status: "pending",
+//           }))
+//         );
+//       } catch (error) {
+//         console.error("Error fetching friend requests:", error);
+//         toast.error("Failed to fetch friend requests.");
+//       }
+//     };
+
+//     fetchFriendRequests();
+//   }, [loggedinUser.username]);
+
+//   const handleAction = async (senderUsername, action) => {
+//     try {
+//       await axios.post("http://localhost:9000/api/users/handleRequest", {
+//         senderUsername,
+//         receiverUsername: loggedinUser.username,
+//         action,
+//       });
+//       toast.success(`Friend request ${action}ed!`);
+
+//       setFriendRequests((prevRequests) =>
+//         prevRequests.filter((req) => req.sender.username !== senderUsername)
+//       );
+//     } catch (error) {
+//       console.error(`Error ${action}ing friend request:`, error);
+//       toast.error(`Failed to ${action} friend request.`);
+//     }
+//   };
+
+//   return (
+//     <div className="max-w-2xl mx-auto p-6">
+//       <h1 className="text-xl font-semibold text-center mb-4">Friend Requests</h1>
+
+//       {friendRequests.length === 0 ? (
+//         <p className="text-center text-gray-500">No friend requests available.</p>
+//       ) : (
+//         <div className="space-y-4">
+//           {friendRequests.map((request) => (
+//             <div
+//               key={request._id}
+//               className="bg-white shadow-lg rounded-xl p-4 flex justify-between items-center transition-all duration-300 hover:shadow-2xl"
+//             >
+//               <div className="flex items-center space-x-4">
+//                 <img
+//                   src={request.sender.avatar || "https://via.placeholder.com/50"}
+//                   alt={request.sender.username}
+//                   className="w-12 h-12 rounded-full border border-gray-300"
+//                 />
+//                 <span className="text-lg font-medium">
+//                   {request.sender.fullname} (@{request.sender.username})
+//                 </span>
+//               </div>
+
+//               <div className="space-x-2">
+//                 {request.status === "pending" ? (
+//                   <>
+//                     <button
+//                       onClick={() => handleAction(request.sender.username, "accept")}
+//                       className="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-all"
+//                     >
+//                       Accept
+//                     </button>
+//                     <button
+//                       onClick={() => handleAction(request.sender.username, "reject")}
+//                       className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-all"
+//                     >
+//                       Reject
+//                     </button>
+//                   </>
+//                 ) : (
+//                   <span
+//                     className={`px-4 py-2 rounded-lg text-white ${
+//                       request.status === "accept" ? "bg-green-500" : "bg-red-500"
+//                     }`}
+//                   >
+//                     {request.status === "accept" ? "Accepted" : "Rejected"}
+//                   </span>
+//                 )}
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default FriendRequests;
+
+
+
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import ProfileHeader from "../Profile/ProfileHeader";
 
 const FriendRequests = () => {
   const [friendRequests, setFriendRequests] = useState([]);
   const { loggedinUser } = useSelector((store) => store.user);
 
   useEffect(() => {
-    // Fetch friend requests
     const fetchFriendRequests = async () => {
       try {
-        console.log(loggedinUser.username);
-        const response = await axios.get('http://localhost:9000/api/users/getfriendrequests', {
+        const response = await axios.get("http://localhost:9000/api/users/getfriendrequests", {
           withCredentials: true,
         });
 
+        // Remove duplicate requests by keeping only one request per sender
+        const uniqueRequests = Object.values(
+          response.data.friendRequests.reduce((acc, request) => {
+            acc[request.sender.username] = request;
+            return acc;
+          }, {})
+        );
+
         setFriendRequests(
-          response.data.friendRequests.map((request) => ({
+          uniqueRequests.map((request) => ({
             ...request,
-            status: 'pending', // Add default 'pending' status to each request
+            status: "pending",
           }))
         );
       } catch (error) {
-        console.error('Error fetching friend requests:', error);
-        toast.error('Failed to fetch friend requests.');
+        console.error("Error fetching friend requests:", error);
+        toast.error("Failed to fetch friend requests.");
       }
     };
 
@@ -33,18 +162,15 @@ const FriendRequests = () => {
 
   const handleAction = async (senderUsername, action) => {
     try {
-      await axios.post('http://localhost:9000/api/users/handleRequest', {
+      await axios.post("http://localhost:9000/api/users/handleRequest", {
         senderUsername,
         receiverUsername: loggedinUser.username,
         action,
       });
       toast.success(`Friend request ${action}ed!`);
 
-      // Update the status of the processed friend request
       setFriendRequests((prevRequests) =>
-        prevRequests.map((req) =>
-          req.sender.username === senderUsername ? { ...req, status: action } : req
-        )
+        prevRequests.filter((req) => req.sender.username !== senderUsername)
       );
     } catch (error) {
       console.error(`Error ${action}ing friend request:`, error);
@@ -53,49 +179,65 @@ const FriendRequests = () => {
   };
 
   return (
-    <div className="friend-requests-container">
-      <h1>Friend Requests</h1>
-      {friendRequests.length === 0 ? (
-        <p>No friend requests to show.</p>
-      ) : (
-        <ul>
-          {friendRequests.map((request) => (
-            <li key={request._id} className="friend-request-item">
-              <div className="request-info">
+    <>
+      <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+        <ProfileHeader />
+      </div>
+
+      <div className="w-full mx-auto p-6 pt-24">
+        <h1 className="text-3xl font-bold mb-6 text-gray-800 text-left mt-4 ml-2">
+          Friend Requests
+        </h1>
+
+        {friendRequests.length === 0 ? (
+          <p className="text-left text-gray-500 text-lg">No friend requests available.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {friendRequests.map((request) => (
+              <div
+                key={request._id}
+                className="bg-white shadow-xl rounded-2xl p-6 flex flex-col items-center justify-center space-y-4 transition-all duration-300 hover:shadow-2xl"
+              >
                 <img
-                  src={request.sender.avatar}
+                  src={request.sender.avatar || "https://via.placeholder.com/100"}
                   alt={request.sender.username}
-                  className="avatar"
+                  className="w-20 h-20 rounded-full border-4 border-gray-300"
                 />
-                <span>{request.sender.fullname} (@{request.sender.username})</span>
-              </div>
-              <div className="request-actions">
-                {request.status === 'pending' ? (
-                  <>
-                    <button
-                      className="btn btn-success"
-                      onClick={() => handleAction(request.sender.username, 'accept')}
+                <span className="text-xl font-medium text-gray-700">
+                  {request.sender.fullname} (@{request.sender.username})
+                </span>
+                <div className="w-full flex justify-center space-x-4">
+                  {request.status === "pending" ? (
+                    <>
+                      <button
+                        onClick={() => handleAction(request.sender.username, "accept")}
+                        className="px-5 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-all"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleAction(request.sender.username, "reject")}
+                        className="px-5 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-all"
+                      >
+                        Reject
+                      </button>
+                    </>
+                  ) : (
+                    <span
+                      className={`px-5 py-2 rounded-lg text-white text-lg font-semibold ${
+                        request.status === "accept" ? "bg-green-500" : "bg-red-500"
+                      }`}
                     >
-                      Accept
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleAction(request.sender.username, 'reject')}
-                    >
-                      Reject
-                    </button>
-                  </>
-                ) : (
-                  <span className={`status-label ${request.status}`}>
-                    {request.status === 'accept' ? 'Accepted' : 'Rejected'}
-                  </span>
-                )}
+                      {request.status === "accept" ? "Accepted" : "Rejected"}
+                    </span>
+                  )}
+                </div>
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

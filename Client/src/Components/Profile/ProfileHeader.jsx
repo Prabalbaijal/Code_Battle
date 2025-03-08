@@ -29,7 +29,7 @@ const ProfileHeader = () => {
 
   return (
     <header 
-    className="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600 shadow-lg"
+      className="w-full z-50 bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600 shadow-lg"
     >
       <div className="flex items-center justify-between w-full px-4 py-2 lg:px-8">
         {/* Logo */}
@@ -49,7 +49,7 @@ const ProfileHeader = () => {
         {/* Navbar Items for Larger Screens */}
         <div className={`absolute left-0 top-16 w-full bg-gray-800 p-4 space-y-2 lg:relative lg:top-0 lg:flex lg:w-auto lg:bg-transparent lg:space-y-0 lg:space-x-6 ${isMenuOpen ? 'block' : 'hidden'}`}>
           <ul className="flex flex-col lg:flex-row lg:items-center gap-4">
-            <li><Link to="/" className="block p-2 text-white lg:text-gray-200 hover:text-gray-300">Home</Link></li>
+            <li><Link to="/home" className="block p-2 text-white lg:text-gray-200 hover:text-gray-300">Home</Link></li>
             <li><Link to="/leaderboard" className="block p-2 text-white lg:text-gray-200 hover:text-gray-300">Leaderboard</Link></li>
             <li><Link to="/practice-mode" className="block p-2 text-white lg:text-gray-200 hover:text-gray-300">Practice Mode</Link></li>
             <li><Link to="/friends" className="block p-2 text-white lg:text-gray-200 hover:text-gray-300">Friends</Link></li>
