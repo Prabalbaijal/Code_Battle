@@ -12,6 +12,8 @@ import FriendRequests from './Components/FriendRequest/FriendRequest.jsx';
 import Friends from './Components/Friends/Friends.jsx';
 import { setSocket, disconnectSocket } from './redux/socketSlice.js';
 import { setOnlineUsers } from './redux/userSlice.js';
+// import { Settings } from './Components/Settings.jsx';
+
 
 const router = createBrowserRouter([
   { path: '/', element: <Login /> },
@@ -21,6 +23,7 @@ const router = createBrowserRouter([
   { path: '/profile', element: <Profile /> },
   { path: '/friendrequests', element: <FriendRequests /> },
   { path: '/friends', element: <Friends /> },
+  // { path: '/Settings', element: <Settings /> },
 ]);
 
 export default function App() {

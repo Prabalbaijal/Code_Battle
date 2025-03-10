@@ -14,12 +14,12 @@ const Problem = () => {
     const [code, setCode] = useState('');
     const [darkMode, setDarkMode] = useState(false);
     const [contestStarted, setContestStarted] = useState(false);
-    
+
     const { socket } = useSelector((store) => store.socket);
     const { loggedinUser } = useSelector((store) => store.user);
     const location = useLocation();
-    const {roomName,endTime} = location.state || {};
-    const navigate=useNavigate()
+    const { roomName, endTime } = location.state || {};
+    const navigate = useNavigate()
     const [isContestEndedModalOpen, setIsContestEndedModalOpen] = useState(false);
     const [contestEndMessage, setContestEndMessage] = useState('');
 
@@ -27,7 +27,7 @@ const Problem = () => {
     if (!roomName) return <Navigate to="/match" replace />;
 
     useEffect(() => {
-        if(!socket) return;
+        if (!socket) return;
         const fetchQuestion = async () => {
             try {
                 const response = await axios.get('http://localhost:9000/api/users/question', {
@@ -47,7 +47,7 @@ const Problem = () => {
             setContestEndMessage(data.message);
             setIsContestEndedModalOpen(true);
         };
-        
+
         socket.on('contestEnded', handleContestEnd);
 
         return () => {
@@ -56,7 +56,7 @@ const Problem = () => {
     }, [roomName, socket]);
 
     useEffect(() => {
-        if(!socket) return;
+        if (!socket) return;
         const handleBeforeUnload = (event) => {
             const confirmationMessage = "Are you sure? Your opponent will win if you leave!";
             event.returnValue = confirmationMessage;
@@ -135,28 +135,33 @@ const Problem = () => {
     return (
         <div className={`${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'} min-h-screen flex flex-col`}>
             {isContestEndedModalOpen && (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="p-6 text-center bg-white rounded-lg shadow-lg">
-            <h2 className="mb-4 text-xl font-semibold">Contest Ended</h2>
-            <p className="text-gray-600">{contestEndMessage}</p>
-            <button
-                onClick={() => navigate('/profile')}
-                className="px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600"
-            >
-                OK
-            </button>
-        </div>
-    </div>
-)}
-            <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} endTime={endTime}/>
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="p-6 text-center bg-white rounded-lg shadow-lg">
+                        <h2 className="mb-4 text-xl font-semibold">Contest Ended</h2>
+                        <p className="text-gray-600">{contestEndMessage}</p>
+                        <button
+                            onClick={() => navigate('/profile')}
+                            className="px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            )}
+            <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} endTime={endTime} />
             <div className="flex flex-col w-full h-screen overflow-hidden lg:flex-row">
                 <ProblemDescription question={question} darkMode={darkMode} />
                 <div className={`w-full lg:w-2/3 p-6 overflow-y-auto ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-l shadow-lg flex flex-col h-full`}>
                     <LanguageSelector language={language} handleChange={handleChange} darkMode={darkMode} />
                     <CodeEditor code={code} setCode={setCode} language={language} darkMode={darkMode} />
-                    <div className="flex justify-end space-x-4">
-                        <button onClick={runCode} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">Submit</button>
+                
+                    <div className="fixed bottom-0 left-0 w-full lg:w-3/3 bg-gray-900 p-4 flex justify-end border-t border-gray-700">
+                        <button onClick={runCode} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
+                            Submit
+                        </button>
                     </div>
+
+
                 </div>
             </div>
         </div>
