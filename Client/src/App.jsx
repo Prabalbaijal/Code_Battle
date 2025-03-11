@@ -12,7 +12,10 @@ import FriendRequests from './Components/FriendRequest/FriendRequest.jsx';
 import Friends from './Components/Friends/Friends.jsx';
 import { setSocket, disconnectSocket } from './redux/socketSlice.js';
 import { setOnlineUsers } from './redux/userSlice.js';
-// import { Settings } from './Components/Settings.jsx';
+import Challenge from './Components/ChallengeFriend/Challenge.jsx';
+import DailyChallenge from './Components/DailyChallenge/DailyChallenge.jsx';
+import Settings from './Components/Settings/Settings.jsx';
+
 
 
 const router = createBrowserRouter([
@@ -23,7 +26,11 @@ const router = createBrowserRouter([
   { path: '/profile', element: <Profile /> },
   { path: '/friendrequests', element: <FriendRequests /> },
   { path: '/friends', element: <Friends /> },
-  // { path: '/Settings', element: <Settings /> },
+  { path: '/challenge', element: <Challenge /> },
+  { path: '/daily-challenge', element: <DailyChallenge /> },
+  { path: '/settings', element: <Settings /> },
+
+
 ]);
 
 export default function App() {
@@ -39,18 +46,18 @@ export default function App() {
 
     // ✅ Disconnect old socket if it exists
     if (socket) {
-        console.log("⚠️ Disconnecting old socket before creating a new one...");
-        socket.off('getOnlineUsers');
-        socket.off('notification');
-        socket.close(); // Properly close old connection
-        dispatch(disconnectSocket()); // Clear from Redux
+      console.log("⚠️ Disconnecting old socket before creating a new one...");
+      socket.off('getOnlineUsers');
+      socket.off('notification');
+      socket.close(); // Properly close old connection
+      dispatch(disconnectSocket()); // Clear from Redux
     }
 
     // ✅ Create a new socket
     console.log("✅ Creating a new socket connection...");
     const newSocket = io('http://localhost:9000', {
-        query: { userId: loggedinUser._id },
-        reconnection: false,
+      query: { userId: loggedinUser._id },
+      reconnection: false,
     });
 
     // ✅ Store new socket in Redux
@@ -58,27 +65,27 @@ export default function App() {
 
     // ✅ Handle incoming events
     newSocket.on('getOnlineUsers', (onlineUsers) => {
-        dispatch(setOnlineUsers(onlineUsers));
+      dispatch(setOnlineUsers(onlineUsers));
     });
 
     newSocket.on('notification', (notification) => {
-        if (notification.type === 'friend_request') {
-            alert(`Friend request from ${notification.from}`);
-        } else if (notification.type === 'friend_request_accepted') {
-            alert(`${notification.from} accepted your friend request!`);
-        }
+      if (notification.type === 'friend_request') {
+        alert(`Friend request from ${notification.from}`);
+      } else if (notification.type === 'friend_request_accepted') {
+        alert(`${notification.from} accepted your friend request!`);
+      }
     });
 
     // ✅ Cleanup: Disconnect socket when user logs out or refreshes
     return () => {
-        console.log("🧹 Cleaning up socket before unmount...");
-        newSocket.off('getOnlineUsers');
-        newSocket.off('notification');
-        newSocket.close();
-        dispatch(disconnectSocket());
+      console.log("🧹 Cleaning up socket before unmount...");
+      newSocket.off('getOnlineUsers');
+      newSocket.off('notification');
+      newSocket.close();
+      dispatch(disconnectSocket());
     };
 
-}, [loggedinUser, dispatch]); // ✅ Runs only when loggedinUser changes
+  }, [loggedinUser, dispatch]); // ✅ Runs only when loggedinUser changes
 
 
   // EFFECT 2: Cleanup socket when user logs out.
@@ -90,6 +97,7 @@ export default function App() {
   }, [loggedinUser, socket, dispatch]);
 
   return (
+
     <div>
       <RouterProvider router={router} />
     </div>
