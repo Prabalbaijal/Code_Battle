@@ -6,6 +6,7 @@ import { setLoggedinUser } from '../../redux/userSlice.js';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Menu, X } from 'lucide-react';
+import logo from "../../assets/logo.png";
 
 const ProfileHeader = () => {
   const { loggedinUser } = useSelector(store => store.user);
@@ -28,16 +29,38 @@ const ProfileHeader = () => {
   };
 
   return (
-    <header 
+    <header
       className="w-full z-50 bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600 shadow-lg"
     >
       <div className="flex items-center justify-between w-full px-4 py-2 lg:px-8">
         {/* Logo */}
-        <div className="navbar-start">
+
+{/* 
+        {<div className="navbar-start">
           <Link to="/" className="text-xl sm:text-2xl font-bold btn btn-ghost whitespace-nowrap">
             Code Battle
           </Link>
-        </div>
+        </div>} */}
+
+{ 
+        <div className="navbar-start">
+          <button
+            onClick={() => window.location.reload()}
+            className="relative flex items-center space-x-4 sm:ml-[-0px] mb-4 sm:mb-0 focus:outline-none"
+          >
+          
+            <img
+              src={logo}
+              alt="Logo"
+              className="w-36 sm:w-80 h-18 rounded-lg hover:brightness-125 transition duration-300"
+            />
+          </button>
+        </div> }
+
+
+
+
+
 
         {/* Hamburger Menu for Small Screens */}
         <div className="lg:hidden">

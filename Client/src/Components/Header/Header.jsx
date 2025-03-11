@@ -7,6 +7,8 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { FaChevronDown, FaBars, FaTimes } from 'react-icons/fa';
 import Settings from '../Settings/Settings.jsx';
+import Leaderboard from '../Leaderboard/Leaderboard.jsx';
+import logo from "../../assets/logo.png";
 
 const Header = () => {
   const { loggedinUser } = useSelector((store) => store.user);
@@ -54,10 +56,28 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 shadow-lg bg-gradient-to-r from-purple-700 via-blue-700 to-indigo-700 p-4 flex items-center justify-between">
-      <Link to="/home" className="text-2xl font-bold text-white" onClick={() => handleNavigation('/home')}>
-        Code Battle
+    // <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600 shadow-lg p-4 flex items-center justify-between">
+
+    //   <Link to="/home" className="text-2xl font-bold text-white" onClick={() => handleNavigation('/home')}>
+    //     Code Battle
+    //   </Link>
+
+    <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600 shadow-lg p-4 flex items-center justify-between">
+
+
+      <Link
+        to="/"
+        onClick={() => window.location.reload()}
+        className="relative flex items-center space-x-4 sm:ml-[-0px] mb-4 sm:mb-0"
+      >
+        {/* Logo Image with Effects */}
+        <img
+          src={logo}
+          alt="Logo"
+          className="w-36 sm:w-80 h-22 rounded-lg  hover:brightness-125 transition duration-300"
+        />
       </Link>
+
 
       <div className="lg:hidden">
         <button onClick={() => setIsSidebarOpen(true)} className="focus:outline-none">
@@ -97,7 +117,7 @@ const Header = () => {
                     <Link to="/challenge" className="block px-4 py-2 hover:bg-gray-700">
                       Challenge a Friend
                     </Link>
-                    
+
                   </li>
                   <li>
                     <Link to="/daily-challenge" className="block px-4 py-2 hover:bg-gray-700">

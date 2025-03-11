@@ -45,8 +45,6 @@ const Stats = ({ level, coins }) => {
           <p className="text-gray-600 font-medium">🎮 Level: <span className="font-normal text-lg text-gray-700">{level}</span></p>
           <p className="text-gray-600 font-medium">💰 Coins: <span className="font-normal text-lg text-gray-700">{coins}</span></p>
 
-          {/* <p className="text-gray-600 font-medium">Full Name: <span className="font-normal text-gray-700">{loggedinUser?.fullName}</span></p> */}
-          {/* <p className="text-gray-600 font-medium">Usernam: <span className="font-normal text-gray-700">{loggedinUser?.userName}</span></p> */}
         </div>
       </div>
 
