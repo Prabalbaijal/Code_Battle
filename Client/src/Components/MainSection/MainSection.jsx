@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './MainSection.css';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 const MainSections = () => {
   const { loggedinUser } = useSelector(store => store.user);
@@ -53,8 +54,8 @@ const MainSections = () => {
         <div className="font-mono text-2xl">{typedMessage}</div>
         
         <h1 className="text-5xl font-bold">Welcome back, {loggedinUser?.fullname}! Ready for a new coding challenge?</h1>
-        <p className="text-lg">Unleash your potential and climb the leaderboard!</p>
-        <button className="btn btn-primary btn-lg">Go for Battle</button>
+        <p className="text-lg">Unleash your potential!</p>
+        <Link to="/match"> <button className="btn btn-primary btn-lg">Go for Battle</button></Link>
         
         {/* Animated Announcement Blocks */}
         <div className="grid w-full max-w-4xl grid-cols-1 gap-6 mt-10 md:grid-cols-2 lg:grid-cols-3">

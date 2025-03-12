@@ -1,9 +1,8 @@
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import ProfileHeader from "../Profile/ProfileHeader";
+import Header from "../Header/Header";
 
 const FriendRequests = () => {
   const [friendRequests, setFriendRequests] = useState([]);
@@ -16,16 +15,8 @@ const FriendRequests = () => {
           withCredentials: true,
         });
 
-        // Remove duplicate requests by keeping only one request per sender
-        const uniqueRequests = Object.values(
-          response.data.friendRequests.reduce((acc, request) => {
-            acc[request.sender.username] = request;
-            return acc;
-          }, {})
-        );
-
         setFriendRequests(
-          uniqueRequests.map((request) => ({
+          response.data.friendRequests.map((request) => ({
             ...request,
             status: "pending",
           }))
@@ -58,65 +49,67 @@ const FriendRequests = () => {
   };
 
   return (
-    <>
-      <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
-        <ProfileHeader />
+    <section className="min-h-screen p-6 friends-section bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-md">
+        <Header />
       </div>
 
-      <div className="w-full mx-auto p-6 pt-24">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800 text-left mt-4 ml-2">
+      <div className="flex flex-col justify-center p-6 pt-24 m-auto w-full max-w-[95vw] md:max-w-[80vw] lg:max-w-[50vw]">
+        <h1 className="mt-4 mb-6 text-2xl font-bold text-center md:text-3xl dark:text-gray-100">
           Friend Requests
         </h1>
 
         {friendRequests.length === 0 ? (
-          <p className="text-left text-gray-500 text-lg">No friend requests available.</p>
+          <p className="text-lg text-center dark:text-gray-100">No friend requests available.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {friendRequests.map((request) => (
-              <div
-                key={request._id}
-                className="bg-white shadow-xl rounded-2xl p-6 flex flex-col items-center justify-center space-y-4 transition-all duration-300 hover:shadow-2xl"
-              >
-                <img
-                  src={request.sender.avatar || "https://via.placeholder.com/100"}
-                  alt={request.sender.username}
-                  className="w-20 h-20 rounded-full border-4 border-gray-300"
-                />
-                <span className="text-xl font-medium text-gray-700">
-                  {request.sender.fullname} (@{request.sender.username})
-                </span>
-                <div className="w-full flex justify-center space-x-4">
-                  {request.status === "pending" ? (
-                    <>
-                      <button
-                        onClick={() => handleAction(request.sender.username, "accept")}
-                        className="px-5 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-all"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={() => handleAction(request.sender.username, "reject")}
-                        className="px-5 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-all"
-                      >
-                        Reject
-                      </button>
-                    </>
-                  ) : (
-                    <span
-                      className={`px-5 py-2 rounded-lg text-white text-lg font-semibold ${
-                        request.status === "accept" ? "bg-green-500" : "bg-red-500"
-                      }`}
-                    >
-                      {request.status === "accept" ? "Accepted" : "Rejected"}
+          <div className="w-full p-4 border rounded-lg shadow-lg bg-white/70 dark:bg-gray-800/70 backdrop-blur-md hover:shadow-xl border-white/20 dark:border-gray-700/20">
+            {/* Scrollable Friend Requests List */}
+            <div className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+              {friendRequests.map((request) => (
+                <div
+                  key={request._id}
+                  className="flex flex-col items-center justify-between gap-4 p-4 transition-all duration-300 md:flex-row rounded-xl hover:shadow-lg md:gap-2"
+                >
+                  {/* User Info */}
+                  <div className="flex items-center w-full space-x-4 md:w-auto">
+                    <img
+                      src={request.sender.avatar || "https://via.placeholder.com/50"}
+                      alt={request.sender.username}
+                      className="w-12 h-12 border-2 border-gray-300 rounded-full"
+                    />
+                    <span className="font-medium text-center text-md md:text-lg dark:text-gray-100 md:text-left">
+                      {request.sender.fullname} (@{request.sender.username})
                     </span>
-                  )}
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex flex-wrap justify-center w-full gap-2 md:justify-end md:w-auto">
+                    <button
+                      onClick={() => handleAction(request.sender.username, "accept")}
+                      className="w-full px-4 py-2 text-white bg-green-500 rounded-lg shadow hover:bg-green-600 md:w-auto"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => handleAction(request.sender.username, "reject")}
+                      className="w-full px-4 py-2 text-white bg-red-500 rounded-lg shadow hover:bg-red-600 md:w-auto"
+                    >
+                      Ignore
+                    </button>
+                    <button
+                      onClick={() => toast.info(`Viewing profile of ${request.sender.username}`)}
+                      className="w-full px-4 py-2 text-gray-900 bg-gray-300 rounded-lg shadow hover:bg-gray-400 md:w-auto"
+                    >
+                      View Profile
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
-    </>
+    </section>
   );
 };
 

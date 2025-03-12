@@ -12,7 +12,6 @@ const HomePage = () => {
     <div>
       <Header></Header>
       <MainSection></MainSection>
-      <UserStats></UserStats>
       <Footer></Footer>
     </div>
   );

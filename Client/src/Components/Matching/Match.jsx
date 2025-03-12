@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import Header from '../Header/Header';
 
 const Match = () => {
   const { loggedinUser, onlineUsers } = useSelector((store) => store.user);
@@ -73,16 +74,31 @@ const Match = () => {
   }, [loggedinUser?._id, socket, navigate]);
 
   useEffect(() => {
-    if (onlineUsers.length > 0 && friends.length > 0) {
+    console.log("Online Users:", onlineUsers);
+    console.log("Friends:", friends);
+    console.log("Logged-in User:", loggedinUser.username);
+  
+    if (onlineUsers.length > 0) {
+      // Extract friend usernames
+      const friendUsernames = friends.map(friend => friend.username);
+  
+      // Find online friends
       const friendsOnline = friends.filter(friend => onlineUsers.includes(friend.username));
-      const filteredOthers = onlineUsers.filter(user => 
-        !friendsOnline.some(friend => friend.username === user) && user !== loggedinUser.username
+  
+      // Find other online users (who are not friends and not the logged-in user)
+      const filteredOthers = onlineUsers.filter(username => 
+        !friendUsernames.includes(username) && username !== loggedinUser.username
       );
+  
+      console.log("Online Friends:", friendsOnline);
+      console.log("Other Users:", filteredOthers);
   
       setOnlineFriends(friendsOnline);
       setOtherUsers(filteredOthers);
     }
   }, [onlineUsers, friends, loggedinUser.username]);
+  
+  
 
   // Accept Challenge
   const acceptChallenge = () => {
@@ -122,6 +138,9 @@ const Match = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 text-gray-100 bg-gray-900">
+      <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-md">
+        <Header />
+      </div>
       <h3 className="mb-6 text-3xl font-bold">Online Users</h3>
 
       {/* Friends Section */}

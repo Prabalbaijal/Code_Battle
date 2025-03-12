@@ -56,13 +56,13 @@ const Header = () => {
   };
 
   return (
-    // <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600 shadow-lg p-4 flex items-center justify-between">
+    // <header className="sticky top-0 z-50 flex items-center justify-between w-full p-4 shadow-lg bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600">
 
     //   <Link to="/home" className="text-2xl font-bold text-white" onClick={() => handleNavigation('/home')}>
     //     Code Battle
     //   </Link>
 
-    <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600 shadow-lg p-4 flex items-center justify-between">
+    <header className="sticky top-0 z-50 flex items-center justify-between w-full p-4 shadow-lg bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600">
 
 
       <Link
@@ -74,7 +74,7 @@ const Header = () => {
         <img
           src={logo}
           alt="Logo"
-          className="w-36 sm:w-80 h-22 rounded-lg  hover:brightness-125 transition duration-300"
+          className="transition duration-300 rounded-lg w-36 sm:w-80 h-22 hover:brightness-125"
         />
       </Link>
 
@@ -87,13 +87,13 @@ const Header = () => {
 
       {isSidebarOpen && (
 
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
-          <div ref={sidebarRef} className="w-64 bg-gray-900 text-white h-full p-6 flex flex-col space-y-4 transition-transform transform translate-x-0">
-            <button onClick={() => setIsSidebarOpen(false)} className="text-white self-end">
+        <div className="fixed inset-0 z-50 flex justify-end bg-black bg-opacity-50">
+          <div ref={sidebarRef} className="flex flex-col w-64 h-full p-6 space-y-4 text-white transition-transform transform translate-x-0 bg-gray-900">
+            <button onClick={() => setIsSidebarOpen(false)} className="self-end text-white">
               <FaTimes size={24} />
             </button>
             <nav className="flex flex-col space-y-4">
-              <button onClick={() => handleNavigation('/home')} className="hover:text-gray-300 text-left">
+              <button onClick={() => handleNavigation('/home')} className="text-left hover:text-gray-300">
                 Home
               </button>
               <Link to="/leaderboard" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
@@ -103,29 +103,9 @@ const Header = () => {
                 Practice
               </Link>
               {/* Challenges Dropdown */}
-              <div className="relative group">
-                <button className="flex items-center gap-1 hover:text-gray-300">
-                  Challenges <FaChevronDown className="w-3 h-3" />
-                </button>
-                <ul className="absolute left-0 mt-2 hidden group-hover:block bg-gray-800 text-white rounded shadow-lg w-48 py-2">
-                  <li>
-                    <Link to="/match" className="block px-4 py-2 hover:bg-gray-700">
-                      Quick Match
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/challenge" className="block px-4 py-2 hover:bg-gray-700">
-                      Challenge a Friend
-                    </Link>
-
-                  </li>
-                  <li>
-                    <Link to="/daily-challenge" className="block px-4 py-2 hover:bg-gray-700">
-                      Daily Challenge
-                    </Link>
-                  </li>
-                </ul>
-              </div>
+              <Link to="/match" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
+                Quick Match
+              </Link>
               <Link to="/friends" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
                 Friends
               </Link>
@@ -150,24 +130,10 @@ const Header = () => {
 
       )}
 
-      <div className="hidden lg:flex items-center space-x-6 text-white">
+      <div className="items-center hidden space-x-6 text-white lg:flex">
         <nav className="flex flex-row space-x-6">
           <Link to="/home" className="hover:text-gray-300" onClick={() => handleNavigation('/home')}>Home</Link>
-          <Link to="/leaderboard" className="hover:text-gray-300">Leaderboard</Link>
-          <Link to="/practice-mode" className="hover:text-gray-300">Practice</Link>
-
-          <div className="relative group">
-            <button className="flex items-center gap-1 hover:text-gray-300">
-              Challenges <FaChevronDown className="w-3 h-3" />
-            </button>
-            <ul className="absolute left-0 mt-2 hidden group-hover:block bg-gray-800 text-white rounded shadow-lg w-48 py-2">
-              <li><Link to="/match" className="block px-4 py-2 hover:bg-gray-700">Quick Match</Link></li>
-              <li><Link to="/challenge" className="block px-4 py-2 hover:bg-gray-700">Challenge a Friend</Link></li>
-              <li><Link to="/daily-challenge" className="block px-4 py-2 hover:bg-gray-700">Daily Challenge</Link></li>
-            </ul>
-          </div>
-
-
+          <Link to="/match" className="hover:text-gray-300">Quick Match</Link>
           <Link to="/friends" className="hover:text-gray-300">Friends</Link>
           <Link to="/friendrequests" className="hover:text-gray-300">Friend Requests</Link>
         </nav>
@@ -176,10 +142,10 @@ const Header = () => {
             <img src={loggedinUser?.avatar} alt="User Avatar" className="w-10 h-10 rounded-full" />
           </button>
           {isDropdownOpen && (
-            <ul className="absolute right-0 mt-2 bg-gray-800 text-white rounded shadow-lg w-48 py-2">
+            <ul className="absolute right-0 w-48 py-2 mt-2 text-white bg-gray-800 rounded shadow-lg">
               <li><Link to="/profile" className="block px-4 py-2 hover:bg-gray-700">Profile</Link></li>
               <li><Link to="/settings" className="block px-4 py-2 hover:bg-gray-700">Settings</Link></li>
-              <li onClick={logoutFunction} className="block px-4 py-2 hover:bg-red-600 cursor-pointer">Logout</li>
+              <li onClick={logoutFunction} className="block px-4 py-2 cursor-pointer hover:bg-red-600">Logout</li>
             </ul>
           )}
         </div>
