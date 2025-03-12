@@ -74,7 +74,7 @@ const ProfileHeader = () => {
           <ul className="flex flex-col gap-4 lg:flex-row lg:items-center">
             <li><Link to="/home" className="block p-2 text-white lg:text-gray-200 hover:text-gray-300">Home</Link></li>
             <li><Link to="/match" className="block p-2 text-white lg:text-gray-200 hover:text-gray-300">Quick Match</Link></li>
-            <li><Link to="/friends" className="block p-2 text-white lg:text-gray-200 hover:text-gray-300">Friends Mode</Link></li>
+            <li><Link to="/friends" className="block p-2 text-white lg:text-gray-200 hover:text-gray-300">Friends</Link></li>
             <li><Link to="/friendrequests" className="block p-2 text-white lg:text-gray-200 hover:text-gray-300">Friend Requests</Link></li>
           </ul>
         </div>

@@ -141,6 +141,7 @@ const Match = () => {
       <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-md">
         <Header />
       </div>
+      <div><h5>Make sure to have a stable internet connection before starting the battle.</h5></div><br></br>
       <h3 className="mb-6 text-3xl font-bold">Online Users</h3>
 
       {/* Friends Section */}
