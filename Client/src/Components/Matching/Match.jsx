@@ -27,7 +27,7 @@ const Match = () => {
         const response = await axios.get('http://localhost:9000/api/users/getfriends', {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
-      });
+        });
         setFriends(response.data.friends);
       } catch (error) {
         console.error('Error fetching friends:', error);
@@ -77,28 +77,28 @@ const Match = () => {
     console.log("Online Users:", onlineUsers);
     console.log("Friends:", friends);
     console.log("Logged-in User:", loggedinUser.username);
-  
+
     if (onlineUsers.length > 0) {
       // Extract friend usernames
       const friendUsernames = friends.map(friend => friend.username);
-  
+
       // Find online friends
       const friendsOnline = friends.filter(friend => onlineUsers.includes(friend.username));
-  
+
       // Find other online users (who are not friends and not the logged-in user)
-      const filteredOthers = onlineUsers.filter(username => 
+      const filteredOthers = onlineUsers.filter(username =>
         !friendUsernames.includes(username) && username !== loggedinUser.username
       );
-  
+
       console.log("Online Friends:", friendsOnline);
       console.log("Other Users:", filteredOthers);
-  
+
       setOnlineFriends(friendsOnline);
       setOtherUsers(filteredOthers);
     }
   }, [onlineUsers, friends, loggedinUser.username]);
-  
-  
+
+
 
   // Accept Challenge
   const acceptChallenge = () => {
@@ -145,23 +145,23 @@ const Match = () => {
       <h3 className="mb-6 text-3xl font-bold">Online Users</h3>
 
       {/* Friends Section */}
-{onlineFriends.length > 0 && (
-  <div className="w-full max-w-md mb-6 bg-gray-800 rounded-lg shadow-lg">
-    <h4 className="px-4 py-2 text-lg font-semibold text-gray-300">Friends (Online)</h4>
-    <ul className="divide-y divide-gray-700">
-      {onlineFriends.map((friend, index) => (
-        <li key={index} className="flex items-center justify-between px-4 py-3 hover:bg-gray-700">
-          <span className="font-medium text-gray-100">{friend.username}</span>
-          <div className="flex space-x-2">
-            <button className="btn btn-success btn-sm" onClick={() => handlePlay(friend.username)}>
-              Play
-            </button>
-          </div>
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
+      {onlineFriends.length > 0 && (
+        <div className="w-full max-w-md mb-6 bg-gray-800 rounded-lg shadow-lg">
+          <h4 className="px-4 py-2 text-lg font-semibold text-gray-300">Friends (Online)</h4>
+          <ul className="divide-y divide-gray-700">
+            {onlineFriends.map((friend, index) => (
+              <li key={index} className="flex items-center justify-between px-4 py-3 hover:bg-gray-700">
+                <span className="font-medium text-gray-100">{friend.username}</span>
+                <div className="flex space-x-2">
+                  <button className="btn btn-success btn-sm" onClick={() => handlePlay(friend.username)}>
+                    Play
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Other Users Section */}
       {otherUsers.length > 0 ? (
@@ -189,39 +189,46 @@ const Match = () => {
 
       {/* Challenge Modal */}
       {isChallengeModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="p-6 text-center bg-white rounded-lg shadow-lg">
-            <h2 className="mb-4 text-xl font-semibold">
-              {challengeDetails?.initiator} has challenged you to a match!
-            </h2>
-            <p className="text-gray-600">Do you accept?</p>
-            <div className="flex justify-center mt-4 space-x-4">
-              <button
-                onClick={acceptChallenge}
-                className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600"
-              >
-                Accept
-              </button>
-              <button
-                onClick={declineChallenge}
-                className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600"
-              >
-                Reject
-              </button>
-            </div>
+       
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
+        <div className="p-6 text-center bg-gray-900 rounded-lg shadow-2xl border border-gray-700 w-80">
+          <h2 className="mb-3 text-xl font-semibold text-white">
+            {challengeDetails?.initiator} has challenged you to a match!
+          </h2>
+          <p className="text-gray-400">Do you accept?</p>
+    
+          <div className="flex justify-center mt-4 space-x-4">
+            <button
+              onClick={acceptChallenge}
+              className="px-4 py-2 text-white bg-green-500 rounded-lg hover:bg-green-400 transition duration-200"
+            >
+              Accept
+            </button>
+            <button
+              onClick={declineChallenge}
+              className="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-400 transition duration-200"
+            >
+              Reject
+            </button>
           </div>
         </div>
+      </div>
       )}
 
       {/* Request Sent Modal */}
       {isRequestSentModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="p-6 text-center bg-white rounded-lg shadow-lg">
-            <h2 className="mb-4 text-xl font-semibold">Waiting for opponent...</h2>
-            <p className="text-gray-600">{waitingMessage || "Waiting for the opponent to accept the match request."}</p>
+
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="p-6 text-center bg-gray-900 rounded-lg shadow-2xl border border-gray-700 w-80">
+            <h2 className="mb-3 text-xl font-semibold text-white">Waiting for Opponent...</h2>
+
+            <p className="text-gray-400">
+              {waitingMessage || "Waiting for the opponent to accept the match request."}
+            </p>
+
             <button
               onClick={() => setIsRequestSentModalOpen(false)}
-              className="px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600"
+              className="px-4 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-500 transition duration-200"
             >
               Close
             </button>
@@ -229,7 +236,13 @@ const Match = () => {
         </div>
       )}
     </div>
+
   );
 };
 
 export default Match;
+
+
+
+
+
