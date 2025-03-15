@@ -190,15 +190,95 @@ export const recordAttempt=async (req, res) => {
 }
 
 
+// export const submitQuestion = async (req, res) => {
+//     const { source_code, language_id, testCases } = req.body;
+//     const maxRetries = 5; // Number of retry attempts
+//     const retryDelay = 2000; // Delay between retries in ms
+
+//     try {
+//         const results = [];
+
+//         for (const testCase of testCases) {
+//             const submissionResponse = await axios.post(
+//                 'https://judge0-ce.p.rapidapi.com/submissions',
+//                 {
+//                     source_code,
+//                     language_id,
+//                     stdin: testCase.input
+//                 },
+//                 {
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+//                         'X-RapidAPI-Key': process.env.JUDGE0_API_KEY
+//                     }
+//                 }
+//             );
+
+//             const token = submissionResponse.data.token;
+//             let attempt = 0;
+//             let resultResponse;
+
+//             // Retry loop to check for final result
+//             while (attempt < maxRetries) {
+//                 await new Promise(resolve => setTimeout(resolve, retryDelay));
+                
+//                 resultResponse = await axios.get(
+//                     `https://judge0-ce.p.rapidapi.com/submissions/${token}`,
+//                     {
+//                         headers: {
+//                             'Content-Type': 'application/json',
+//                             'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+//                             'X-RapidAPI-Key': process.env.JUDGE0_API_KEY
+//                         }
+//                     }
+//                 );
+
+//                 const status = resultResponse.data.status.description;
+                
+//                 if (status !== 'Processing') {
+//                     break; // Exit loop if result is not in "Processing"
+//                 }
+                
+//                 attempt++;
+//             }
+
+//             const { stdout, stderr, status, compile_output,time } = resultResponse.data;
+//             const actualOutput = stdout ? stdout.trim() : null;
+//             results.push({
+//                 expected: testCase.expectedOutput,
+//                 actual: actualOutput,
+//                 isCorrect: actualOutput === testCase.expectedOutput,
+//                 status,
+//                 time,
+//                 compile_output,
+//                 error: stderr
+//             });
+//         }
+
+//         const allPassed = results.every(result => result.isCorrect);
+
+//         res.json({
+//             allPassed,
+//             results
+//         });
+//     } catch (error) {
+//         console.error('Error in code submission:', error);
+//         res.status(500).json({ error: 'Error submitting code for evaluation' });
+//     }
+// };
+
 export const submitQuestion = async (req, res) => {
-    const { source_code, language_id, testCases } = req.body;
+    const { source_code, language_id, testCases, executionTimes } = req.body;
     const maxRetries = 5; // Number of retry attempts
     const retryDelay = 2000; // Delay between retries in ms
 
     try {
         const results = [];
+        const timeLimit = executionTimes.find(et => et.language_id === language_id)?.timeLimit || 1; // Default to 1 sec if not specified
 
-        for (const testCase of testCases) {
+        for (let i = 0; i < testCases.length; i++) {
+            const testCase = testCases[i];
             const submissionResponse = await axios.post(
                 'https://judge0-ce.p.rapidapi.com/submissions',
                 {
@@ -243,17 +323,25 @@ export const submitQuestion = async (req, res) => {
                 attempt++;
             }
 
-            const { stdout, stderr, status, compile_output,time } = resultResponse.data;
+            const { stdout, stderr, status, compile_output, time } = resultResponse.data;
             const actualOutput = stdout ? stdout.trim() : null;
+            const executionTime = time ? parseFloat(time) : 0;
+            console.log(executionTime)
             results.push({
                 expected: testCase.expectedOutput,
                 actual: actualOutput,
                 isCorrect: actualOutput === testCase.expectedOutput,
                 status,
-                time,
+                time: executionTime,
                 compile_output,
                 error: stderr
             });
+
+            // Check TLE only for the second test case(since it has larger test cases) (index 1)
+            if (i === 1 && executionTime > timeLimit) {
+                results[i].status = "Time Limit Exceeded";
+                results[i].isCorrect = false;
+            }
         }
 
         const allPassed = results.every(result => result.isCorrect);
@@ -267,7 +355,6 @@ export const submitQuestion = async (req, res) => {
         res.status(500).json({ error: 'Error submitting code for evaluation' });
     }
 };
-
 
 export const sendrequest = async (req, res) => {
     const { senderUsername, receiverUsername } = req.body;

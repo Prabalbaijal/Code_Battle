@@ -155,7 +155,7 @@
 //                     <LanguageSelector language={language} handleChange={handleChange} darkMode={darkMode} />
 //                     <CodeEditor code={code} setCode={setCode} language={language} darkMode={darkMode} />
                 
-//                     <div className="fixed bottom-0 left-0 w-full lg:w-3/3 bg-gray-900 p-4 flex justify-end border-t border-gray-700">
+//                     <div className="fixed bottom-0 left-0 flex justify-end w-full p-4 bg-gray-900 border-t border-gray-700 lg:w-3/3">
 //                         <button onClick={runCode} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
 //                             Submit
 //                         </button>
@@ -281,6 +281,7 @@ const Problem = () => {
             source_code: code,
             language_id: getLanguageId(language),
             testCases: question?.testCases,
+            executionTimes:question?.executionTimes
         };
 
         try {
@@ -310,7 +311,7 @@ const Problem = () => {
         switch (language) {
             case 'javascript': return 63;
             case 'python': return 71;
-            case 'cpp': return 54;
+            case 'cpp': return 52;
             case 'java': return 62;
             default: return 63;
         }
@@ -320,7 +321,7 @@ const Problem = () => {
         <div className={`${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'} min-h-screen flex flex-col`}>
             {/* Contest Ended Modal (ALWAYS ON TOP) */}
             {isContestEndedModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
                     <div className="p-6 text-center bg-white rounded-lg shadow-lg">
                         <h2 className={`mb-4 text-xl ${messageColor}`}>{contestEndMessage}</h2>
                         <button
@@ -341,7 +342,7 @@ const Problem = () => {
                     <LanguageSelector language={language} handleChange={handleChange} darkMode={darkMode} />
                     <CodeEditor code={code} setCode={setCode} language={language} darkMode={darkMode} />
 
-                    <div className="fixed bottom-0 left-0 w-full lg:w-3/3 bg-gray-900 p-4 flex justify-end border-t border-gray-700">
+                    <div className="fixed bottom-0 left-0 flex justify-end w-full p-4 bg-gray-900 border-t border-gray-700 lg:w-3/3">
                         <button onClick={runCode} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
                             Submit
                         </button>

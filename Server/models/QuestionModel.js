@@ -4,7 +4,17 @@ import mongoose from 'mongoose';
 const testCaseSchema = new mongoose.Schema({
   input: String,
   expectedOutput: String,
-  // executionTime: { type: Number, default: null },
+});
+
+const executionTimeSchema=new mongoose.Schema({
+  language_id: {
+    type:Number,
+    required:true
+  },
+  timeLimit:{
+    type:Number,
+    required:true
+  }
 });
 
 const questionSchema = new mongoose.Schema({
@@ -20,7 +30,7 @@ const questionSchema = new mongoose.Schema({
   ],
   constraints: [String],
   testCases: [testCaseSchema], // Array of test cases
-
+  executionTimes:[executionTimeSchema]
 });
 
 const Question = mongoose.model('Question', questionSchema);

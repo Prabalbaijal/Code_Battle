@@ -56,11 +56,6 @@ const Header = () => {
   };
 
   return (
-    // <header className="sticky top-0 z-50 flex items-center justify-between w-full p-4 shadow-lg bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600">
-
-    //   <Link to="/home" className="text-2xl font-bold text-white" onClick={() => handleNavigation('/home')}>
-    //     Code Battle
-    //   </Link>
 
     <header className="sticky top-0 z-50 flex items-center justify-between w-full p-4 shadow-lg bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600">
 
@@ -96,12 +91,6 @@ const Header = () => {
               <button onClick={() => handleNavigation('/home')} className="text-left hover:text-gray-300">
                 Home
               </button>
-              <Link to="/leaderboard" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
-                Leaderboard
-              </Link>
-              <Link to="/practice-mode" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
-                Practice
-              </Link>
               {/* Challenges Dropdown */}
               <Link to="/match" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
                 Quick Match
