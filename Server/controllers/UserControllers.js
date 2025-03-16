@@ -148,16 +148,9 @@ export const getQuestion = async (req, res) => {
         const userId = req.user.id; // User ID from decoded token
         const user = await User.findById(userId).populate('questionsAttempted');
         if(!user) console.log("User not found ")
-        
-        // Determine difficulty based on user's level
-        let difficulty;
-        if (user.level === 0 || user.level === 1) difficulty = 'Easy';
-        else if (user.level === 2 || user.level === 3) difficulty = 'Medium';
-        else difficulty = 'Hard';
 
         // Fetch a question not yet attempted by the user
         const question = await Question.findOne({
-            difficulty,
             _id: { $nin: user.questionsAttempted }
         });
 
@@ -322,9 +315,10 @@ export const submitQuestion = async (req, res) => {
                 
                 attempt++;
             }
-
             const { stdout, stderr, status, compile_output, time } = resultResponse.data;
             const actualOutput = stdout ? stdout.trim() : null;
+            console.log(actualOutput)
+            console.log(testCase.expectedOutput)
             const executionTime = time ? parseFloat(time) : 0;
             console.log(executionTime)
             results.push({

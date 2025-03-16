@@ -154,7 +154,7 @@
 //                 <div className={`w-full lg:w-2/3 p-6 overflow-y-auto ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-l shadow-lg flex flex-col h-full`}>
 //                     <LanguageSelector language={language} handleChange={handleChange} darkMode={darkMode} />
 //                     <CodeEditor code={code} setCode={setCode} language={language} darkMode={darkMode} />
-                
+
 //                     <div className="fixed bottom-0 left-0 flex justify-end w-full p-4 bg-gray-900 border-t border-gray-700 lg:w-3/3">
 //                         <button onClick={runCode} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
 //                             Submit
@@ -236,7 +236,7 @@ const Problem = () => {
         return () => {
             socket.off('contestEnded', handleContestEnd);
         };
-    }, [socket, roomName, loggedinUser.username]);
+    }, [roomName, socket]);
 
     useEffect(() => {
         if (!socket) return;
@@ -265,10 +265,10 @@ const Problem = () => {
         const selectedLanguage = event.target.value;
         setLanguage(selectedLanguage);
         const templates = {
-            javascript: `class Solution {\n\tmain() {\n\t\t/* Your code here */\n\t}\n}`,  
-            python: `class Solution:\n\tdef main(self):\n\t\t# Your code here`,  
-            cpp: `#include <iostream>\nclass Solution {\n\tpublic:\n\t\int main() {\n\t\t\t/* Your code here */\n\n\t\treturn 0;\n\t\t}\n};`,  
-            java: `public class Solution {\n\tpublic static void main(String[] args) {\n\t\t/* Your code here */\n\t}\n}`, 
+            javascript: `class Solution {\n\tmain() {\n\t\t/* Your code here */\n\t}\n}`,
+            python: `class Solution:\n\tdef main(self):\n\t\t# Your code here`,
+            cpp: `#include <iostream>\nclass Solution {\n\tpublic:\n\t\int main() {\n\t\t\t/* Your code here */\n\n\t\treturn 0;\n\t\t}\n};`,
+            java: `public class Solution {\n\tpublic static void main(String[] args) {\n\t\t/* Your code here */\n\t}\n}`,
         };
         setCode(templates[selectedLanguage]);
     };
@@ -281,7 +281,7 @@ const Problem = () => {
             source_code: code,
             language_id: getLanguageId(language),
             testCases: question?.testCases,
-            executionTimes:question?.executionTimes
+            executionTimes: question?.executionTimes
         };
 
         try {
@@ -336,17 +336,18 @@ const Problem = () => {
 
             {/* Navbar and Main UI */}
             <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} endTime={endTime} />
-            <div className="flex flex-col w-full h-screen overflow-hidden lg:flex-row">
+            <div className="flex flex-col w-full h-[90vh] overflow-hidden lg:flex-row">
                 <ProblemDescription question={question} darkMode={darkMode} />
-                <div className={`w-full lg:w-2/3 p-6 overflow-y-auto ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-l shadow-lg flex flex-col h-full`}>
+                <div className={`w-full lg:w-2/3 p-6 overflow-y-auto ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-l shadow-lg flex flex-col h-[90vh]`}>
                     <LanguageSelector language={language} handleChange={handleChange} darkMode={darkMode} />
                     <CodeEditor code={code} setCode={setCode} language={language} darkMode={darkMode} />
 
-                    <div className="fixed bottom-0 left-0 flex justify-end w-full p-4 bg-gray-900 border-t border-gray-700 lg:w-3/3">
+                    <div className="flex justify-end mt-4">
                         <button onClick={runCode} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
                             Submit
                         </button>
                     </div>
+
                 </div>
             </div>
         </div>

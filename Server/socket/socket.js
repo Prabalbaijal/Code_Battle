@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
             console.log(`Room: ${roomName}, Users:`, roomUsers);
         
             if (roomUsers.length === 2 && !contestTimers[roomName]) {
-                const contestDuration = 300000; // 5 minutes
+                const contestDuration = 1800000; // 5 minutes
                 const endTime = Date.now() + contestDuration;
         
                 // Start the contest timer
