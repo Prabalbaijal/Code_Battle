@@ -14,6 +14,7 @@ const Match = () => {
   const [isChallengeModalOpen, setIsChallengeModalOpen] = useState(false);
   const [waitingMessage, setWaitingMessage] = useState('');
   const [isRequestSentModalOpen, setIsRequestSentModalOpen] = useState(false);
+  const [creatingRoom, setCreatingRoom] = useState(false);
   const [friends, setFriends] = useState([]);
   const [otherUsers, setOtherUsers] = useState([]);
   const [onlineFriends, setOnlineFriends] = useState([]);
@@ -21,7 +22,6 @@ const Match = () => {
   useEffect(() => {
     if (!loggedinUser?._id || !socket) return;
 
-    // Fetch friends list
     const fetchFriends = async () => {
       try {
         const response = await axios.get('http://localhost:9000/api/users/getfriends', {
@@ -37,32 +37,42 @@ const Match = () => {
 
     fetchFriends();
 
-    // Opponent ne challenge bheja
     socket.on('playNotification', ({ roomName, initiator }) => {
-      console.log("Received playNotification from", initiator);
-
       if (initiator !== loggedinUser.username) {
         setChallengeDetails({ roomName, initiator });
         setIsChallengeModalOpen(true);
       }
     });
 
-    // Match start hone par problem page par navigate
-    socket.on('startContest', ({ roomName, endTime }) => {
-      console.log("startContest received. Navigating to problem page:", roomName);
-      navigate('/problem', { state: { roomName, endTime } });
+    socket.on('startContest', ({ roomName, endTime, problem }) => {
+      console.log("✅ Contest Started!");
+      navigate('/problem', { state: { roomName, endTime, problem } });
+      setCreatingRoom(false); // Reset creating room state
+      setWaitingMessage('');
     });
 
-    // Opponent left
     socket.on('opponentOffline', ({ message }) => {
-      console.log("Opponent offline:", message);
       toast.error(message);
+      setCreatingRoom(false);
+      setWaitingMessage('');
     });
 
-    // Request sent confirmation
+    socket.on("challengeRejected", ({ initiator }) => {
+      if (initiator === loggedinUser.username) {
+        toast.error("Your challenge was rejected!!.");
+        setIsRequestSentModalOpen(false);
+        setCreatingRoom(false);
+        setWaitingMessage('');
+      }
+    });
+
     socket.on('requestSent', ({ message }) => {
       setWaitingMessage(message);
       setIsRequestSentModalOpen(true);
+    });
+
+    socket.on('reconnectContest', ({ roomName, endTime, problem }) => {
+      navigate('/problem', { state: { roomName, endTime, problem } });
     });
 
     return () => {
@@ -70,59 +80,48 @@ const Match = () => {
       socket.off('startContest');
       socket.off('opponentOffline');
       socket.off('requestSent');
+      socket.off('reconnectContest');
     };
   }, [loggedinUser?._id, socket, navigate]);
 
   useEffect(() => {
-    console.log("Online Users:", onlineUsers);
-    console.log("Friends:", friends);
-    console.log("Logged-in User:", loggedinUser.username);
-
     if (onlineUsers.length > 0) {
-      // Extract friend usernames
       const friendUsernames = friends.map(friend => friend.username);
-
-      // Find online friends
       const friendsOnline = friends.filter(friend => onlineUsers.includes(friend.username));
-
-      // Find other online users (who are not friends and not the logged-in user)
       const filteredOthers = onlineUsers.filter(username =>
         !friendUsernames.includes(username) && username !== loggedinUser.username
       );
-
-      console.log("Online Friends:", friendsOnline);
-      console.log("Other Users:", filteredOthers);
 
       setOnlineFriends(friendsOnline);
       setOtherUsers(filteredOthers);
     }
   }, [onlineUsers, friends, loggedinUser.username]);
 
-
-
-  // Accept Challenge
   const acceptChallenge = () => {
     if (challengeDetails) {
-      console.log("Accepted challenge. Emitting joinRoom with roomName:", challengeDetails.roomName);
+      setCreatingRoom(true);
+      setWaitingMessage("Creating Room..."); // Set message to "Creating Room..."
       socket.emit("joinRoom", challengeDetails.roomName);
       setIsChallengeModalOpen(false);
+      setIsRequestSentModalOpen(true); // Open modal
     }
   };
 
-  // Reject Challenge
   const declineChallenge = () => {
+    if (challengeDetails) {
+      socket.emit("challengeRejected", { initiator: challengeDetails.initiator });
+    }
     setChallengeDetails(null);
     setIsChallengeModalOpen(false);
   };
 
-  // Play Request
   const handlePlay = (opponentUsername) => {
     if (!socket) return;
     socket.emit('playRequest', { opponentUsername });
     toast.success(`Play request sent to ${opponentUsername}`);
   };
 
-  // Add Friend
+
   const handleAddFriend = async (friendUsername) => {
     try {
       const response = await axios.post('http://localhost:9000/api/users/sendfriendrequest', {
@@ -135,7 +134,7 @@ const Match = () => {
       toast.error(error.response?.data?.message || 'Failed to send friend request.');
     }
   };
-
+  
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 text-gray-100 bg-gray-900">
       <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-md">
@@ -191,7 +190,7 @@ const Match = () => {
       {isChallengeModalOpen && (
        
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
-        <div className="p-6 text-center bg-gray-900 rounded-lg shadow-2xl border border-gray-700 w-80">
+        <div className="p-6 text-center bg-gray-900 border border-gray-700 rounded-lg shadow-2xl w-80">
           <h2 className="mb-3 text-xl font-semibold text-white">
             {challengeDetails?.initiator} has challenged you to a match!
           </h2>
@@ -200,13 +199,13 @@ const Match = () => {
           <div className="flex justify-center mt-4 space-x-4">
             <button
               onClick={acceptChallenge}
-              className="px-4 py-2 text-white bg-green-500 rounded-lg hover:bg-green-400 transition duration-200"
+              className="px-4 py-2 text-white transition duration-200 bg-green-500 rounded-lg hover:bg-green-400"
             >
               Accept
             </button>
             <button
               onClick={declineChallenge}
-              className="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-400 transition duration-200"
+              className="px-4 py-2 text-white transition duration-200 bg-red-500 rounded-lg hover:bg-red-400"
             >
               Reject
             </button>
@@ -219,7 +218,7 @@ const Match = () => {
       {isRequestSentModalOpen && (
 
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
-          <div className="p-6 text-center bg-gray-900 rounded-lg shadow-2xl border border-gray-700 w-80">
+          <div className="p-6 text-center bg-gray-900 border border-gray-700 rounded-lg shadow-2xl w-80">
             <h2 className="mb-3 text-xl font-semibold text-white">Waiting for Opponent...</h2>
 
             <p className="text-gray-400">
@@ -228,7 +227,7 @@ const Match = () => {
 
             <button
               onClick={() => setIsRequestSentModalOpen(false)}
-              className="px-4 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-500 transition duration-200"
+              className="px-4 py-2 mt-4 text-white transition duration-200 bg-blue-600 rounded-lg hover:bg-blue-500"
             >
               Close
             </button>
@@ -241,8 +240,3 @@ const Match = () => {
 };
 
 export default Match;
-
-
-
-
-

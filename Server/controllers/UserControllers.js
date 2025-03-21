@@ -5,6 +5,8 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import Question from '../models/QuestionModel.js'
 import axios from 'axios'
+import { Contest } from '../models/ContestModel.js'
+import { unSocketMap } from '../socket/socket.js'
 
 
 export const register = async (req, res) => {
@@ -143,23 +145,34 @@ export const logout = async (req, res) => {
     }
 }
 
-export const getQuestion = async (req, res) => {
+export const getQuestion = async (user1, user2) => {
     try {
-        const userId = req.user.id; // User ID from decoded token
-        const user = await User.findById(userId).populate('questionsAttempted');
-        if(!user) console.log("User not found ")
+        // Fetch attempted questions by both users
+        console.log(user1)
+        console.log(user2)
+        const user1Data = await User.findOne({ username: user1 }).select("questionsAttempted");
+        const user2Data = await User.findOne({ username: user2 }).select("questionsAttempted");
 
-        // Fetch a question not yet attempted by the user
+        if (!user1Data || !user2Data) {
+            throw new Error("One or both users not found");
+        }
+
+        const attemptedQuestions = [...user1Data.questionsAttempted, ...user2Data.questionsAttempted];
+        console.log(attemptedQuestions)
+        // Fetch a random question that has not been attempted
         const question = await Question.findOne({
-            _id: { $nin: user.questionsAttempted }
+            _id:{$nin : attemptedQuestions}
         });
-
-        if (!question) return res.status(404).json({ message: 'No questions available' });
-        res.json(question);
+        console.log(question.title)
+        return  question;
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error("Error fetching problem:", error);
+        return null;
     }
 };
+
+
+
 
 
 export const recordAttempt=async (req, res) => {
@@ -513,3 +526,69 @@ export const sendrequest = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };  
+
+export const scheduleContestTimeout = (roomName, endTime) => {
+    const timeRemaining = endTime - Date.now();
+
+    if (timeRemaining <= 0) return; // If already expired, exit.
+
+    setTimeout(async () => {
+        const contest = await Contest.findOne({ roomName, status: "active" });
+
+        if (contest) {
+            const { user1, user2 } = contest;
+
+            // Notify users
+            [user1, user2].forEach((user) => {
+                const usersocket=unSocketMap.get(user)
+                if (usersocket) {
+                    usersocket.emit('contestEnded',{
+                        winner:'Nobody',
+                        message:'Nobody won.Time Up!!'
+                    })
+                }
+            });
+
+            // Remove contest from DB
+            await Contest.findOneAndDelete({ roomName });
+            console.log(`Contest ${roomName} ended due to timeout.`);
+        }
+    }, timeRemaining);
+};
+
+export const rescheduleAllTimeouts = async () => {
+    try {
+        const activeContests = await Contest.find({ status: "active" });
+
+        activeContests.forEach((contest) => {
+            scheduleContestTimeout(contest.roomName, contest.endTime);
+        });
+
+        console.log(`✅ Rescheduled ${activeContests.length} contest timeouts.`);
+    } catch (error) {
+        console.error("❌ Error rescheduling contests:", error);
+    }
+};
+export const getActiveContests=async (req, res) => {
+    try {
+        const { username } = req.body; // Get username from request body
+
+        // Find active contests where user is either user1 or user2
+        const contests = await Contest.find({
+            $or: [{ user1: username }, { user2: username }],
+            status: "active"
+        }).select("roomName user1 user2 endTime");
+
+        // Process contests to determine opponent names without extra DB calls
+        const contestsWithOpponent = contests.map(contest => ({
+            roomName: contest.roomName,
+            endTime: contest.endTime,
+            opponentName: contest.user1 === username ? contest.user2 : contest.user1, // Determine opponent directly
+        }));
+
+        res.json(contestsWithOpponent);
+    } catch (error) {
+        console.error("Error fetching active contests:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+}

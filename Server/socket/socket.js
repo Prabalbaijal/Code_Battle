@@ -2,21 +2,27 @@ import { Server } from 'socket.io';
 import http from 'http';
 import express from 'express';
 import { User } from '../models/Usermodel.js';
+import { Contest } from '../models/ContestModel.js';
+import Question from '../models/QuestionModel.js'
 import mongoose from 'mongoose';
 import { updateUserData, updateUserDataOnNoWinner } from '../controllers/UserUpdate.js';
+import { getQuestion } from '../controllers/UserControllers.js';
+import { scheduleContestTimeout } from '../controllers/UserControllers.js';
+
 
 const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:5173'], // Adjust for your frontend URL
+    origin: ['http://localhost:5173'],
     methods: ['GET', 'POST'],
   },
 });
 
 const userSocketMap = {}; // Maps userId -> { socketId, userName }
-const contestTimers = {};
+const contestRoomMap = {}; // Maps roomName -> contest details
+const unSocketMap=new Map();
 
 io.on('connection', (socket) => {
   const userId = socket.handshake.query.userId;
@@ -25,33 +31,73 @@ io.on('connection', (socket) => {
     const objectId = new mongoose.Types.ObjectId(userId);
 
     User.findById(objectId)
-      .then((user) => {
+      .then(async (user) => {
         if (user) {
           const userName = user.username;
           userSocketMap[userId] = { socketId: socket.id, userName };
+          unSocketMap.set(userName, socket);
 
           console.log(`User connected: userId=${userId}, socketId=${socket.id}, userName=${userName}`);
 
-          // Broadcast updated online users list
           const onlineUserNames = Object.values(userSocketMap).map((user) => user.userName);
           io.emit('getOnlineUsers', onlineUserNames);
 
+          // Check if user was in an active contest
+
+          socket.on('reconnectContest', async ({ roomName, username }) => {
+            try {
+                // Fetch contest without populating problem
+                const contest = await Contest.findOne({ roomName }).select("problemId endTime");
+                if (!contest) {
+                    return socket.emit('contestError', { message: 'Contest not found.' });
+                }
+        
+                // Fetch problem separately using problemId
+                const problem = await Question.findById(contest.problemId);
+                if (!problem) {
+                    return socket.emit('contestError', { message: 'Problem not found.' });
+                }
+        
+                // Extract usernames from roomName
+                const [user1, user2] = roomName.split('-');
+                const opponent = user1 === username ? user2 : user1; // Get opponent's name
+        
+                // Ensuring the requesting user is in this contest
+                if (username !== user1 && username !== user2) {
+                    return socket.emit('contestError', { message: 'You are not part of this contest.' });
+                }
+                const userSocketId = unSocketMap.get(username);
+                if (userSocketId) {
+                    userSocketId.emit('reconnectContest', {
+                        roomName,
+                        endTime: contest.endTime.getTime(),
+                        problem,
+                    });
+                } else {
+                    socket.emit('contestError', { message: 'User socket not found. Try again.' });
+                }
+        
+            } catch (error) {
+                console.error('Error reconnecting contest:', error);
+                socket.emit('contestError', { message: 'Failed to reconnect. Try again.' });
+            }
+        });
+        
+        
           // Handle Play request
-          socket.on('playRequest', ({ opponentUsername }) => {
+          socket.on('playRequest', async ({ opponentUsername }) => {
             const opponent = Object.values(userSocketMap).find(
               (user) => user.userName === opponentUsername
             );
-          
             if (opponent) {
               const roomName = `${userName}-${opponentUsername}`;
-              socket.join(roomName); // Sender joins the room
-          
-              io.to(opponent.socketId).emit('playNotification', {
-                roomName,
-                initiator: userName,
-              });
-          
-              // Also notify the sender that the request is sent
+              
+              // Notify opponent about the challenge request
+              console.log(roomName)
+
+              io.to(opponent.socketId).emit('playNotification', { roomName, initiator: userName });
+              console.log("playnotification emitted")
+              // Notify sender that request has been sent
               socket.emit('requestSent', { message: 'Waiting for opponent to accept...' });
           
             } else {
@@ -59,134 +105,145 @@ io.on('connection', (socket) => {
             }
           });
           
-          // Handle opponent joining the room
-          socket.on('joinRoom', (roomName) => {
-            socket.join(roomName);
-            const roomUsers = [...(io.sockets.adapter.rooms.get(roomName) || [])];
-            console.log(`Room: ${roomName}, Users:`, roomUsers);
+          socket.on("challengeRejected", ({ initiator }) => {
+            const initiatorid=unSocketMap.get(initiator)
+            initiatorid.emit("challengeRejected", { initiator });
+          });          
+
+          socket.on('joinRoom', async (roomName) => {
+            try {
+                const [user1, user2] = roomName.split('-');
+                if (!user1 || !user2) return;
+
+                const user1Socket = unSocketMap.get(user1);
+                const user2Socket = unSocketMap.get(user2);
+                console.log(user1Socket);
+                console.log(user2Socket)
+                if (!user1Socket || !user2Socket) {
+                  return socket.emit('contestError', { message: 'One or both users are not online.' });
+              }
+              user1Socket.join(roomName);
+              user2Socket.join(roomName);
+
+                console.log(`User joined room: ${roomName}`);
         
-            if (roomUsers.length === 2 && !contestTimers[roomName]) {
-                const contestDuration = 1800000; // 5 minutes
+                // Fetch the unattempted problem
+                const problem = await getQuestion(user1, user2);
+                if (!problem) {
+                    return socket.emit('contestError', { message: 'No unattempted problems available.' });
+                }
+        
+                // Store contest with `endTime`
+                const contestDuration = 1800000; // 30 minutes
                 const endTime = Date.now() + contestDuration;
         
-                // Start the contest timer
-                contestTimers[roomName] = {
-                    timer: setTimeout(async () => {  // ✅ Make this async
-                        console.log(`Contest ended with no winner in room: ${roomName}`);
-        
-                        const [user1, user2] = roomName.split('-');
-                        const loserName = userName === user1 ? user2 : user1;
-        
-                        io.to(roomName).emit('contestEnded', {
-                            winner: null,
-                            message: 'Contest ended. No one solved the problem.',
-                        });
-        
-                        delete contestTimers[roomName];
-                    }, contestDuration),
-                    winner: null,
-                    endTime,
-                };
-        
-                io.to(roomName).emit('startContest', { roomName, endTime });
-            }
-        });
-        
-          
-          
-          
-          socket.on('acceptRequest', (roomName) => {
-            socket.join(roomName);
-            io.to(roomName).emit('startContest', { roomName });
-          });
-          
-
-          // Handle problem-solving
-          socket.on('solveProblem', ({ roomName, userName }) => {
-            console.log(`Received solveProblem event: roomName=${roomName}, userName=${userName}`);
-        
-            const contest = contestTimers[roomName];
-            const roomUsers = [...(io.sockets.adapter.rooms.get(roomName) || [])];
-        
-            console.log(`Current users in room "${roomName}":`, roomUsers);
-            console.log(`Contest exists? ${contest !== undefined}, Contest winner: ${contest?.winner}`);
-        
-            if (contest && !contest.winner) {
-                clearTimeout(contest.timer); // Stop the contest timer
-                contest.winner = userName;
-        
-                console.log(`Emitting contestEnded for room: ${roomName}, winner: ${userName}`);
-                const [user1, user2] = roomName.split('-');
-                const loserName = userName === user1 ? user2 : user1;
-                updateUserData(userName,loserName);
-        
-                // Notify both users about the winner
-                io.to(roomName).emit('contestEnded', {
-                    winner: userName,
-                    message: `${userName} solved the problem first and won the contest!`,
+                const contest = new Contest({
+                    roomName,
+                    user1,
+                    user2,
+                    problemId: problem._id,
+                    status: 'active',
+                    endTime
                 });
         
-                console.log(`Contest ended for room: ${roomName}, winner: ${userName}`);
-                delete contestTimers[roomName];
-            } else {
-                console.log(`Contest does not exist or already has a winner.`);
+                await contest.save();
+        
+                // Schedule contest timeout
+                scheduleContestTimeout(roomName, endTime);
+        
+                // Notify users
+                io.to(roomName).emit('startContest', { 
+                    roomName, 
+                    endTime, 
+                    problem
+                });
+        
+            } catch (error) {
+                console.error('Error handling contest:', error);
+                socket.emit('contestError', { message: 'Failed to start contest. Please try again.' });
             }
-        });
-
-        // Handle user leaving the contest
-socket.on("leaveContest", ({ roomName, userName }) => {
-  console.log(`${userName} left the contest in room: ${roomName}`);
-
-  if (contestTimers[roomName]) {
-      const roomUsers = [...(io.sockets.adapter.rooms.get(roomName) || [])];
-      const opponentSocketId = roomUsers.find((id) => id !== socket.id);
-
-      if (opponentSocketId) {
-          const opponent = Object.values(userSocketMap).find(
-              (user) => user.socketId === opponentSocketId
-          );
-
-          if (opponent) {
-            const [user1, user2] = roomName.split('-');
-                const winner = userName === user1 ? user2 : user1;
-                updateUserData(winner,userName);
+        });        
         
-              io.to(roomName).emit("contestEnded", {
-                  winner: opponent.userName,
-                  message: `${userName} left the contest. ${opponent.userName} wins! 🎉`,
+        
+        socket.on('solveProblem', async ({ roomName, userName }) => {
+          try {
+              // Fetch contest from DB
+              const contest = await Contest.findOne({ roomName }).select("user1 user2");
+              if (!contest) {
+                  return socket.emit('contestError', { message: 'Contest not found.' });
+              }
+      
+              const { user1, user2 } = contest;
+              const loserName = userName === user1 ? user2 : user1;
+      
+              // Update user data
+              await updateUserData(userName, loserName);
+      
+              // Notify both users
+              [user1, user2].forEach((user) => {
+                  const userSocket = unSocketMap.get(user);
+                if (userSocket) {
+                    userSocket.emit('contestEnded', {
+                        winner:userName,
+                        message: `${userName} solved the problem first. ${userName} wins!`,
+                    });
+                }
               });
-
-              console.log(`${opponent.userName} is declared the winner in room: ${roomName}`);
+      
+              // Remove contest from DB
+              await Contest.findOneAndDelete({ roomName });
+      
+          } catch (error) {
+              console.error("Error handling problem solve:", error);
+              socket.emit('contestError', { message: 'Failed to update contest. Try again.' });
           }
-      }
+      });
+      
+          
 
-      clearTimeout(contestTimers[roomName]?.timer);
-      delete contestTimers[roomName];
-  }
-});
+      socket.on('leaveContest', async ({ roomName, userName }) => {
+        try {
+            // Fetch contest from DB
+            const contest = await Contest.findOne({ roomName }).select("user1 user2");
+            if (!contest) {
+                return socket.emit('contestError', { message: 'Contest not found.' });
+            }
+    
+            const { user1, user2 } = contest;
+            const winner = userName === user1 ? user2 : user1;
+    
+            // Update user data
+            await updateUserData(winner, userName);
+    
+            // Notify both users
+            [user1, user2].forEach((user) => {
+                const userSocket = unSocketMap.get(user);
+                if (userSocket) {
+                    userSocket.emit('contestEnded', {
+                        winner,
+                        message: `${userName} left. ${winner} wins!`,
+                    });
+                }
+            });
+    
+            // Remove contest from DB
+            await Contest.findOneAndDelete({ roomName });
+    
+        } catch (error) {
+            console.error("Error handling contest leave:", error);
+            socket.emit('contestError', { message: 'Failed to update contest. Try again.' });
+        }
+    });
+    
+    
 
-        
-          // Handle disconnection
-          socket.on('disconnect', () => {
+          socket.on('disconnect', async () => {
             if (userId) {
               const userName = userSocketMap[userId]?.userName;
               delete userSocketMap[userId];
+              delete unSocketMap[userName];
               console.log(`User disconnected: userId=${userId}, socketId=${socket.id}, userName=${userName}`);
 
-              // Notify opponents in active contests
-              const activeRooms = Array.from(socket.rooms).filter(
-                (room) => room !== socket.id && contestTimers[room]
-              );
-
-              activeRooms.forEach((roomName) => {
-                io.to(roomName).emit('opponentOffline', {
-                  message: `${userName} disconnected. Contest ended.`,
-                });
-                clearTimeout(contestTimers[roomName]?.timer);
-                delete contestTimers[roomName];
-              });
-
-              // Update online users list
               const onlineUserNames = Object.values(userSocketMap).map((user) => user.userName);
               io.emit('getOnlineUsers', onlineUserNames);
             }
@@ -197,4 +254,4 @@ socket.on("leaveContest", ({ roomName, userName }) => {
   }
 });
 
-export { app, io, server, userSocketMap };
+export { app, io, server, userSocketMap, contestRoomMap,unSocketMap };

@@ -95,6 +95,9 @@ const Header = () => {
               <Link to="/match" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
                 Quick Match
               </Link>
+              <Link to="/activecontests" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
+                Active Contests
+              </Link>
               <Link to="/friends" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
                 Friends
               </Link>
@@ -123,6 +126,8 @@ const Header = () => {
         <nav className="flex flex-row space-x-6">
           <Link to="/home" className="hover:text-gray-300" onClick={() => handleNavigation('/home')}>Home</Link>
           <Link to="/match" className="hover:text-gray-300">Quick Match</Link>
+          <Link to="/activecontests" className="hover:text-gray-300">Active Contests</Link>
+
           <Link to="/friends" className="hover:text-gray-300">Friends</Link>
           <Link to="/friendrequests" className="hover:text-gray-300">Friend Requests</Link>
         </nav>

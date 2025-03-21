@@ -5,6 +5,7 @@ import connectDB from './config/database.js';
 import cookieParser from 'cookie-parser';
 import UserRoute from './routes/UserRoutes.js';
 import { server, app } from './socket/socket.js'; // Import server from socket.js
+import { rescheduleAllTimeouts } from './controllers/UserControllers.js';
 
 dotenv.config();
 
@@ -23,7 +24,8 @@ app.use(cookieParser());
 
 app.use('/api/users', UserRoute);
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     connectDB();
     console.log(`Server is running on port ${PORT}`);
+    await rescheduleAllTimeouts();
 });

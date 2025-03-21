@@ -16,6 +16,7 @@ import Challenge from './Components/ChallengeFriend/Challenge.jsx';
 import DailyChallenge from './Components/DailyChallenge/DailyChallenge.jsx';
 import Settings from './Components/Settings/Settings.jsx';
 import Leaderboard from './Components/Leaderboard/Leaderboard.jsx';
+import ActiveContests from './Components/ActiveContests.jsx/ActiveContests.jsx';
 
 
 const router = createBrowserRouter([
@@ -30,8 +31,7 @@ const router = createBrowserRouter([
   { path: '/daily-challenge', element: <DailyChallenge /> },
   { path: '/settings', element: <Settings /> },
   { path: '/leaderboard', element: <Leaderboard /> },
-
-
+  { path:'/activecontests',element: <ActiveContests/>}
 ]);
 
 export default function App() {
