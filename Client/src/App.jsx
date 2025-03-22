@@ -16,7 +16,9 @@ import Challenge from './Components/ChallengeFriend/Challenge.jsx';
 import DailyChallenge from './Components/DailyChallenge/DailyChallenge.jsx';
 import Settings from './Components/Settings/Settings.jsx';
 import Leaderboard from './Components/Leaderboard/Leaderboard.jsx';
-import ActiveContests from './Components/ActiveContests.jsx/ActiveContests.jsx';
+import ActiveContests from './Components/ActiveContests/ActiveContests.jsx';
+import axios from 'axios';
+import { setLoggedinUser } from './redux/userSlice.js';
 
 
 const router = createBrowserRouter([
@@ -38,6 +40,16 @@ export default function App() {
   const { loggedinUser } = useSelector((store) => store.user);
   const { socket } = useSelector((store) => store.socket);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    axios.get('http://localhost:9000/api/users/getUser', { withCredentials: true }) 
+        .then(res => {
+            if (res.data) {
+                dispatch(setLoggedinUser(res.data));
+            }
+        })
+        .catch(() => dispatch(setLoggedinUser(null))); 
+}, [dispatch]);
 
   // EFFECT 1: Create socket when user logs in.
   useEffect(() => {
@@ -61,10 +73,10 @@ export default function App() {
       reconnection: false,
     });
 
-    // ✅ Store new socket in Redux
+    //  Store new socket in Redux
     dispatch(setSocket(newSocket));
 
-    // ✅ Handle incoming events
+    // Handle incoming events
     newSocket.on('getOnlineUsers', (onlineUsers) => {
       dispatch(setOnlineUsers(onlineUsers));
     });
@@ -77,7 +89,7 @@ export default function App() {
       }
     });
 
-    // ✅ Cleanup: Disconnect socket when user logs out or refreshes
+    // Cleanup: Disconnect socket when user logs out or refreshes
     return () => {
       console.log("🧹 Cleaning up socket before unmount...");
       newSocket.off('getOnlineUsers');
@@ -86,7 +98,7 @@ export default function App() {
       dispatch(disconnectSocket());
     };
 
-  }, [loggedinUser, dispatch]); // ✅ Runs only when loggedinUser changes
+  }, [loggedinUser, dispatch]); //  Runs only when loggedinUser changes
 
 
   // EFFECT 2: Cleanup socket when user logs out.

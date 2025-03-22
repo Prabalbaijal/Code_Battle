@@ -18,6 +18,7 @@ const Match = () => {
   const [friends, setFriends] = useState([]);
   const [otherUsers, setOtherUsers] = useState([]);
   const [onlineFriends, setOnlineFriends] = useState([]);
+  const [sentRequests, setSentRequests] = useState({});
 
   useEffect(() => {
     if (!loggedinUser?._id || !socket) return;
@@ -39,7 +40,7 @@ const Match = () => {
     fetchFriends();
 
     socket.on('playNotification', ({ roomName, initiator }) => {
-      if (initiator !== loggedinUser.username) {
+      if (initiator !== loggedinUser?.username) {
         setChallengeDetails({ roomName, initiator });
         setIsChallengeModalOpen(true);
       }
@@ -59,7 +60,7 @@ const Match = () => {
     });
 
     socket.on("challengeRejected", ({ initiator }) => {
-      if (initiator === loggedinUser.username) {
+      if (initiator === loggedinUser?.username) {
         toast.error("Your challenge was rejected!!.");
         setIsRequestSentModalOpen(false);
         setCreatingRoom(false);
@@ -86,24 +87,24 @@ const Match = () => {
   }, [loggedinUser?._id, socket, navigate]);
 
   useEffect(() => {
-    if (onlineUsers.length > 0 && friends.length > 0) {
+    if (onlineUsers?.length > 0 && friends?.length > 0) {
       const friendUsernames = new Set(friends.map(friend => friend.username));
   
       // Filter online friends (EXCLUDE logged-in user)
       const friendsOnline = onlineUsers.filter(user => 
         friendUsernames.has(user.userName) && 
-        (user.userName) !== loggedinUser.username
+        (user.userName) !== loggedinUser?.username
       );
   
       // Filter other online users (EXCLUDE friends & logged-in user)
       const filteredOthers = onlineUsers.filter(user => 
         !friendUsernames.has(user.userName) && 
-        (user.userName) !== loggedinUser.username
+        (user.userName) !== loggedinUser?.username
       );
       setOnlineFriends(friendsOnline);
       setOtherUsers(filteredOthers);
     }
-  }, [onlineUsers, friends, loggedinUser.username]);
+  }, [onlineUsers, friends, loggedinUser?.username]);
   
 
   const acceptChallenge = () => {
@@ -131,19 +132,30 @@ const Match = () => {
   };
 
 
-  const handleAddFriend = async (friendUsername) => {
-    try {
-      const response = await axios.post('http://localhost:9000/api/users/sendfriendrequest', {
-        senderUsername: loggedinUser.username,
-        receiverUsername: friendUsername,
-      });
-      toast.success(response.data.message);
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || 'Failed to send friend request.');
-    }
-  };
-  
+const handleAddFriend = async (friendUsername) => {
+  try {
+    const response = await axios.post('http://localhost:9000/api/users/sendfriendrequest', {
+      senderUsername: loggedinUser?.username,
+      receiverUsername: friendUsername,
+    });
+
+    toast.success(response.data.message);
+
+    // Disable button for this user
+    setSentRequests((prev) => ({ ...prev, [friendUsername]: true }));
+  } catch (error) {
+    console.error(error);
+    toast.error(error.response?.data?.message || 'Failed to send friend request.');
+  }
+};
+
+  if (!loggedinUser) {
+    return (
+      <div className="flex items-center justify-center h-screen text-white">
+        <p>Loading user data...</p>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 text-gray-100 bg-gray-900">
       <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-md">
@@ -185,7 +197,7 @@ const Match = () => {
             {otherUsers.map(({ userName, inContest }, index) => (
               <li key={index} className="flex items-center justify-between px-4 py-3 hover:bg-gray-700">
                 <span className="font-medium text-gray-100">
-                  {username} {inContest ? "(In Contest)" : "(Available)"}
+                  {userName} {inContest ? "(In Contest)" : "(Available)"}
                 </span>
                 <div className="flex space-x-2">
                   <button
@@ -195,9 +207,13 @@ const Match = () => {
                   >
                     Play
                   </button>
-                  <button className="btn btn-info btn-sm" onClick={() => handleAddFriend(userName)}>
-                    Add Friend
-                  </button>
+                  <button
+  className="btn btn-info btn-sm"
+  onClick={() => handleAddFriend(userName)}
+  disabled={sentRequests[userName]}
+>
+  {sentRequests[userName] ? "Request Sent" : "Add Friend"}
+</button>
                 </div>
               </li>
             ))}

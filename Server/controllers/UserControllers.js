@@ -109,7 +109,7 @@ export const login = async (req, res) => {
         return res.status(200).cookie("token", token, {
             maxAge: 1 * 24 * 60 * 60 * 1000,
             httpOnly: true,
-            sameSite: 'strict'
+            sameSite: 'Strict'
         })
             .json({
                 _id: user._id,
@@ -130,6 +130,29 @@ export const login = async (req, res) => {
         })
     }
 }
+
+export const getUser = async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const user=req.user;
+      res.status(200).json({
+        _id: user._id,
+        email: user.email,
+        fullname:user.fullname,
+        username:user.username,
+        avatar:user.avatar,
+        level:user.level,
+        coins:user.coins,
+        success: true
+      });
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  };
+  
 
 export const logout = async (req, res) => {
     try {

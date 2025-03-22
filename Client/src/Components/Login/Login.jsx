@@ -128,7 +128,7 @@ export default function Login() {
     return (
     
         <div
-            className="flex items-center justify-center min-h-screen w-full back bg-cover bg-center bg-no-repeat"
+            className="flex items-center justify-center w-full min-h-screen bg-center bg-no-repeat bg-cover back"
             style={{
                 backgroundImage: "url('/images/login1.jpg')"
             }}
