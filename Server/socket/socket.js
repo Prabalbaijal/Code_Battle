@@ -20,8 +20,7 @@ const io = new Server(server, {
   },
 });
 
-const userSocketMap = {}; // Maps userId -> { socketId, userName }
-const contestRoomMap = {}; // Maps roomName -> contest details
+const contestUsers = new Set();
 const unSocketMap=new Map();
 
 io.on('connection', (socket) => {
@@ -34,13 +33,10 @@ io.on('connection', (socket) => {
       .then(async (user) => {
         if (user) {
           const userName = user.username;
-          userSocketMap[userId] = { socketId: socket.id, userName };
           unSocketMap.set(userName, socket);
-
+          
           console.log(`User connected: userId=${userId}, socketId=${socket.id}, userName=${userName}`);
-
-          const onlineUserNames = Object.values(userSocketMap).map((user) => user.userName);
-          io.emit('getOnlineUsers', onlineUserNames);
+          updateOnlineUsers();
 
           // Check if user was in an active contest
 
@@ -86,24 +82,24 @@ io.on('connection', (socket) => {
         
           // Handle Play request
           socket.on('playRequest', async ({ opponentUsername }) => {
-            const opponent = Object.values(userSocketMap).find(
-              (user) => user.userName === opponentUsername
-            );
-            if (opponent) {
-              const roomName = `${userName}-${opponentUsername}`;
-              
-              // Notify opponent about the challenge request
-              console.log(roomName)
-
-              io.to(opponent.socketId).emit('playNotification', { roomName, initiator: userName });
-              console.log("playnotification emitted")
-              // Notify sender that request has been sent
-              socket.emit('requestSent', { message: 'Waiting for opponent to accept...' });
-          
+            const opponentSocketId = unSocketMap.get(opponentUsername);
+        
+            if (opponentSocketId) {
+                const roomName = `${userName}-${opponentUsername}`;
+                
+                // Notify opponent about the challenge request
+                console.log(roomName);
+        
+                opponentSocketId.emit('playNotification', { roomName, initiator: userName });
+                console.log("playNotification emitted");
+        
+                // Notify sender that request has been sent
+                socket.emit('requestSent', { message: 'Waiting for opponent to accept...' });
             } else {
-              socket.emit('opponentOffline', { message: 'Opponent is offline.' });
+                socket.emit('opponentOffline', { message: 'Opponent is offline.' });
             }
-          });
+        });
+        
           
           socket.on("challengeRejected", ({ initiator }) => {
             const initiatorid=unSocketMap.get(initiator)
@@ -150,7 +146,12 @@ io.on('connection', (socket) => {
         
                 // Schedule contest timeout
                 scheduleContestTimeout(roomName, endTime);
-        
+                
+                
+                contestUsers.add(user1);
+                contestUsers.add(user2);
+                updateOnlineUsers();
+
                 // Notify users
                 io.to(roomName).emit('startContest', { 
                     roomName, 
@@ -192,7 +193,9 @@ io.on('connection', (socket) => {
       
               // Remove contest from DB
               await Contest.findOneAndDelete({ roomName });
-      
+              contestUsers.delete(user1);
+              contestUsers.delete(user2);
+              updateOnlineUsers();
           } catch (error) {
               console.error("Error handling problem solve:", error);
               socket.emit('contestError', { message: 'Failed to update contest. Try again.' });
@@ -214,7 +217,7 @@ io.on('connection', (socket) => {
     
             // Update user data
             await updateUserData(winner, userName);
-    
+
             // Notify both users
             [user1, user2].forEach((user) => {
                 const userSocket = unSocketMap.get(user);
@@ -228,6 +231,8 @@ io.on('connection', (socket) => {
     
             // Remove contest from DB
             await Contest.findOneAndDelete({ roomName });
+            contestUsers.delete(userName);
+            updateOnlineUsers();
     
         } catch (error) {
             console.error("Error handling contest leave:", error);
@@ -238,14 +243,12 @@ io.on('connection', (socket) => {
     
 
           socket.on('disconnect', async () => {
-            if (userId) {
-              const userName = userSocketMap[userId]?.userName;
-              delete userSocketMap[userId];
-              delete unSocketMap[userName];
-              console.log(`User disconnected: userId=${userId}, socketId=${socket.id}, userName=${userName}`);
-
-              const onlineUserNames = Object.values(userSocketMap).map((user) => user.userName);
-              io.emit('getOnlineUsers', onlineUserNames);
+            const userNames = Array.from(unSocketMap.keys()).find(key => unSocketMap.get(key) === socket);
+            if (userNames) {
+              unSocketMap.delete(userName);
+             contestUsers.delete(userName);
+              console.log(`User disconnected: ${userName}`);
+              updateOnlineUsers();
             }
           });
         }
@@ -254,4 +257,14 @@ io.on('connection', (socket) => {
   }
 });
 
-export { app, io, server, userSocketMap, contestRoomMap,unSocketMap };
+function updateOnlineUsers() {
+  const onlineUsers = Array.from(unSocketMap.keys()).map(userName => ({
+    userName,
+    inContest: contestUsers.has(userName), // Check if the user is in a contest
+  }));
+
+  io.emit('getOnlineUsers', onlineUsers);
+}
+
+
+export { app, io, server, unSocketMap };

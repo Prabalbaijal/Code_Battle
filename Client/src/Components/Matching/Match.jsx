@@ -28,6 +28,7 @@ const Match = () => {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
         });
+
         setFriends(response.data.friends);
       } catch (error) {
         console.error('Error fetching friends:', error);
@@ -85,17 +86,25 @@ const Match = () => {
   }, [loggedinUser?._id, socket, navigate]);
 
   useEffect(() => {
-    if (onlineUsers.length > 0) {
-      const friendUsernames = friends.map(friend => friend.username);
-      const friendsOnline = friends.filter(friend => onlineUsers.includes(friend.username));
-      const filteredOthers = onlineUsers.filter(username =>
-        !friendUsernames.includes(username) && username !== loggedinUser.username
+    if (onlineUsers.length > 0 && friends.length > 0) {
+      const friendUsernames = new Set(friends.map(friend => friend.username));
+  
+      // Filter online friends (EXCLUDE logged-in user)
+      const friendsOnline = onlineUsers.filter(user => 
+        friendUsernames.has(user.userName) && 
+        (user.userName) !== loggedinUser.username
       );
-
+  
+      // Filter other online users (EXCLUDE friends & logged-in user)
+      const filteredOthers = onlineUsers.filter(user => 
+        !friendUsernames.has(user.userName) && 
+        (user.userName) !== loggedinUser.username
+      );
       setOnlineFriends(friendsOnline);
       setOtherUsers(filteredOthers);
     }
   }, [onlineUsers, friends, loggedinUser.username]);
+  
 
   const acceptChallenge = () => {
     if (challengeDetails) {
@@ -144,22 +153,28 @@ const Match = () => {
       <h3 className="mb-6 text-3xl font-bold">Online Users</h3>
 
       {/* Friends Section */}
-      {onlineFriends.length > 0 && (
+      {onlineFriends.length > 0 ? (
         <div className="w-full max-w-md mb-6 bg-gray-800 rounded-lg shadow-lg">
           <h4 className="px-4 py-2 text-lg font-semibold text-gray-300">Friends (Online)</h4>
           <ul className="divide-y divide-gray-700">
-            {onlineFriends.map((friend, index) => (
+            {onlineFriends.map(({ userName, inContest }, index) => (
               <li key={index} className="flex items-center justify-between px-4 py-3 hover:bg-gray-700">
-                <span className="font-medium text-gray-100">{friend.username}</span>
-                <div className="flex space-x-2">
-                  <button className="btn btn-success btn-sm" onClick={() => handlePlay(friend.username)}>
-                    Play
-                  </button>
-                </div>
+                <span className="font-medium text-gray-100">
+                  {userName} {inContest ? "(In Contest)" : "(Available)"}
+                </span>
+                <button
+                  className="btn btn-success btn-sm"
+                  onClick={() => handlePlay(userName)}
+                  disabled={inContest}
+                >
+                  Play
+                </button>
               </li>
             ))}
           </ul>
         </div>
+      ):(
+        <p className="text-lg text-gray-400">No friends online.</p>
       )}
 
       {/* Other Users Section */}
@@ -167,11 +182,17 @@ const Match = () => {
         <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-lg">
           <h4 className="px-4 py-2 text-lg font-semibold text-gray-300">Other Users</h4>
           <ul className="divide-y divide-gray-700">
-            {otherUsers.map((userName, index) => (
+            {otherUsers.map(({ userName, inContest }, index) => (
               <li key={index} className="flex items-center justify-between px-4 py-3 hover:bg-gray-700">
-                <span className="font-medium text-gray-100">{userName}</span>
+                <span className="font-medium text-gray-100">
+                  {username} {inContest ? "(In Contest)" : "(Available)"}
+                </span>
                 <div className="flex space-x-2">
-                  <button className="btn btn-success btn-sm" onClick={() => handlePlay(userName)}>
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={() => handlePlay(userName)}
+                    disabled={inContest}
+                  >
                     Play
                   </button>
                   <button className="btn btn-info btn-sm" onClick={() => handleAddFriend(userName)}>
