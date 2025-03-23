@@ -1,0 +1,165 @@
+.stats-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    background: linear-gradient(to right, #0a0a0a, #1c1c1c);
+    color: white;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 2px 0px 10px rgba(0, 255, 255, 0.2);
+  }
+  
+  .profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    flex-grow: 1;
+    margin-top: 2rem;
+  }
+  
+  .profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #00ffcc;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .profile-pic:hover {
+    transform: scale(1.05);
+  }
+  
+  .profile-info {
+    text-align: center;
+  }
+  
+  .profile-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .profile-username {
+    font-size: 0.9rem;
+    color: #00ffff;
+  }
+  
+  .stats-card {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 10px;
+    background: #222;
+    box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+  }
+  
+  .stats-text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #cccccc;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stats-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #00ffcc;
+  }
+  
+  /* Settings Button */
+  .settings-section {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-top: auto;
+  }
+  
+  .settings-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.6rem;
+    border-radius: 50%;
+    transition: background 0.3s ease-in-out;
+  }
+  
+  .settings-btn:hover {
+    background: rgba(0, 255, 255, 0.1);
+  }
+  
+  .settings-icon {
+    color: #cccccc;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .settings-btn:hover .settings-icon {
+    color: #00ffff;
+  }
+  
+  /* Settings Dropdown */
+  .settings-dropdown {
+    position: absolute;
+    bottom: 50px;
+    background: #222;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
+    padding: 0.5rem;
+    width: 120px;
+  }
+  
+  .logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0.6rem;
+    color: #ff5555;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    background: none;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  }
+  
+  .logout-btn:hover {
+    background: #ff4444;
+    color: white;
+  }
+  
+  .logout-icon {
+    margin-right: 5px;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 1024px) {
+    .stats-container {
+      padding: 1rem;
+    }
+  
+    .profile-pic {
+      width: 100px;
+      height: 100px;
+    }
+  
+    .profile-name {
+      font-size: 1.3rem;
+    }
+  
+    .stats-card {
+      padding: 0.8rem;
+    }
+  
+    .settings-btn {
+      padding: 0.5rem;
+    }
+  
+    .settings-dropdown {
+      width: 100px;
+    }
+  
+    .logout-btn {
+      font-size: 0.8rem;
+    }
+  }
+  

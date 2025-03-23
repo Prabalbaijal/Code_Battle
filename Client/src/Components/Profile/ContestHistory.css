@@ -1,34 +1,58 @@
-/* ContestHistory.css */
-
-.recent-contests {
-    background-color: #2d3748; /* Dark gray background */
-    padding: 1.25rem;
-    border-radius: 0.5rem;
-}
-
-.recent-contests h2 {
-    font-size: 1.5rem; /* 2xl */
+.contest-history {
+    background: rgba(17, 25, 40, 0.75);
+    border-radius: 12px;
+    padding: 1.5rem;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .contest-history-title {
+    font-size: 1.5rem;
     font-weight: 600;
-    margin-bottom: 1rem;
-    color: #edf2f7; /* Very light gray */
-}
-
-.contest-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.contest-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0.75rem;
-    background-color: #4a5568; /* Gray item background */
-    border-radius: 0.25rem;
-    color: #cbd5e0; /* Light gray */
-}
-
-.contest-item span {
-    font-size: 1rem;
+    color: var(--neon-primary);
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 10px var(--neon-primary);
+  }
+  
+  .contest-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+  }
+  
+  .contest-table th {
+    color: #8b9cb3;
     font-weight: 500;
-}
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .contest-row {
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .contest-row:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+  }
+  
+  .contest-row td {
+    padding: 1rem;
+    color: #ffffff;
+  }
+  
+  .win {
+    color: var(--neon-accent);
+    text-shadow: 0 0 5px var(--neon-accent);
+  }
+  
+  .lose {
+    color: #ff4d4d;
+    text-shadow: 0 0 5px #ff4d4d;
+  }
+  
+  .draw {
+    color: #8b9cb3;
+  }
