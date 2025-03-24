@@ -39,7 +39,7 @@ const Friends = () => {
 
         {/* Scrollable Friends List */}
         <div className="w-full max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-transparent">
-          {friends.length === 0 ? (
+          {friends?.length === 0 ? (
             <p className="mt-6 text-gray-600 dark:text-gray-400">You don't have any friends.</p>
           ) : (
             <ul className="space-y-4">

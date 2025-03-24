@@ -6,7 +6,8 @@ import jwt from 'jsonwebtoken'
 import Question from '../models/QuestionModel.js'
 import axios from 'axios'
 import { Contest } from '../models/ContestModel.js'
-import { unSocketMap } from '../socket/socket.js'
+import { contestUsers, unSocketMap, updateOnlineUsers } from '../socket/socket.js'
+import { updateUserDataOnNoWinner } from './UserUpdate.js'
 
 
 export const register = async (req, res) => {
@@ -529,26 +530,36 @@ export const sendrequest = async (req, res) => {
 
   export const getUserProfile = async (req, res) => {
     try {
-        // Assuming user ID is available in req.user from authentication middleware
         const userId = req.user.id;
 
-        // Fetch user data
-        const user = await User.findById(userId, "level coins matchHistory");
-        
+        // Fetch user data and populate opponent details
+        const user = await User.findById(userId, "level coins matchHistory")
+            .populate({
+                path: "matchHistory.opponent",  // Populate opponent field
+                select: "username"  // Only fetch username
+            });
+
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
+        // Format matchHistory to ensure opponent's username is sent instead of ID
+        const formattedMatchHistory = user.matchHistory.map(match => ({
+            ...match.toObject(),
+            opponent: match.opponent?.username || "Unknown"  // Ensure username is returned
+        }));
+
         res.json({
             level: user.level,
             coins: user.coins,
-            matchHistory: user.matchHistory
+            matchHistory: formattedMatchHistory
         });
     } catch (error) {
         console.error("Error fetching user profile:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
-};  
+};
+
 
 export const scheduleContestTimeout = (roomName, endTime) => {
     const timeRemaining = endTime - Date.now();
@@ -571,8 +582,12 @@ export const scheduleContestTimeout = (roomName, endTime) => {
                     })
                 }
             });
+            updateUserDataOnNoWinner(user1,user2)
 
             // Remove contest from DB
+            contestUsers.delete(user1);
+            contestUsers.delete(user2);
+            updateOnlineUsers()
             await Contest.findOneAndDelete({ roomName });
             console.log(`Contest ${roomName} ended due to timeout.`);
         }

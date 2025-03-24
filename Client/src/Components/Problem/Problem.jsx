@@ -53,10 +53,10 @@ const Problem = () => {
         const selectedLanguage = event.target.value;
         setLanguage(selectedLanguage);
         const templates = {
-            javascript: "class Solution {\n\tmain() {\n\t\t/* Your code here */\n\t}\n}",
+            javascript: "class Solution {\n\tmain() {\n\t\t// Your code here\n\t}\n}",
             python: "class Solution:\n\tdef main(self):\n\t\t# Your code here",
-            cpp: "#include <iostream>\nclass Solution {\n\tpublic:\n\t\int main() {\n\t\t\t/* Your code here */\n\n\t\treturn 0;\n\t}\n};",
-            java: "public class Solution {\n\tpublic static void main(String[] args) {\n\t\t/* Your code here */\n\t}\n}",
+            cpp: "#include <bits/stdc++.h>\nusing namespace std;\nusing ll=long long;\nint main() {\n\t// Your code here\n\n\treturn 0;\n}",
+            java: "import java.util.*;\npublic class Solution {\n\tpublic static void main(String[] args) {\n\t\t// Your code here\n\t}\n}"
         };
         setCode(templates[selectedLanguage]);
     };
