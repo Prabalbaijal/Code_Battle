@@ -21,7 +21,7 @@ const Header = () => {
 
   const logoutFunction = async () => {
     try {
-      const res = await axios.get('http://localhost:9000/api/users/logout');
+      const res = await axios.get('http://localhost:9000/api/users/logout',{withCredentials:true});
       dispatch(setLoggedinUser(null));
       navigate('/');
       toast.success(res.data.message);

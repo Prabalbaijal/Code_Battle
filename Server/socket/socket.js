@@ -54,7 +54,7 @@
                   if (!problem) {
                       return socket.emit('contestError', { message: 'Problem not found.' });
                   }
-          
+                          
                   // Extract usernames from roomName
                   const [user1, user2] = roomName.split('-');
                   const opponent = user1 === username ? user2 : user1; // Get opponent's name
@@ -221,9 +221,9 @@
           try {
               // Fetch contest from DB
               const contest = await Contest.findOneAndUpdate(
-                { roomName, status: "active" }, // Condition: Sirf active contest update ho
-                { status: "completed" }, // Update: Status ko completed karo
-                { new: false,session } // Purana contest milega (race condition prevent karne ke liye)
+                { roomName, status: "active" }, 
+                { status: "completed" }, 
+                { new: false,session }
             );
               if (!contest) {
                 await session.abortTransaction();
@@ -248,7 +248,7 @@
               });
       
               // Remove contest from DB
-              await Contest.findOneAndDelete({ roomName });
+              await Contest.findOneAndDelete({ roomName },{ session });
               await session.commitTransaction(); // Commit all changes
               session.endSession();
               contestUsers.delete(user1);
