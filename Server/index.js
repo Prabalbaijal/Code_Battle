@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 2000;
 
 // CORS Configuration
 const corsOptions = {
-    origin: ["http://localhost:4173"],
+    origin: ["http://localhost:4173","https://code-battle-1.onrender.com"],
     credentials: true,
 };
 
@@ -24,7 +24,7 @@ app.use(cookieParser());
 
 app.use('/api/users', UserRoute);
 
-server.listen(PORT, async () => {
+server.listen(PORT, "0.0.0.0" ,async () => {
     connectDB();
     console.log(`Server is running on port ${PORT}`);
     await rescheduleAllTimeouts();
