@@ -6,7 +6,7 @@ import { setLoggedinUser } from '../../redux/userSlice.js';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { FaTimes } from 'react-icons/fa';
-import logo from "../../assets/logo.png";
+import logo from "../../assets/Logo.png";
 
 const Header = () => {
   const { loggedinUser } = useSelector((store) => store.user);
