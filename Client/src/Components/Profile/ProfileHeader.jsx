@@ -6,7 +6,7 @@ import { setLoggedinUser } from '../../redux/userSlice.js';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Menu, X } from 'lucide-react';
-import logo from "../../assets/Logo.png";
+import logo from "../../Assets/AppLogo.png";
 
 const ProfileHeader = () => {
   const { loggedinUser } = useSelector(store => store.user);
