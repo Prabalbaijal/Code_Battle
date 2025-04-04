@@ -1,22 +1,10 @@
 import React, { useEffect } from 'react';
-import Login from './Components/Login/Login.jsx';
 import './index.css';
-import HomePage from './Components/HomePage/HomePage.jsx';
 import { RouterProvider, createBrowserRouter,useNavigate } from 'react-router-dom';
-import Match from './Components/Matching/Match.jsx';
-import Problem from './Components/Problem/Problem.jsx';
-import Profile from './Components/Profile/Profile.jsx';
 import { useSelector, useDispatch } from 'react-redux';
 import io from 'socket.io-client';
-import FriendRequests from './Components/FriendRequest/FriendRequest.jsx';
-import Friends from './Components/Friends/Friends.jsx';
 import { setSocket, disconnectSocket } from './redux/socketSlice.js';
 import { setOnlineUsers } from './redux/userSlice.js';
-import Challenge from './Components/ChallengeFriend/Challenge.jsx';
-import DailyChallenge from './Components/DailyChallenge/DailyChallenge.jsx';
-import Settings from './Components/Settings/Settings.jsx';
-import Leaderboard from './Components/Leaderboard/Leaderboard.jsx';
-import ActiveContests from './Components/ActiveContests/ActiveContests.jsx';
 import axios from 'axios';
 import { setLoggedinUser } from './redux/userSlice.js';
 import router from './Components/Routes.jsx';
@@ -43,7 +31,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:9000/api/users/getUser', { withCredentials: true }) 
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+    axios.get(`${BACKEND_URL}/api/users/getUser`, { withCredentials: true }) 
         .then(res => {
             if (res.data) {
                 dispatch(setLoggedinUser(res.data));
@@ -73,7 +62,8 @@ export default function App() {
 
     // ✅ Create a new socket
     console.log("✅ Creating a new socket connection...");
-    const newSocket = io('http://localhost:9000', {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+    const newSocket = io(`${BACKEND_URL}`, {
       query: { userId: loggedinUser._id },
       reconnection: false,
     });

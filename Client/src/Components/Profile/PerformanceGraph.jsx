@@ -81,11 +81,11 @@
 //   };
 
 //   return (
-//     <div className="p-4 bg-white shadow rounded-lg sm:p-6 md:p-8">
-//       <div className="flex justify-between items-center mb-4 sm:mb-6">
+//     <div className="p-4 bg-white rounded-lg shadow sm:p-6 md:p-8">
+//       <div className="flex items-center justify-between mb-4 sm:mb-6">
 //         <div className="text-lg font-semibold">Total Contests: {totalContests}</div>
 //         <select
-//           className="border p-2 rounded-md w-full sm:w-40 ml-2" // Added w-full for small screens and sm:w-40 for larger ones
+//           className="w-full p-2 ml-2 border rounded-md sm:w-40" // Added w-full for small screens and sm:w-40 for larger ones
 //           value={selectedMonth}
 //           onChange={(e) => setSelectedMonth(e.target.value)}
 //         >
@@ -97,7 +97,7 @@
 //           ))}
 //         </select>
 //       </div>
-//       <div className="h-60 sm:h-80 md:h-96 w-full">
+//       <div className="w-full h-60 sm:h-80 md:h-96">
 //         {loading ? (
 //           <p className="text-center text-gray-500">Loading...</p>
 //         ) : filteredData.length > 0 ? (
@@ -135,7 +135,8 @@ const PerformanceGraph = () => {
   useEffect(() => {
     const fetchPerformanceData = async () => {
       try {
-        const response = await axios.get("http://localhost:9000/api/users/updateprofile", {
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+        const response = await axios.get(`${BACKEND_URL}/api/users/updateprofile`, {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
         });
@@ -192,11 +193,11 @@ const PerformanceGraph = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-900 text-white shadow-lg rounded-lg sm:p-8 md:p-10 border border-gray-700">
-      <div className="flex justify-between items-center mb-6 sm:mb-8">
+    <div className="p-6 text-white bg-gray-900 border border-gray-700 rounded-lg shadow-lg sm:p-8 md:p-10">
+      <div className="flex items-center justify-between mb-6 sm:mb-8">
         <div className="text-lg font-semibold text-cyan-400">Total Contests: {totalContests}</div>
         <select
-          className="bg-gray-800 border border-cyan-400 text-white p-2 rounded-md w-full sm:w-40 ml-2 transition-all duration-300 hover:bg-cyan-600"
+          className="w-full p-2 ml-2 text-white transition-all duration-300 bg-gray-800 border rounded-md border-cyan-400 sm:w-40 hover:bg-cyan-600"
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(e.target.value)}
         >
@@ -208,7 +209,7 @@ const PerformanceGraph = () => {
           ))}
         </select>
       </div>
-      <div className="h-60 sm:h-80 md:h-96 w-full">
+      <div className="w-full h-60 sm:h-80 md:h-96">
         {loading ? (
           <p className="text-center text-gray-400">Loading...</p>
         ) : filteredData.length > 0 ? (

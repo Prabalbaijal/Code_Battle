@@ -12,7 +12,8 @@ const Friends = () => {
   useEffect(() => {
     const fetchFriends = async () => {
       try {
-        const response = await axios.get('http://localhost:9000/api/users/getfriends', {
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+        const response = await axios.get(`${BACKEND_URL}/api/users/getfriends`, {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
         });

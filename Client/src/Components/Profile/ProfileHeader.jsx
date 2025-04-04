@@ -19,7 +19,8 @@ const ProfileHeader = () => {
 
   const logoutFunction = async () => {
     try {
-      const res = await axios.get('http://localhost:9000/api/users/logout');
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+      const res = await axios.get(`${BACKEND_URL}/api/users/logout`);
       navigate("/");
       toast.success(res.data.message);
       dispatch(setLoggedinUser(null));
