@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setLoggedinUser } from "../../redux/userSlice.js";
-import Footer from "../Footer/footer.jsx"; // ✅ Import Footer
+import Footer from "../Footer/Footer.jsx"; // ✅ Import Footer
 
 const Settings = () => {
   const dispatch = useDispatch();
@@ -38,26 +38,26 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900 text-white">
+    <div className="flex flex-col min-h-screen text-white bg-gray-900">
       {/* Navbar-like Header */}
-      <header className="w-full bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600 shadow-lg py-4 px-6 text-left text-2xl font-bold">
+      <header className="w-full px-6 py-4 text-2xl font-bold text-left shadow-lg bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-600">
         Settings
       </header>
 
       {/* Main Content */}
-      <div className="flex-grow flex justify-center items-center">
-        <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-2xl">
+      <div className="flex items-center justify-center flex-grow">
+        <div className="w-full max-w-2xl p-6 bg-gray-800 rounded-lg shadow-xl">
           
           {/* Username */}
-          <div className="flex items-center justify-between mb-4 border-b border-gray-700 pb-2">
+          <div className="flex items-center justify-between pb-2 mb-4 border-b border-gray-700">
             <div>
-              <p className="text-gray-400 text-sm">Username:</p>
+              <p className="text-sm text-gray-400">Username:</p>
               {editField === "username" ? (
                 <input
                   type="text"
                   value={formData.username}
                   onChange={(e) => handleChange("username", e.target.value)}
-                  className="w-full bg-gray-700 text-white p-2 rounded mt-1"
+                  className="w-full p-2 mt-1 text-white bg-gray-700 rounded"
                 />
               ) : (
                 <p className="text-lg font-semibold">{formData.username}</p> // ✅ Now always displays current data
@@ -66,28 +66,28 @@ const Settings = () => {
             {editField === "username" ? (
               <button
                 onClick={() => handleSave("username")}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition">
+                className="px-4 py-2 text-white transition bg-green-600 rounded-lg shadow-md hover:bg-green-700">
                 Save
               </button>
             ) : (
               <button
                 onClick={() => setEditField("username")}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition">
+                className="px-4 py-2 text-white transition bg-blue-600 rounded-lg shadow-md hover:bg-blue-700">
                 Change
               </button>
             )}
           </div>
 
           {/* Email */}
-          <div className="flex items-center justify-between mb-4 border-b border-gray-700 pb-2">
+          <div className="flex items-center justify-between pb-2 mb-4 border-b border-gray-700">
             <div>
-              <p className="text-gray-400 text-sm">Email:</p>
+              <p className="text-sm text-gray-400">Email:</p>
               {editField === "email" ? (
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="w-full bg-gray-700 text-white p-2 rounded mt-1"
+                  className="w-full p-2 mt-1 text-white bg-gray-700 rounded"
                 />
               ) : (
                 <p className="text-lg font-semibold">{formData.email}</p> // ✅ Displays updated email
@@ -96,13 +96,13 @@ const Settings = () => {
             {editField === "email" ? (
               <button
                 onClick={() => handleSave("email")}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition">
+                className="px-4 py-2 text-white transition bg-green-600 rounded-lg shadow-md hover:bg-green-700">
                 Save
               </button>
             ) : (
               <button
                 onClick={() => setEditField("email")}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition">
+                className="px-4 py-2 text-white transition bg-green-600 rounded-lg shadow-md hover:bg-green-700">
                 Change
               </button>
             )}
@@ -111,13 +111,13 @@ const Settings = () => {
           {/* Password */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Password:</p>
+              <p className="text-sm text-gray-400">Password:</p>
               {editField === "password" ? (
                 <input
                   type="password"
                   value={formData.password}
                   onChange={(e) => handleChange("password", e.target.value)}
-                  className="w-full bg-gray-700 text-white p-2 rounded mt-1"
+                  className="w-full p-2 mt-1 text-white bg-gray-700 rounded"
                 />
               ) : (
                 <p className="text-lg font-semibold">********</p> // ✅ Keeps password hidden
@@ -126,13 +126,13 @@ const Settings = () => {
             {editField === "password" ? (
               <button
                 onClick={() => handleSave("password")}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition">
+                className="px-4 py-2 text-white transition bg-green-600 rounded-lg shadow-md hover:bg-green-700">
                 Save
               </button>
             ) : (
               <button
                 onClick={() => setEditField("password")}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-md transition">
+                className="px-4 py-2 text-white transition bg-purple-600 rounded-lg shadow-md hover:bg-purple-700">
                 Change
               </button>
             )}
