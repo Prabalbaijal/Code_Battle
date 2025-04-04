@@ -10,7 +10,8 @@ export default function ForgotPassword() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post("http://localhost:9000/api/users/forgot-password", { email });
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+            const res = await axios.post(`${BACKEND_URL}/api/users/forgot-password`, { email });
             toast.success(res.data.message || "Reset link sent successfully!");
             setEmail("");
         } catch (error) {
