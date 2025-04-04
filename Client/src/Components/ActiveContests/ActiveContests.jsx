@@ -16,8 +16,8 @@ export default function ActiveContests() {
 
     useEffect(() => {
         if (!loggedinUser) return;
-
-        axios.post("http://localhost:9000/api/users/activecontests", { username: loggedinUser.username })
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+        axios.post(`${BACKEND_URL}/api/users/activecontests`, { username: loggedinUser.username })
             .then((res) => {
                 setActiveContests(res.data);
                 setLoading(false);

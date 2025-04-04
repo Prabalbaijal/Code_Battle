@@ -73,7 +73,8 @@ const Problem = () => {
         };
 
         try {
-            const response = await axios.post('http://localhost:9000/api/users/submit', submissionData, {
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+            const response = await axios.post(`${BACKEND_URL}/api/users/submit`, submissionData, {
                 headers: { 'Content-Type': 'application/json' },
             });
             toast.dismiss(loadingToastId);

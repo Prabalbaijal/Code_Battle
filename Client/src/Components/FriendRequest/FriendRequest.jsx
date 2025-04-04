@@ -11,7 +11,8 @@ const FriendRequests = () => {
   useEffect(() => {
     const fetchFriendRequests = async () => {
       try {
-        const response = await axios.get("http://localhost:9000/api/users/getfriendrequests", {
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+        const response = await axios.get(`${BACKEND_URL}/api/users/getfriendrequests`, {
           withCredentials: true,
         });
 
@@ -32,7 +33,8 @@ const FriendRequests = () => {
 
   const handleAction = async (senderUsername, action) => {
     try {
-      await axios.post("http://localhost:9000/api/users/handleRequest", {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+      await axios.post(`${BACKEND_URL}/api/users/handleRequest`, {
         senderUsername,
         receiverUsername: loggedinUser.username,
         action,

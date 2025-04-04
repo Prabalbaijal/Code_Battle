@@ -25,7 +25,8 @@ const Match = () => {
 
     const fetchFriends = async () => {
       try {
-        const response = await axios.get('http://localhost:9000/api/users/getfriends', {
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+        const response = await axios.get(`${BACKEND_URL}/api/users/getfriends`, {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
         });
@@ -134,7 +135,8 @@ const Match = () => {
 
 const handleAddFriend = async (friendUsername) => {
   try {
-    const response = await axios.post('http://localhost:9000/api/users/sendfriendrequest', {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+    const response = await axios.post(`${BACKEND_URL}/api/users/sendfriendrequest`, {
       senderUsername: loggedinUser?.username,
       receiverUsername: friendUsername,
     });

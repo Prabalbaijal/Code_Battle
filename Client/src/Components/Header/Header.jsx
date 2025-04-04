@@ -5,9 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { setLoggedinUser } from '../../redux/userSlice.js';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { FaChevronDown, FaBars, FaTimes } from 'react-icons/fa';
-import Settings from '../Settings/Settings.jsx';
-import Leaderboard from '../Leaderboard/Leaderboard.jsx';
+import { FaTimes } from 'react-icons/fa';
 import logo from "../../assets/logo.png";
 
 const Header = () => {
@@ -21,7 +19,8 @@ const Header = () => {
 
   const logoutFunction = async () => {
     try {
-      const res = await axios.get('http://localhost:9000/api/users/logout',{withCredentials:true});
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+      const res = await axios.get(`${BACKEND_URL}/api/users/logout`,{withCredentials:true});
       dispatch(setLoggedinUser(null));
       navigate('/');
       toast.success(res.data.message);

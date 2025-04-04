@@ -25,8 +25,9 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
         const response = await axios.get(
-          "http://localhost:9000/api/users/updateprofile",
+          `${BACKEND_URL}/api/users/updateprofile`,
           {
             headers: { "Content-Type": "application/json" },
             withCredentials: true,
@@ -57,7 +58,8 @@ const Profile = () => {
 
   const logoutFunction = async () => {
     try {
-      const res = await axios.get("http://localhost:9000/api/users/logout");
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+      const res = await axios.get(`${BACKEND_URL}/api/users/logout`);
       navigate("/");
       toast.success(res.data.message);
       dispatch(setLoggedinUser(null));

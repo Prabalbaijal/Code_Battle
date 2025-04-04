@@ -9,7 +9,6 @@ export default function ForgotPassword() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
         try {
             const res = await axios.post("http://localhost:9000/api/users/forgot-password", { email });
             toast.success(res.data.message || "Reset link sent successfully!");
@@ -25,14 +24,14 @@ export default function ForgotPassword() {
         <div className="min-h-screen flex items-center justify-center bg-[#0F172A] text-gray-100">
             {/* Background decorative elements */}
             <div className="absolute inset-0">
-                <div className="absolute -left-4 top-0 h-72 w-72 bg-purple-500/30 blur-3xl rounded-full" />
-                <div className="absolute -right-4 bottom-0 h-72 w-72 bg-blue-500/30 blur-3xl rounded-full" />
+                <div className="absolute top-0 rounded-full -left-4 h-72 w-72 bg-purple-500/30 blur-3xl" />
+                <div className="absolute bottom-0 rounded-full -right-4 h-72 w-72 bg-blue-500/30 blur-3xl" />
             </div>
 
             <div className="relative z-10 w-full max-w-md p-6">
-                <div className="bg-gray-900/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-gray-800">
-                    <div className="text-center mb-8">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                <div className="p-8 border border-gray-800 shadow-xl bg-gray-900/80 backdrop-blur-xl rounded-2xl">
+                    <div className="mb-8 text-center">
+                        <h2 className="text-3xl font-bold text-transparent bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text">
                             Recover Access
                         </h2>
                         <p className="mt-2 text-gray-400">
@@ -42,7 +41,7 @@ export default function ForgotPassword() {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                            <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-300">
                                 Email Address
                             </label>
                             <input
@@ -52,7 +51,7 @@ export default function ForgotPassword() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition text-white placeholder-gray-500"
+                                className="w-full px-4 py-3 text-white placeholder-gray-500 transition bg-gray-800 border border-gray-700 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
@@ -65,10 +64,10 @@ export default function ForgotPassword() {
                             {isLoading ? 'Sending...' : 'Send Reset Link'}
                         </button>
 
-                        <div className="text-center mt-4">
+                        <div className="mt-4 text-center">
                             <Link
                                 to="/"
-                                className="text-sm text-gray-400 hover:text-white transition"
+                                className="text-sm text-gray-400 transition hover:text-white"
                             >
                                 Back to Login
                             </Link>
