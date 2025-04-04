@@ -86,26 +86,27 @@ const Match = () => {
       socket.off('reconnectContest');
     };
   }, [loggedinUser?._id, socket, navigate]);
-
   useEffect(() => {
-    if (onlineUsers?.length > 0 && friends?.length > 0) {
-      const friendUsernames = new Set(friends.map(friend => friend.username));
+    if (!onlineUsers || !loggedinUser) return;
   
-      // Filter online friends (EXCLUDE logged-in user)
-      const friendsOnline = onlineUsers.filter(user => 
-        friendUsernames.has(user.userName) && 
-        (user.userName) !== loggedinUser?.username
-      );
+    const friendUsernames = new Set(friends?.map(friend => friend.username) || []);
+    
+    // Filter online friends (EXCLUDE logged-in user)
+    const friendsOnline = onlineUsers.filter(user => 
+      friendUsernames.has(user.userName) && 
+      user.userName !== loggedinUser.username
+    );
   
-      // Filter other online users (EXCLUDE friends & logged-in user)
-      const filteredOthers = onlineUsers.filter(user => 
-        !friendUsernames.has(user.userName) && 
-        (user.userName) !== loggedinUser?.username
-      );
-      setOnlineFriends(friendsOnline);
-      setOtherUsers(filteredOthers);
-    }
+    // Filter other online users (EXCLUDE logged-in user, but include when friends is empty)
+    const filteredOthers = onlineUsers.filter(user => 
+      (!friendUsernames.has(user.userName) || friends.length === 0) && 
+      user.userName !== loggedinUser.username
+    );
+  
+    setOnlineFriends(friendsOnline);
+    setOtherUsers(filteredOthers);
   }, [onlineUsers, friends, loggedinUser?.username]);
+  
   
 
   const acceptChallenge = () => {

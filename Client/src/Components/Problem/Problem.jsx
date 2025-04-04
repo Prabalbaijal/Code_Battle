@@ -23,7 +23,11 @@ const Problem = () => {
     const navigate = useNavigate();
     const { roomName, endTime, problem } = location.state || {};
 
-    if (!roomName || !problem) return <Navigate to="/match" replace />;
+    useEffect(() => {
+        if (!roomName || !problem) {
+            navigate("/match", { replace: true });
+        }
+    }, [roomName, problem, navigate]);
 
     useEffect(() => {
         if (!socket) return;
