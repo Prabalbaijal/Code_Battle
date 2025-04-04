@@ -37,6 +37,13 @@
             unSocketMap.set(userName, socket);
             
             console.log(`User connected: userId=${userId}, socketId=${socket.id}, userName=${userName}`);
+            const ongoingContest = await Contest.findOne({
+              $or: [{ user1: userName }, { user2: userName }],
+              status: 'active'
+          });
+          if(ongoingContest) {
+             contestUsers.add(userName);
+          }
             updateOnlineUsers();
 
             // Check if user was in an active contest
