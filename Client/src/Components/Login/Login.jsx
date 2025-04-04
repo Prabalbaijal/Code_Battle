@@ -1,15 +1,17 @@
+
 import React, { useState } from 'react';
-import './Login.css'; // Keep your existing styles if needed.
+import { useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import axios from "axios";
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux'
 import { setLoggedinUser } from '../../redux/userSlice.js';
-import { io } from 'socket.io-client'
 import { setSocket } from '../../redux/socketSlice.js';
+import { io } from 'socket.io-client';
 
 export default function Login() {
     const [isSignUp, setIsSignUp] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [forgotEmail, setForgotEmail] = useState("");
 
     const [registeruser, setRegisterUser] = useState({
         fullname: "",
@@ -28,9 +30,24 @@ export default function Login() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.post('http://localhost:9000/api/users/forgot-password', 
+                { email: forgotEmail },
+                { withCredentials: true }
+            );
+            if (res.data.success) {
+                toast.success("Password reset link sent to your email!");
+                setShowForgotPassword(false);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Something went wrong!");
+        }
+    };
+
     const SignupSubmitHandler = async (e) => {
         e.preventDefault();
-
         const formData = new FormData();
         formData.append('fullname', registeruser.fullname);
         formData.append('username', registeruser.username);
@@ -40,25 +57,20 @@ export default function Login() {
         if (registeruser.avatar) {
             formData.append('avatar', registeruser.avatar);
         }
-        for (const [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
-        }
+
         const loadingToastId = toast.loading('Signing up...');
 
         try {
             const res = await axios.post('http://localhost:9000/api/users/register', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                },
+                headers: { 'Content-Type': 'multipart/form-data' },
                 withCredentials: true
             });
             if (res.data.success) {
                 toast.success(res.data.message, { id: loadingToastId });
-                toggle('login');
+                setIsSignUp(false);
             }
         } catch (error) {
             toast.error(error.response.data.message, { id: loadingToastId });
-            console.log(error);
         }
 
         setRegisterUser({
@@ -79,18 +91,14 @@ export default function Login() {
         e.preventDefault();
         try {
             const res = await axios.post('http://localhost:9000/api/users/login', loginuser, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 withCredentials: true,
             });
 
             if (res.data.success) {
                 dispatch(setLoggedinUser(res.data));
-
                 toast.success(`Welcome ${res.data.fullname}`, { icon: '👋' });
 
-                // Connect socket
                 const newSocket = io('http://localhost:9000', {
                     query: { userId: res.data._id },
                     reconnection: true,
@@ -98,18 +106,15 @@ export default function Login() {
 
                 dispatch(setSocket(newSocket));
 
-                // ✅ Fix: Use newSocket instead of undefined socket
                 newSocket.on('connect_error', (err) => {
                     console.error('Socket connection error:', err.message);
                 });
 
-                // ✅ Navigate only once after setting up everything
                 navigate("/home");
             } else {
                 toast.error("Login failed! Please try again.");
             }
         } catch (error) {
-            console.error("Login error:", error);
             if (error.response) {
                 toast.error(error.response.data.message);
             } else {
@@ -117,188 +122,154 @@ export default function Login() {
             }
         }
 
-        // Reset login form
         setLoginUser({
             username: "",
             password: "",
         });
     };
 
-
     return (
-    
-        <div
-            className="flex items-center justify-center w-full min-h-screen bg-center bg-no-repeat bg-cover back"
-            style={{
-                backgroundImage: "url('/images/login1.jpg')"
-            }}
-        >
+        <div className="min-h-screen flex items-center justify-center bg-[#0F172A] text-gray-100">
+            <div className="absolute inset-0 bg-grid-white/[0.05]" />
+            
+            {/* Decorative elements */}
+            <div className="absolute inset-0">
+                <div className="absolute -left-4 top-0 h-72 w-72 bg-purple-500/30 blur-3xl rounded-full" />
+                <div className="absolute -right-4 bottom-0 h-72 w-72 bg-blue-500/30 blur-3xl rounded-full" />
+            </div>
 
-            <div className="flex flex-col items-center p-6 bg-white border border-gray-300 rounded-lg shadow-md">
-                <div className="mb-4 text-2xl font-bold underline header">{isSignUp ? 'Sign Up' : 'Login'}</div>
+            <div className="relative z-10 w-full max-w-md">
+                <div className="bg-gray-900/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-gray-800">
+                    <div className="flex items-center justify-center mb-8">
+                        <div className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                            {isSignUp ? 'Sign Up' : 'Coding Battle'}
+                        </div>
+                    </div>
 
-                {isSignUp ? (
-                    <>
-                        <form onSubmit={SignupSubmitHandler} action="">
-                            <label className="flex items-center gap-2 mb-2 w-72">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    className="w-5 h-5 opacity-70">
-                                    <path
-                                        d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.866 0-7 3.134-7 7v1h14v-1c0-3.866-3.134-7-7-7z" />
-                                </svg>
+                    {showForgotPassword ? (
+                        <form onSubmit={handleForgotPassword} className="space-y-4">
+                            <div>
                                 <input
-                                    type="text"
-                                    className="p-2 border-b border-gray-300 grow focus:outline-none"
-                                    placeholder="FullName"
-                                    value={registeruser.fullname} onChange={(e) => setRegisterUser({ ...registeruser, fullname: e.target.value })}
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                                    value={forgotEmail}
+                                    onChange={(e) => setForgotEmail(e.target.value)}
                                 />
-                            </label>
-
-
-                            <label className="flex items-center gap-2 mb-2 w-72">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    fill="currentColor"
-                                    className="w-4 h-4 opacity-70">
-                                    <path
-                                        d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
-                                    <path
-                                        d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
-                                </svg>
-                                <input
-                                    type="text"
-                                    className="p-2 border-b border-gray-300 grow focus:outline-none"
-                                    placeholder="Email"
-                                    value={registeruser.email} onChange={(e) => setRegisterUser({ ...registeruser, email: e.target.value })}
-                                />
-                            </label>
-
-                            <label className="flex items-center gap-2 mb-2 w-72">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    fill="currentColor"
-                                    className="w-4 h-4 opacity-70">
-                                    <path
-                                        d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
-                                </svg>
-                                <input
-                                    type="text"
-                                    className="p-2 border-b border-gray-300 grow focus:outline-none"
-                                    placeholder="Username"
-                                    value={registeruser.username} onChange={(e) => setRegisterUser({ ...registeruser, username: e.target.value })}
-                                />
-                            </label>
-
-                            <label className="flex items-center gap-2 mb-2 w-72">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    fill="currentColor"
-                                    className="w-4 h-4 opacity-70">
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
-                                        clipRule="evenodd" />
-                                </svg>
-                                <input
-                                    type="password"
-                                    className="p-2 border-b border-gray-300 grow focus:outline-none"
-                                    placeholder="Password"
-                                    value={registeruser.password} onChange={(e) => setRegisterUser({ ...registeruser, password: e.target.value })}
-                                />
-                            </label>
-
-                            <label className="flex items-center gap-2 mb-2 w-72">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    fill="currentColor"
-                                    className="w-4 h-4 opacity-70">
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
-                                        clipRule="evenodd" />
-                                </svg>
-                                <input
-                                    type="password"
-                                    className="p-2 border-b border-gray-300 grow focus:outline-none"
-                                    placeholder="Confirm Password"
-                                    value={registeruser.confirmPassword} onChange={(e) => setRegisterUser({ ...registeruser, confirmPassword: e.target.value })}
-                                />
-                            </label>
-
-
-                            <label className="w-full max-w-xs form-control">
-                                <div className="flex flex-col justify-between md:flex-row">
-                                    <span className="ml-4 text-lg text-gray-700 label-text">Avatar</span>
-                                </div>
-                                <input
-                                    type="file"
-                                    className="w-full p-0 mt-2 ml-4 cursor-pointer focus:outline-none"
-                                    onChange={handleFileChange} name="avatar"
-                                />
-                            </label>
-
-                            <button className="w-full p-2 mt-4 text-white bg-green-500 rounded-md btn btn-wide">Sign Up</button>
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 transition text-white font-semibold"
+                            >
+                                Reset Password
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowForgotPassword(false)}
+                                className="w-full text-sm text-gray-400 hover:text-white transition"
+                            >
+                                Back to login
+                            </button>
                         </form>
-                    </>
-                ) : (
-                    <>
-                        <form onSubmit={LoginSubmitHandler}>
-                            <label className="flex items-center gap-2 mb-2 w-72">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    fill="currentColor"
-                                    className="w-4 h-4 opacity-70">
-                                    <path
-                                        d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
-                                </svg>
-                                <input
-                                    type="text"
-                                    className="p-2 border-b border-gray-300 grow focus:outline-none"
-                                    placeholder="Username"
-                                    value={loginuser.username} onChange={(e) => setLoginUser({ ...loginuser, username: e.target.value })}
-                                />
-                            </label>
+                    ) : (
+                        <>
+                            {isSignUp ? (
+                                <form onSubmit={SignupSubmitHandler} className="space-y-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Full Name"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                                        value={registeruser.fullname}
+                                        onChange={(e) => setRegisterUser({ ...registeruser, fullname: e.target.value })}
+                                    />
+                                    <input
+                                        type="email"
+                                        placeholder="Email"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                                        value={registeruser.email}
+                                        onChange={(e) => setRegisterUser({ ...registeruser, email: e.target.value })}
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Username"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                                        value={registeruser.username}
+                                        onChange={(e) => setRegisterUser({ ...registeruser, username: e.target.value })}
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="Password"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                                        value={registeruser.password}
+                                        onChange={(e) => setRegisterUser({ ...registeruser, password: e.target.value })}
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="Confirm Password"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                                        value={registeruser.confirmPassword}
+                                        onChange={(e) => setRegisterUser({ ...registeruser, confirmPassword: e.target.value })}
+                                    />
+                                    <div className="space-y-2">
+                                        <label className="block text-sm text-gray-400">Avatar</label>
+                                        <input
+                                            type="file"
+                                            onChange={handleFileChange}
+                                            className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500/50 file:text-white hover:file:bg-blue-500/70"
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="w-full py-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition text-white font-semibold"
+                                    >
+                                        Sign Up
+                                    </button>
+                                </form>
+                            ) : (
+                                <form onSubmit={LoginSubmitHandler} className="space-y-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Username"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                                        value={loginuser.username}
+                                        onChange={(e) => setLoginUser({ ...loginuser, username: e.target.value })}
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="Password"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                                        value={loginuser.password}
+                                        onChange={(e) => setLoginUser({ ...loginuser, password: e.target.value })}
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 transition text-white font-semibold"
+                                    >
+                                        Login
+                                    </button>
+                                </form>
+                            )}
 
-                            <label className="flex items-center gap-2 mb-2 w-72">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    fill="currentColor"
-                                    className="w-4 h-4 opacity-70">
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
-                                        clipRule="evenodd" />
-                                </svg>
-                                <input
-                                    type="password"
-                                    className="p-2 border-b border-gray-300 grow focus:outline-none"
-                                    placeholder="Password"
-                                    value={loginuser.password} onChange={(e) => setLoginUser({ ...loginuser, password: e.target.value })}
-                                />
-                            </label>
-
-                            <button className="w-full p-2 mt-4 text-white bg-blue-500 rounded-md btn btn-wide">Login</button>
-                        </form>
-                    </>
-                )}
-
-                <button
-                    onClick={() => setIsSignUp(!isSignUp)}
-                    className="mt-2 text-sm text-blue-500">
-                    {isSignUp ? 'Already have an account? Login' : 'Don\'t have an account? Sign Up'}
-                </button>
+                            <div className="mt-6 text-center space-y-2">
+                                <button
+                                    onClick={() => setIsSignUp(!isSignUp)}
+                                    className="text-sm text-gray-400 hover:text-white transition"
+                                >
+                                    {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
+                                </button>
+                                {!isSignUp && (
+                                    <Link
+                                        to="/forgot-password"
+                                        className="block w-full text-sm text-gray-400 hover:text-white transition"
+                                    >
+                                        Forgot Password?
+                                    </Link>
+                                )}
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );
 }
-
-
