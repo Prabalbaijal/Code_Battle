@@ -196,7 +196,7 @@ export const forgotPassword = async (req, res) => {
             },
         });
 
-        const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+        const resetURL = `https://code-battle-1.onrender.com/reset-password/${resetToken}`;
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: user.email,
