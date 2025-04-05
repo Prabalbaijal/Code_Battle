@@ -1,5 +1,5 @@
     import express from "express"
-    import { register,login, logout, submitQuestion, sendrequest, handleFriendRequest, getFriendRequests, getFriends, getUserProfile, getActiveContests, getUser, forgotPassword, resetPassword } from "../controllers/UserControllers.js"
+    import { register,login, logout, submitQuestion, sendrequest, handleFriendRequest, getFriendRequests, getFriends, getUserProfile, getActiveContests, getUser, forgotPassword, resetPassword, searchUsers } from "../controllers/UserControllers.js"
     import { upload } from "../middlewares/multer.js"
     import multer from "multer"
     import isAuthenticated from "../middlewares/check-auth.js"
@@ -20,5 +20,6 @@
     router.route("/getUser").get(isAuthenticated,getUser)
     router.route("/forgot-password").post(forgotPassword)
     router.route("/reset-password/:token").post(resetPassword)
+    router.route("/search").get(isAuthenticated,searchUsers)
     
     export default router

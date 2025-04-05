@@ -196,7 +196,7 @@ export const forgotPassword = async (req, res) => {
             },
         });
 
-        const resetURL = `https://code-battle-1.onrender.com/reset-password/${resetToken}`;
+        const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: user.email,
@@ -381,34 +381,40 @@ export const submitQuestion = async (req, res) => {
     }
 };
 
+
 export const sendrequest = async (req, res) => {
     const { senderUsername, receiverUsername } = req.body;
   
     try {
-      console.log(senderUsername, receiverUsername);
+      console.log('Sender:', senderUsername, 'Receiver:', receiverUsername);
   
-      // Find the receiver in the database
-      const receiver = await User.findOne({ username: receiverUsername });
-      if (!receiver) {
-        return res.status(404).json({ message: 'Receiver not found!' });
-      }
-  
-      // Find the sender in the database
       const sender = await User.findOne({ username: senderUsername });
+      const receiver = await User.findOne({ username: receiverUsername });
+  
       if (!sender) {
         return res.status(404).json({ message: 'Sender not found. Please log in again!' });
       }
   
-      // Check if a friend request already exists in the receiver's schema
+      if (!receiver) {
+        return res.status(404).json({ message: 'Receiver not found!' });
+      }
+  
+      if (sender._id.equals(receiver._id)) {
+        return res.status(400).json({ message: 'You cannot send a friend request to yourself.' });
+      }
+  
+      const alreadyFriends = sender.friends.includes(receiver._id);
+      if (alreadyFriends) {
+        return res.status(400).json({ message: 'You are already friend of this user.' });
+      }
       const existingRequest = receiver.friendRequests.find(
-        (request) => request.sender === sender._id.toString()
+        (req) => req.sender.toString() === sender._id.toString()
       );
   
       if (existingRequest) {
         return res.status(400).json({ message: 'Friend request already sent!' });
       }
   
-      // Add the friend request to the receiver's friendRequests array
       receiver.friendRequests.push({
         sender: sender._id,
         status: 'pending',
@@ -418,11 +424,11 @@ export const sendrequest = async (req, res) => {
   
       res.status(200).json({ message: 'Friend request sent successfully!' });
     } catch (error) {
-      console.error(error);
+      console.error('Error in sendrequest:', error);
       res.status(500).json({ message: 'Failed to send friend request.' });
     }
   };
-
+  
 
 
   export const getFriendRequests = async (req, res) => {
@@ -475,8 +481,12 @@ export const sendrequest = async (req, res) => {
   
       // Handle the action
       if (action === 'accept') {
+        const alreadyFriends =
+        receiver.friends.includes(sender._id) || sender.friends.includes(receiver._id);
+        if(!alreadyFriends){
         receiver.friends.push(sender._id);
         sender.friends.push(receiver._id);
+        }
   
         friendRequest.status = 'accepted'; // Optional: update status before filtering
       } else if (action === 'reject') {
@@ -624,3 +634,24 @@ export const getActiveContests=async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 }
+
+export const searchUsers = async (req, res) => {
+    try {
+      const query = req.query.query;
+      if (!query) {
+        return res.status(400).json({ message: 'Query is required' });
+      }
+  
+      // Case-insensitive regex search
+      const users = await User.find({
+        username: { $regex: query, $options: 'i' },
+      })
+        .select('_id username fullname avatar')
+        .limit(10);
+  
+      res.status(200).json({ users });
+    } catch (error) {
+      console.error('Error in searchUsers:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };

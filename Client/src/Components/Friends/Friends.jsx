@@ -2,17 +2,19 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { FaGamepad, FaUser, FaCircle } from 'react-icons/fa';
+import { FaGamepad, FaUser, FaCircle,FaSearch,FaUserPlus } from 'react-icons/fa';
 import Header from '../Header/Header';
 
 const Friends = () => {
   const [friends, setFriends] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
   const { loggedinUser } = useSelector((store) => store.user);
-
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  
   useEffect(() => {
     const fetchFriends = async () => {
       try {
-        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
         const response = await axios.get(`${BACKEND_URL}/api/users/getfriends`, {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
@@ -27,6 +29,35 @@ const Friends = () => {
     if (loggedinUser && loggedinUser._id) fetchFriends();
   }, [loggedinUser]);
 
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    try {
+      console.log(searchQuery)
+      const res = await axios.get(`${BACKEND_URL}/api/users/search?query=${searchQuery}`, {
+        withCredentials: true,
+      });
+      setSearchResults(res.data.users);
+    } catch (error) {
+      console.error('Search failed:', error);
+      toast.error('Search failed.');
+    }
+  };
+
+  const handleAddFriend = async (friendUsername) => {
+    try {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+      const response = await axios.post(`${BACKEND_URL}/api/users/sendfriendrequest`, {
+        senderUsername: loggedinUser?.username,
+        receiverUsername: friendUsername,
+      });
+  
+      toast.success(response.data.message);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || 'Failed to send friend request.');
+    }
+  };
+  
   return (
     <section className="min-h-screen p-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
       <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-md">
@@ -38,6 +69,55 @@ const Friends = () => {
           Your Friends
         </h1>
 
+        {/* 🔍 Search Section */}
+        <div className="flex w-full mb-6 space-x-2">
+          <input
+            type="text"
+            placeholder="Search by username to add friend..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 dark:bg-gray-800 dark:text-white"
+          />
+          <button
+            onClick={handleSearch}
+            className="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700"
+          >
+            <FaSearch />
+          </button>
+        </div>
+
+        {/* 🔍 Search Results */}
+        {searchResults.length > 0 && (
+          <div className="w-full p-4 mb-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
+            <h2 className="mb-2 text-xl font-semibold dark:text-white">Search Results</h2>
+            <ul className="space-y-3">
+              {searchResults.map((user) => (
+                <li key={user._id} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={user.avatar}
+                      alt={user.username}
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-800 dark:text-gray-100">
+                        {user.fullname}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">@{user.username}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleAddFriend(user.username)}
+                    className="flex items-center px-3 py-1 text-sm text-white bg-green-600 rounded hover:bg-green-700"
+                  >
+                    <FaUserPlus className="mr-1" /> Add
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      
         {/* Scrollable Friends List */}
         <div className="w-full max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-transparent">
           {friends?.length === 0 ? (
