@@ -3,7 +3,6 @@ import ProtectedRoute from "./ProtectedRoutes";
 import HomePage from "./HomePage/HomePage";
 import Match from "./Matching/Match";
 import Profile from "./Profile/Profile";
-import Settings from "./Settings/Settings";
 import FriendRequests from "./FriendRequest/FriendRequest";
 import Friends from "./Friends/Friends";
 import ActiveContests from "./ActiveContests/ActiveContests";
