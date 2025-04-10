@@ -28,7 +28,6 @@ const router = createBrowserRouter([
       { path: "/home", element: <HomePage /> },
       { path: "/match", element: <Match /> },
       { path: "/profile", element: <Profile /> },
-      { path: "/settings", element: <Settings /> },
       { path: '/friendrequests', element: <FriendRequests /> },
         { path: '/friends', element: <Friends /> },
         { path:'/activecontests',element: <ActiveContests/>},
