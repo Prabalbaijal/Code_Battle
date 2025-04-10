@@ -3,14 +3,18 @@ import './index.css';
 import { RouterProvider } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import { setLoggedinUser } from './redux/userSlice.js';
+import { setLoggedinUser,setOnlineUsers } from './redux/userSlice.js';
 import router from './Components/Routes.jsx';
 import { useState } from 'react';
-import SocketInitialiser from './Components/SocketInitialiser.jsx';
+import { io } from 'socket.io-client';
+import { setSocket,disconnectSocket } from './redux/socketSlice.js';
 
 
 export default function App() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()  
+  const {loggedinUser}=useSelector((store)=>store.user)
+  const { socket } = useSelector((store) => store.socket);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,14 +31,60 @@ export default function App() {
         })
 }, [dispatch]);
 
+
+  // EFFECT 1: Create socket when user logs in.
+  useEffect(() => {
+    if (!loggedinUser || loading) return; // No user? Skip effect.
+
+     //console.log(" Checking existing socket before creating a new one...");
+    if (socket) {
+      // console.log("Disconnecting old socket before creating a new one...");
+      socket.off('getOnlineUsers');
+      socket.close();
+      dispatch(disconnectSocket()); 
+    }
+
+    // console.log("Creating a new socket connection...");
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+    const newSocket = io(`${BACKEND_URL}`, {
+      query: { userId: loggedinUser._id },
+      reconnection: false,
+    });
+
+    //  Store new socket in Redux
+    dispatch(setSocket(newSocket));
+
+    // Handle incoming events
+    newSocket.on('getOnlineUsers', (onlineUsers) => {
+      dispatch(setOnlineUsers(onlineUsers));
+    });
+
+    // Cleanup: Disconnect socket when user logs out or refreshes
+    return () => {
+      //console.log("Cleaning up socket before unmount...");
+      newSocket.off('getOnlineUsers');
+      newSocket.close();
+      dispatch(disconnectSocket());
+    };
+
+  }, [loggedinUser, dispatch]); //  Runs only when loggedinUser changes
+
+
+  // EFFECT 2: Cleanup socket when user logs out.
+  useEffect(() => {
+    if (!loggedinUser && socket) {
+      socket.close();
+      dispatch(disconnectSocket());
+    }
+  }, [loggedinUser, socket, dispatch]);
+
+
   if (loading) return <h2>Loading...</h2>;
 
   return (
 
     <div>
-      <RouterProvider router={router} >
-        <SocketInitialiser/>
-      </RouterProvider>
+      <RouterProvider router={router} />
     </div>
   );
 }

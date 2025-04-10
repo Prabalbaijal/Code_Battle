@@ -14,7 +14,7 @@ export default function SocketInitialiser() {
   useEffect(() => {
     if (!loggedinUser) return; // No user? Skip effect.
 
-    // console.log(" Checking existing socket before creating a new one...");
+     console.log(" Checking existing socket before creating a new one...");
     if (socket) {
       // console.log("Disconnecting old socket before creating a new one...");
       socket.off('getOnlineUsers');
