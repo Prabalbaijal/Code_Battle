@@ -59,9 +59,9 @@ const MainSections = () => {
         
         {/* Animated Announcement Blocks */}
         <div className="grid w-full max-w-4xl grid-cols-1 gap-6 mt-10 md:grid-cols-2 lg:grid-cols-3">
-          <div className="p-6 bg-gray-800 rounded-lg shadow-lg animate-pulse">New: Code Challenge starts in 2 hours!</div>
-          <div className="p-6 bg-gray-800 rounded-lg shadow-lg animate-pulse">Top Scorers updated! Check the leaderboard.</div>
-          <div className="p-6 bg-gray-800 rounded-lg shadow-lg animate-pulse">Daily Challenge: Complete for extra points!</div>
+          <div className="p-6 bg-gray-800 rounded-lg shadow-lg animate-pulse">Just Navigate to 'Quick Match' for 1v1 battle</div>
+          <div className="p-6 bg-gray-800 rounded-lg shadow-lg animate-pulse">Rewards: +50 Coins for a win and -50 for a defeat</div>
+          <div className="p-6 bg-gray-800 rounded-lg shadow-lg animate-pulse">Wanna Play with your friends? Search them in online Users</div>
         </div>
       </div>
     </section>

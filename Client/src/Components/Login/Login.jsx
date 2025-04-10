@@ -91,6 +91,7 @@ export default function Login() {
 
     const LoginSubmitHandler = async (e) => {
         e.preventDefault();
+        toast.loading('Validating',{id:'logging-toast'})
         try {
             const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
             const res = await axios.post(`${BACKEND_URL}/api/users/login`, loginuser, {
@@ -100,7 +101,7 @@ export default function Login() {
 
             if (res.data.success) {
                 dispatch(setLoggedinUser(res.data));
-                toast.success(`Welcome ${res.data.fullname}`, { icon: '👋' });
+                toast.success(`Welcome ${res.data.fullname}`, { icon: '👋' ,id:'logging-toast'});
                 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
                 const newSocket = io(`${BACKEND_URL}`, {
                     query: { userId: res.data._id },
@@ -115,11 +116,11 @@ export default function Login() {
 
                 navigate("/home");
             } else {
-                toast.error("Login failed! Please try again.");
+                toast.error("Login failed! Please try again.",{id:'logging-toast'});
             }
         } catch (error) {
             if (error.response) {
-                toast.error(error.response.data.message);
+                toast.error(error.response.data.message,{id:"logging-toast"});
             } else {
                 toast.error("Something went wrong!!");
             }

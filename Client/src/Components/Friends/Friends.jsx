@@ -9,6 +9,7 @@ const Friends = () => {
   const [friends, setFriends] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [loading,setLoading]=useState(true)
   const { loggedinUser } = useSelector((store) => store.user);
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   
@@ -20,30 +21,40 @@ const Friends = () => {
           withCredentials: true,
         });
         setFriends(response.data.friends);
+        setLoading(false);
       } catch (error) {
-        console.error('Error fetching friends:', error);
-        toast.error('Failed to fetch friends.');
+        // console.error('Error fetching friends:', error);
+        toast.error(error.message);
+        setLoading(false);
       }
     };
 
     if (loggedinUser && loggedinUser._id) fetchFriends();
   }, [loggedinUser]);
+  useEffect(()=>{
+    if(searchQuery===''){
+      setSearchResults([])
+    }
+  },[searchQuery])
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
+    toast.loading("Searching for users",{id: 'search-toast'})
     try {
-      console.log(searchQuery)
+      //console.log(searchQuery)
       const res = await axios.get(`${BACKEND_URL}/api/users/search?query=${searchQuery}`, {
         withCredentials: true,
       });
+      toast.dismiss('search-toast')
       setSearchResults(res.data.users);
     } catch (error) {
-      console.error('Search failed:', error);
-      toast.error('Search failed.');
+      // console.error('Search failed:', error);
+      toast.error(error.message,{id:'search-toast'});
     }
   };
 
   const handleAddFriend = async (friendUsername) => {
+    toast.loading('Sending Friend request',{id:'friend-request-toast'})
     try {
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
       const response = await axios.post(`${BACKEND_URL}/api/users/sendfriendrequest`, {
@@ -51,10 +62,10 @@ const Friends = () => {
         receiverUsername: friendUsername,
       });
   
-      toast.success(response.data.message);
+      toast.success(response.data.message,{id:'friend-request-toast'});
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || 'Failed to send friend request.');
+      toast.error(error.response?.data?.message || 'Failed to send friend request.',{id:'friend-request-toast'});
     }
   };
   
@@ -120,7 +131,10 @@ const Friends = () => {
       
         {/* Scrollable Friends List */}
         <div className="w-full max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-transparent">
-          {friends?.length === 0 ? (
+          {loading ? (
+    <p className="mt-6 text-gray-600 dark:text-gray-400">Loading friends...</p>
+  ):
+          friends?.length === 0 ? (
             <p className="mt-6 text-gray-600 dark:text-gray-400">You don't have any friends.</p>
           ) : (
             <ul className="space-y-4">

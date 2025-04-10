@@ -40,7 +40,7 @@ export default function ActiveContests() {
         });
     
         socket.once("contestError", (error) => {
-            toast.error(error.message);
+            toast.error(error.message,{id:"reconnect-toast"});
         });
     };
     

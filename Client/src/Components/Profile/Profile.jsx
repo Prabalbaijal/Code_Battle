@@ -33,7 +33,7 @@ const Profile = () => {
             withCredentials: true,
           }
         );
-        console.log(response.data.matchHistory)
+        // console.log(response.data.matchHistory)
         setMatchHistory(response.data.matchHistory);
         setLevel(response.data.level);
         setCoins(response.data.coins);
@@ -64,7 +64,7 @@ const Profile = () => {
       toast.success(res.data.message);
       dispatch(setLoggedinUser(null));
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   };
 

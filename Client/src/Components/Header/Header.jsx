@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
@@ -107,9 +106,6 @@ const Header = () => {
               <Link to="/profile" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
                 Profile
               </Link>
-              <Link to="/settings" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
-                Settings
-              </Link>
               <button onClick={logoutFunction} className="hover:text-red-500">
                 Logout
               </button>
@@ -138,7 +134,6 @@ const Header = () => {
           {isDropdownOpen && (
             <ul className="absolute right-0 w-48 py-2 mt-2 text-white bg-gray-800 rounded shadow-lg">
               <li><Link to="/profile" className="block px-4 py-2 hover:bg-gray-700">Profile</Link></li>
-              <li><Link to="/settings" className="block px-4 py-2 hover:bg-gray-700">Settings</Link></li>
               <li onClick={logoutFunction} className="block px-4 py-2 cursor-pointer hover:bg-red-600">Logout</li>
             </ul>
           )}
