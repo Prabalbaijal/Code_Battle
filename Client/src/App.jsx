@@ -1,20 +1,19 @@
 import React, { useEffect } from 'react';
 import './index.css';
-import { RouterProvider } from 'react-router-dom';
+import { RouterProvider} from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import io from 'socket.io-client';
+import { setSocket, disconnectSocket } from './redux/socketSlice.js';
+import { setOnlineUsers } from './redux/userSlice.js';
 import axios from 'axios';
-import { setLoggedinUser,setOnlineUsers } from './redux/userSlice.js';
+import { setLoggedinUser } from './redux/userSlice.js';
 import router from './Components/Routes.jsx';
 import { useState } from 'react';
-import { io } from 'socket.io-client';
-import { setSocket,disconnectSocket } from './redux/socketSlice.js';
-
 
 export default function App() {
-  const dispatch = useDispatch()  
-  const {loggedinUser}=useSelector((store)=>store.user)
+  const { loggedinUser } = useSelector((store) => store.user);
   const { socket } = useSelector((store) => store.socket);
-
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,15 +35,18 @@ export default function App() {
   useEffect(() => {
     if (!loggedinUser || loading) return; // No user? Skip effect.
 
-     //console.log(" Checking existing socket before creating a new one...");
+    console.log("Checking existing socket before creating a new one...");
+
+    // Disconnect old socket if it exists
     if (socket) {
-      // console.log("Disconnecting old socket before creating a new one...");
+      console.log(" Disconnecting old socket before creating a new one...");
       socket.off('getOnlineUsers');
-      socket.close();
-      dispatch(disconnectSocket()); 
+      socket.close(); // Properly close old connection
+      dispatch(disconnectSocket()); // Clear from Redux
     }
 
-    // console.log("Creating a new socket connection...");
+    // Create a new socket
+    console.log("Creating a new socket connection...");
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
     const newSocket = io(`${BACKEND_URL}`, {
       query: { userId: loggedinUser._id },
@@ -59,9 +61,10 @@ export default function App() {
       dispatch(setOnlineUsers(onlineUsers));
     });
 
+
     // Cleanup: Disconnect socket when user logs out or refreshes
     return () => {
-      //console.log("Cleaning up socket before unmount...");
+      console.log("🧹 Cleaning up socket before unmount...");
       newSocket.off('getOnlineUsers');
       newSocket.close();
       dispatch(disconnectSocket());
@@ -77,7 +80,6 @@ export default function App() {
       dispatch(disconnectSocket());
     }
   }, [loggedinUser, socket, dispatch]);
-
 
   if (loading) return <h2>Loading...</h2>;
 
