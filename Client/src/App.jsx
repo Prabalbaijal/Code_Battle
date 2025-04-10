@@ -64,13 +64,13 @@ export default function App() {
 
     // Cleanup: Disconnect socket when user logs out or refreshes
     return () => {
-      console.log("🧹 Cleaning up socket before unmount...");
+      console.log("Cleaning up socket before unmount...");
       newSocket.off('getOnlineUsers');
       newSocket.close();
       dispatch(disconnectSocket());
     };
 
-  }, [loggedinUser, dispatch]); //  Runs only when loggedinUser changes
+  }, [loggedinUser, dispatch,loading]); //  Runs only when loggedinUser changes
 
 
   // EFFECT 2: Cleanup socket when user logs out.
