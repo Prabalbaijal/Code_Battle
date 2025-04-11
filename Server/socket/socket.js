@@ -122,8 +122,8 @@
 
                   const user1Socket = unSocketMap.get(user1);
                   const user2Socket = unSocketMap.get(user2);
-                  console.log(user1Socket);
-                  console.log(user2Socket)
+                  // console.log(user1Socket);
+                  // console.log(user2Socket)
                   if (!user1Socket || !user2Socket) {
                     return socket.emit('contestError', { message: 'One or both users are not online.' });
                 }
@@ -173,6 +173,17 @@
                   socket.emit('contestError', { message: 'Failed to start contest. Please try again.' });
               }
           });        
+
+          
+          
+          socket.on("cancelChallenge", ({ opponent,initiator }) => {
+            const opponentSocket = unSocketMap.get(opponent);
+            // console.log(opponent,initiator)
+            if (opponentSocket) {
+              opponentSocket.emit("challengeCancelled", { initiator });
+            }
+          });
+          
           
           
           socket.on('solveProblem', async ({ roomName, userName }) => {

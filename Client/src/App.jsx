@@ -9,6 +9,8 @@ import axios from 'axios';
 import { setLoggedinUser } from './redux/userSlice.js';
 import router from './Components/Routes.jsx';
 import { useState } from 'react';
+import SocketHandler from './SocketHandler.jsx';
+import ModalList from './Components/NotificationPanel/NotificationPanel.jsx';
 
 export default function App() {
   const { loggedinUser } = useSelector((store) => store.user);

@@ -11,6 +11,7 @@ import Problem from "./Problem/Problem";
 import { useSelector } from "react-redux";
 import ForgotPassword from "./PasswordReset/ForgotPassword";
 import ResetPassword from "./PasswordReset/ResetPassword";
+import Layout from "../Layout";
 
 function RedirectToHome() {
   const { loggedinUser } = useSelector((store) => store.user);
@@ -23,15 +24,20 @@ const router = createBrowserRouter([
   { path: "/reset-password/:token", element: <ResetPassword /> },
 
   {
-    element: <ProtectedRoute />, 
+    element: <ProtectedRoute />,
     children: [
-      { path: "/home", element: <HomePage /> },
-      { path: "/match", element: <Match /> },
-      { path: "/profile", element: <Profile /> },
-      { path: '/friendrequests', element: <FriendRequests /> },
-        { path: '/friends', element: <Friends /> },
-        { path:'/activecontests',element: <ActiveContests/>},
-        { path: '/problem', element: <Problem /> },
+      {
+        element: <Layout />, // layout wraps all protected pages
+        children: [
+          { path: "/home", element: <HomePage /> },
+          { path: "/match", element: <Match /> },
+          { path: "/profile", element: <Profile /> },
+          { path: "/friendrequests", element: <FriendRequests /> },
+          { path: "/friends", element: <Friends /> },
+          { path: "/activecontests", element: <ActiveContests /> },
+          { path: "/problem", element: <Problem /> },
+        ],
+      },
     ],
   },
 ]);

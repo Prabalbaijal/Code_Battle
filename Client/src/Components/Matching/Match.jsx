@@ -1,25 +1,24 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import Header from '../Header/Header';
+import { setRequestSentModal } from '../../redux/uiSlice';
 
 const Match = () => {
   const { loggedinUser, onlineUsers } = useSelector((store) => store.user);
   const { socket } = useSelector((store) => store.socket);
   const navigate = useNavigate();
+  const dispatch=useDispatch();
+  const {requestSentModal,waitingMessage}=useSelector((state)=>state.ui)
 
-  const [challengeDetails, setChallengeDetails] = useState(null);
-  const [isChallengeModalOpen, setIsChallengeModalOpen] = useState(false);
-  const [waitingMessage, setWaitingMessage] = useState('');
-  const [isRequestSentModalOpen, setIsRequestSentModalOpen] = useState(false);
-  const [creatingRoom, setCreatingRoom] = useState(false);
   const [friends, setFriends] = useState([]);
   const [otherUsers, setOtherUsers] = useState([]);
   const [onlineFriends, setOnlineFriends] = useState([]);
   const [sentRequests, setSentRequests] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [opponentName, setOpponentName] = useState('');
 
 
   useEffect(() => {
@@ -42,51 +41,6 @@ const Match = () => {
 
     fetchFriends();
 
-    socket.on('playNotification', ({ roomName, initiator }) => {
-      if (initiator !== loggedinUser?.username) {
-        setChallengeDetails({ roomName, initiator });
-        setIsChallengeModalOpen(true);
-      }
-    });
-
-    socket.on('startContest', ({ roomName, endTime, problem }) => {
-      console.log("✅ Contest Started!");
-      navigate('/problem', { state: { roomName, endTime, problem } });
-      setCreatingRoom(false); // Reset creating room state
-      setWaitingMessage('');
-    });
-
-    socket.on('opponentOffline', ({ message }) => {
-      toast.error(message);
-      setCreatingRoom(false);
-      setWaitingMessage('');
-    });
-
-    socket.on("challengeRejected", ({ initiator }) => {
-      if (initiator === loggedinUser?.username) {
-        toast.error("Your challenge was rejected!!.");
-        setIsRequestSentModalOpen(false);
-        setCreatingRoom(false);
-        setWaitingMessage('');
-      }
-    });
-
-    socket.on('requestSent', ({ message }) => {
-      setWaitingMessage(message);
-      setIsRequestSentModalOpen(true);
-    });
-
-    socket.on('reconnectContest', ({ roomName, endTime, problem }) => {
-      navigate('/problem', { state: { roomName, endTime, problem } });
-    });
-
-    return () => {
-      socket.off('playNotification');
-      socket.off('startContest');
-      socket.off('opponentOffline');
-      socket.off('requestSent');
-      socket.off('reconnectContest');
-    };
   }, [loggedinUser?._id, socket, navigate]);
   useEffect(() => {
     if (!onlineUsers || !loggedinUser) return;
@@ -116,33 +70,24 @@ const Match = () => {
   const filteredOtherUsers = otherUsers.filter(user =>
     user.userName.toLowerCase().includes(searchTerm)
   );
-  
-  
-
-  const acceptChallenge = () => {
-    if (challengeDetails) {
-      setCreatingRoom(true);
-      setWaitingMessage("Creating Room..."); // Set message to "Creating Room..."
-      socket.emit("joinRoom", challengeDetails.roomName);
-      setIsChallengeModalOpen(false);
-      setIsRequestSentModalOpen(true); // Open modal
-    }
-  };
-
-  const declineChallenge = () => {
-    if (challengeDetails) {
-      socket.emit("challengeRejected", { initiator: challengeDetails.initiator });
-    }
-    setChallengeDetails(null);
-    setIsChallengeModalOpen(false);
-  };
-
   const handlePlay = (opponentUsername) => {
     if (!socket) return;
+    setOpponentName(opponentUsername); 
     socket.emit('playRequest', { opponentUsername });
     toast.success(`Play request sent to ${opponentUsername}`);
   };
 
+  const handleCloseModal = () => {
+    console.log(opponentName)
+    if (socket && loggedinUser) {
+      socket.emit("cancelChallenge", { 
+        opponent:opponentName ,
+        initiator: loggedinUser.username,
+      });
+    }
+    dispatch(setRequestSentModal(false));
+    setOpponentName('');
+  };
 
 const handleAddFriend = async (friendUsername) => {
   try {
@@ -243,54 +188,28 @@ const handleAddFriend = async (friendUsername) => {
         <p className="text-lg text-gray-400">No other users online.</p>
       )}
 
-      {/* Challenge Modal */}
-      {isChallengeModalOpen && (
-       
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
-        <div className="p-6 text-center bg-gray-900 border border-gray-700 rounded-lg shadow-2xl w-80">
-          <h2 className="mb-3 text-xl font-semibold text-white">
-            {challengeDetails?.initiator} has challenged you to a match!
-          </h2>
-          <p className="text-gray-400">Do you accept?</p>
-    
-          <div className="flex justify-center mt-4 space-x-4">
-            <button
-              onClick={acceptChallenge}
-              className="px-4 py-2 text-white transition duration-200 bg-green-500 rounded-lg hover:bg-green-400"
-            >
-              Accept
-            </button>
-            <button
-              onClick={declineChallenge}
-              className="px-4 py-2 text-white transition duration-200 bg-red-500 rounded-lg hover:bg-red-400"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-      </div>
-      )}
-
       {/* Request Sent Modal */}
-      {isRequestSentModalOpen && (
+      {requestSentModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
+    <div className="p-6 text-center bg-gray-900 border border-gray-700 rounded-lg shadow-2xl w-80">
+      <h2 className="mb-3 text-xl font-semibold text-white">Waiting for Opponent...</h2>
 
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
-          <div className="p-6 text-center bg-gray-900 border border-gray-700 rounded-lg shadow-2xl w-80">
-            <h2 className="mb-3 text-xl font-semibold text-white">Waiting for Opponent...</h2>
+      <p className="text-gray-400">
+        {waitingMessage || "Waiting for the opponent to accept the match request."}
+        <br></br>
+        Don't refresh page without cancelling your request.
+      </p>
 
-            <p className="text-gray-400">
-              {waitingMessage || "Waiting for the opponent to accept the match request."}
-            </p>
+      <button
+        onClick={handleCloseModal}
+        className="px-4 py-2 mt-4 text-white transition duration-200 bg-blue-600 rounded-lg hover:bg-blue-500"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
 
-            <button
-              onClick={() => setIsRequestSentModalOpen(false)}
-              className="px-4 py-2 mt-4 text-white transition duration-200 bg-blue-600 rounded-lg hover:bg-blue-500"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
 
   );
