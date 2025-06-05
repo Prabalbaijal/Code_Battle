@@ -12,7 +12,7 @@ const FriendRequests = () => {
     const fetchFriendRequests = async () => {
       try {
         const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-        const response = await axios.get(`${BACKEND_URL}/api/users/getfriendrequests`, {
+        const response = await axios.get(`${BACKEND_URL}/api/friends/getfriendrequests`, {
           withCredentials: true,
         });
 
@@ -34,10 +34,12 @@ const FriendRequests = () => {
   const handleAction = async (senderUsername, action) => {
     try {
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-      await axios.post(`${BACKEND_URL}/api/users/handleRequest`, {
+      await axios.post(`${BACKEND_URL}/api/friends/handleRequest`, {
         senderUsername,
         receiverUsername: loggedinUser.username,
         action,
+      },{
+        withCredentials:true
       });
       toast.success(`Friend request ${action}ed!`);
 

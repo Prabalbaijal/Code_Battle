@@ -9,8 +9,6 @@ import axios from 'axios';
 import { setLoggedinUser } from './redux/userSlice.js';
 import router from './Components/Routes.jsx';
 import { useState } from 'react';
-import SocketHandler from './SocketHandler.jsx';
-import ModalList from './Components/NotificationPanel/NotificationPanel.jsx';
 
 export default function App() {
   const { loggedinUser } = useSelector((store) => store.user);
@@ -20,9 +18,9 @@ export default function App() {
 
   useEffect(() => {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-    axios.get(`${BACKEND_URL}/api/users/getUser`, { withCredentials: true }) 
+    axios.get(`${BACKEND_URL}/api/auth/getUser`, { withCredentials: true }) 
         .then(res => {
-            if (res.data) {
+            if (res.data && !loggedinUser) {
                 dispatch(setLoggedinUser(res.data));
             }
         })
@@ -35,7 +33,7 @@ export default function App() {
 
   // EFFECT 1: Create socket when user logs in.
   useEffect(() => {
-    if (!loggedinUser || loading) return; // No user? Skip effect.
+    if (!loggedinUser || loading) return; 
 
     console.log("Checking existing socket before creating a new one...");
 
@@ -72,7 +70,7 @@ export default function App() {
       dispatch(disconnectSocket());
     };
 
-  }, [loggedinUser, dispatch,loading]); //  Runs only when loggedinUser changes
+  }, [loggedinUser,loading]); //  Runs only when loggedinUser changes
 
 
   // EFFECT 2: Cleanup socket when user logs out.

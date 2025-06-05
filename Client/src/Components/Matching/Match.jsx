@@ -22,16 +22,17 @@ const Match = () => {
 
 
   useEffect(() => {
+    console.log(loggedinUser,socket)
     if (!loggedinUser?._id || !socket) return;
 
     const fetchFriends = async () => {
       try {
         const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-        const response = await axios.get(`${BACKEND_URL}/api/users/getfriends`, {
+        const response = await axios.get(`${BACKEND_URL}/api/friends/getfriends`, {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
         });
-
+        console.log(response)
         setFriends(response.data.friends);
       } catch (error) {
         console.error('Error fetching friends:', error);
@@ -92,9 +93,11 @@ const Match = () => {
 const handleAddFriend = async (friendUsername) => {
   try {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-    const response = await axios.post(`${BACKEND_URL}/api/users/sendfriendrequest`, {
+    const response = await axios.post(`${BACKEND_URL}/api/friends/sendfriendrequest`, {
       senderUsername: loggedinUser?.username,
       receiverUsername: friendUsername,
+    },{
+      withCredentials:true
     });
 
     toast.success(response.data.message);

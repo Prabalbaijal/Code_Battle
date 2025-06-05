@@ -7,7 +7,7 @@ const isAuthenticated = async (req, res, next) => {
   try {
     // Check if token exists in cookies
     const token = req.cookies.token;
-    // console.log(token)
+    //  console.log(token)
 
     if (!token) {
       return res.status(401).json({ message: 'User authentication failed!!' });

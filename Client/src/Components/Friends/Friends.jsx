@@ -16,7 +16,7 @@ const Friends = () => {
   useEffect(() => {
     const fetchFriends = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/api/users/getfriends`, {
+        const response = await axios.get(`${BACKEND_URL}/api/friends/getfriends`, {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
         });
@@ -57,10 +57,10 @@ const Friends = () => {
     toast.loading('Sending Friend request',{id:'friend-request-toast'})
     try {
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-      const response = await axios.post(`${BACKEND_URL}/api/users/sendfriendrequest`, {
+      const response = await axios.post(`${BACKEND_URL}/api/friends/sendfriendrequest`, {
         senderUsername: loggedinUser?.username,
         receiverUsername: friendUsername,
-      });
+      },{withCredentials:true});
   
       toast.success(response.data.message,{id:'friend-request-toast'});
     } catch (error) {

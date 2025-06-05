@@ -78,7 +78,7 @@ const Problem = () => {
 
         try {
             const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-            const response = await axios.post(`${BACKEND_URL}/api/users/submit`, submissionData, {
+            const response = await axios.post(`${BACKEND_URL}/api/questions/submit`, submissionData, {
                 headers: { 'Content-Type': 'application/json' },
             });
             toast.dismiss(loadingToastId);

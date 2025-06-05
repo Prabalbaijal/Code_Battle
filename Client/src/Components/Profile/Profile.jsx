@@ -59,7 +59,7 @@ const Profile = () => {
   const logoutFunction = async () => {
     try {
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-      const res = await axios.get(`${BACKEND_URL}/api/users/logout`);
+      const res = await axios.get(`${BACKEND_URL}/api/auth/logout`,{withCredentials:true});
       navigate("/");
       toast.success(res.data.message);
       dispatch(setLoggedinUser(null));

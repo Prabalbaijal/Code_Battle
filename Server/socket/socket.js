@@ -6,8 +6,8 @@
   import Question from '../models/QuestionModel.js'
   import mongoose from 'mongoose';
   import { updateUserData } from '../controllers/UserUpdate.js';
-  import { getQuestion } from '../controllers/UserControllers.js';
-  import { scheduleContestTimeout } from '../controllers/UserControllers.js';
+  import { getQuestion } from '../controllers/QuestionControllers.js';
+  import { scheduleContestTimeout } from '../controllers/ContestControllers.js';
   import { startSession } from 'mongoose';
 
 

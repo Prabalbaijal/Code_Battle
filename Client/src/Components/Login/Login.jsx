@@ -34,7 +34,7 @@ export default function Login() {
         e.preventDefault();
         try {
             const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-            const res = await axios.post(`${BACKEND_URL}/api/users/forgot-password`, 
+            const res = await axios.post(`${BACKEND_URL}/api/auth/forgot-password`, 
                 { email: forgotEmail },
                 { withCredentials: true }
             );
@@ -63,7 +63,7 @@ export default function Login() {
 
         try {
             const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-            const res = await axios.post(`${BACKEND_URL}/api/users/register`, formData, {
+            const res = await axios.post(`${BACKEND_URL}/api/auth/register`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 withCredentials: true
             });
@@ -94,7 +94,7 @@ export default function Login() {
         toast.loading('Validating',{id:'logging-toast'})
         try {
             const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-            const res = await axios.post(`${BACKEND_URL}/api/users/login`, loginuser, {
+            const res = await axios.post(`${BACKEND_URL}/api/auth/login`, loginuser, {
                 headers: { 'Content-Type': 'application/json' },
                 withCredentials: true,
             });
@@ -103,17 +103,7 @@ export default function Login() {
                 dispatch(setLoggedinUser(res.data));
                 toast.success(`Welcome ${res.data.fullname}`, { icon: '👋' ,id:'logging-toast'});
                 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-                const newSocket = io(`${BACKEND_URL}`, {
-                    query: { userId: res.data._id },
-                    reconnection: true,
-                });
-
-                dispatch(setSocket(newSocket));
-
-                newSocket.on('connect_error', (err) => {
-                    console.error('Socket connection error:', err.message);
-                });
-
+                
                 navigate("/home");
             } else {
                 toast.error("Login failed! Please try again.",{id:'logging-toast'});

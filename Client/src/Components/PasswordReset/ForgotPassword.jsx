@@ -11,7 +11,7 @@ export default function ForgotPassword() {
         e.preventDefault();
         try {
             const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-            const res = await axios.post(`${BACKEND_URL}/api/users/forgot-password`, { email });
+            const res = await axios.post(`${BACKEND_URL}/api/auth/forgot-password`, { email });
             toast.success(res.data.message || "Reset link sent successfully!");
             setEmail("");
         } catch (error) {

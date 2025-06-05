@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
@@ -20,7 +19,7 @@ const ProfileHeader = () => {
   const logoutFunction = async () => {
     try {
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-      const res = await axios.get(`${BACKEND_URL}/api/users/logout`);
+      const res = await axios.get(`${BACKEND_URL}/api/auth/logout`);
       navigate("/");
       toast.success(res.data.message);
       dispatch(setLoggedinUser(null));
@@ -104,88 +103,3 @@ const ProfileHeader = () => {
 };
 
 export default ProfileHeader;
-
-
-// import React, { useState } from 'react';
-// import { useDispatch, useSelector } from 'react-redux';
-// import { useNavigate, Link, useLocation } from 'react-router-dom';
-// import { setLoggedinUser } from '../../redux/userSlice.js';
-// import axios from 'axios';
-// import toast from 'react-hot-toast';
-// import { Menu, X, Moon, Sun } from 'lucide-react';
-// import logo from '../../assets/logo.png';
-
-// const ProfileHeader = ({ toggleDarkMode, darkMode }) => {
-//   const { loggedinUser } = useSelector((store) => store.user);
-//   const navigate = useNavigate();
-//   const dispatch = useDispatch();
-//   const [isMenuOpen, setIsMenuOpen] = useState(false);
-//   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-//   const location = useLocation();
-//   const isProfilePage = location.pathname === '/profile';
-
-//   const logoutFunction = async () => {
-//     try {
-//       const res = await axios.get('http://localhost:9000/api/users/logout');
-//       navigate('/');
-//       toast.success(res.data.message);
-//       dispatch(setLoggedinUser(null));
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   };
-
-//   return (
-//     <header className="profile-header">
-//       <div className="header-container">
-//         {/* Logo */}
-//         <div className="navbar-start">
-//           <button onClick={() => window.location.reload()} className="logo-container">
-//             <img src={logo} alt="Logo" className="logo" />
-//           </button>
-//         </div>
-
-//         {/* Navbar Items */}
-//         <nav className={`nav-links ${isMenuOpen ? 'open' : ''}`}>
-//           {["home", "match", "activecontests", "friends", "friendrequests"].map((item) => (
-//             <Link key={item} to={`/${item}`} className="nav-item">
-//               {item.charAt(0).toUpperCase() + item.slice(1)}
-//             </Link>
-//           ))}
-//         </nav>
-
-//         {/* Dark Mode Toggle */}
-//         <button onClick={toggleDarkMode} className="dark-mode-toggle">
-//           {darkMode ? <Sun size={24} /> : <Moon size={24} />}
-//         </button>
-
-//         {/* Profile Section */}
-//         {!isProfilePage && loggedinUser && (
-//           <div className="profile-container">
-//             <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="profile-button">
-//               <img src={loggedinUser.avatar} alt="User Avatar" className="avatar" />
-//               <span className="status-dot"></span>
-//             </button>
-
-//             {isDropdownOpen && (
-//               <div className="profile-dropdown">
-//                 <Link to="/profile" className="dropdown-item">Profile</Link>
-//                 <Link to="/settings" className="dropdown-item">Settings</Link>
-//                 <button onClick={logoutFunction} className="dropdown-item logout">
-//                   Logout
-//                 </button>
-//               </div>
-//             )}
-//           </div>
-//         )}
-
-//         {/* Mobile Menu Button */}
-//         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="menu-toggle">
-//           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-//         </button>
-//       </div>
-//     </header>
-//   );
-// };
-
-// export default ProfileHeader;
