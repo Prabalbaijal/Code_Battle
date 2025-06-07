@@ -154,7 +154,12 @@ export const getUser = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
-        return res.status(200).cookie("token", "", { maxAge: 0 }).json({
+        return res.status(200).cookie("token", "", { 
+            maxAge: 0 ,
+            httpOnly:true,
+            sameSite:'None',
+            secure:true
+        }).json({
             message: "Logged Out Successfully."
         })
     } catch (error) {

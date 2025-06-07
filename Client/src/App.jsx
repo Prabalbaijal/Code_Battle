@@ -81,7 +81,7 @@ export default function App() {
     }
   }, [loggedinUser, socket, dispatch]);
 
-  if (loading) return <h2>Loading...</h2>;
+  if (loading) return <h2>Connecting to server,Please wait...</h2>;
 
   return (
 

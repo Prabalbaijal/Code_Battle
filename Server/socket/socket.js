@@ -117,6 +117,9 @@
 
             socket.on('joinRoom', async (roomName) => {
               try {
+                  const existing = await Contest.findOne({ roomName, status: 'active' });
+                  if (existing) return socket.emit('contestError', { message: 'Contest already active.' });
+
                   const [user1, user2] = roomName.split('-');
                   if (!user1 || !user2) return;
 
