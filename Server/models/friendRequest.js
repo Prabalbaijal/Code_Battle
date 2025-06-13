@@ -1,23 +1,24 @@
 import mongoose from "mongoose";
 
-const friendRequestSchema = new mongoose.Schema({
-  sender: {
-    type: String,
-    required: true,
+const FriendsSchema = new mongoose.Schema(
+  {
+    requester: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    recipient: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "accepted", "ignored"],
+      default: "pending",
+    },
   },
-  receiver: {
-    type: String,
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ["pending", "accepted", "rejected"],
-    default: "pending",
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true }
+);
 
-export const FriendRequest = mongoose.model("FriendRequest", friendRequestSchema);
+export const Friend = mongoose.model("Friend", FriendsSchema);

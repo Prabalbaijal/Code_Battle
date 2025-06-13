@@ -70,7 +70,7 @@ const Profile = () => {
 
   return (
     <div className="profile-container">
-      <ProfileHeader />
+      
 
       <div className="profile-main">
         <div className="profile-sidebar">

@@ -34,30 +34,7 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
-  friends: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
-  friendRequests: [
-    {
-      sender: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-      },
-      status: {
-        type: String,
-        enum: ["pending", "accepted", "ignored"],
-        default: "pending",
-      },
-      date: {
-        type: Date,
-        default: Date.now,
-      },
-    },
-  ],
+  
   matchHistory: [
     {
       opponent: {

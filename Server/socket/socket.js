@@ -257,7 +257,7 @@
       
               // Update user data
               await updateUserData(winner, userName);
-
+              
               // Notify both users
               [user1, user2].forEach((user) => {
                   const userSocket = unSocketMap.get(user);
