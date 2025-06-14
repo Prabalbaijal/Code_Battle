@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
+import Header from "../Header/Header";
 
 const FriendRequests = () => {
   const [friendRequests, setFriendRequests] = useState([]);
@@ -52,6 +53,9 @@ const FriendRequests = () => {
 
   return (
     <section className="min-h-screen p-6 friends-section bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+     <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-md">
+        <Header />
+      </div>
       <div className="flex flex-col justify-center p-6 pt-24 m-auto w-full max-w-[95vw] md:max-w-[80vw] lg:max-w-[50vw]">
         <h1 className="mt-4 mb-6 text-2xl font-bold text-center md:text-3xl dark:text-gray-100">
           Friend Requests

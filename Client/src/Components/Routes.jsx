@@ -12,19 +12,25 @@ import { useSelector } from "react-redux";
 import ForgotPassword from "./PasswordReset/ForgotPassword";
 import ResetPassword from "./PasswordReset/ResetPassword";
 import Layout from "../Layout";
+import Error from "./Error";
+import AddQuestion from "./AddQuestion/AddQuestion";
 
 function RedirectToHome() {
   const { loggedinUser } = useSelector((store) => store.user);
-  return loggedinUser ? <Navigate to="/home" replace /> : <Login />;
+
+  if (!loggedinUser) return <Login />;
+  if (loggedinUser.isAdmin) return <Navigate to="/add-question" replace />;
+  return <Navigate to="/home" replace />;
 }
 
+
 const router = createBrowserRouter([
-  { path: "/", element: <RedirectToHome /> },
+  { path: "/", element: <RedirectToHome /> , errorElement:<Error/> },
   { path: "/forgot-password", element: <ForgotPassword /> },
   { path: "/reset-password/:token", element: <ResetPassword /> },
-
+  //User Protected Routes
   {
-    element: <ProtectedRoute />,
+    element: <ProtectedRoute adminOnly={false}/>,
     children: [
       {
         element: <Layout />, // layout wraps all protected pages
@@ -36,6 +42,18 @@ const router = createBrowserRouter([
           { path: "/friends", element: <Friends /> },
           { path: "/activecontests", element: <ActiveContests /> },
           { path: "/problem", element: <Problem /> },
+        ],
+      },
+    ],
+  },
+  //Admin-Only Routes
+  {
+    element: <ProtectedRoute adminOnly={true} />,
+    children: [
+      {
+        element: <Layout />,
+        children: [
+          { path: "/add-question", element: <AddQuestion /> },
         ],
       },
     ],

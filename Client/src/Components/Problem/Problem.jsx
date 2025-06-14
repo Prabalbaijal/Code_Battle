@@ -22,9 +22,12 @@ const Problem = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { roomName, endTime, problem } = location.state || {};
-
+    if (!roomName || !problem) {
+    return <Navigate to="/match" replace />;
+}
     useEffect(() => {
-        if (!roomName || !problem) {
+        const contestOver = sessionStorage.getItem('contestOver') === 'true';
+        if (contestOver || !roomName || !problem) {
             navigate("/match", { replace: true });
         }
     }, [roomName, problem, navigate]);
@@ -44,6 +47,7 @@ const Problem = () => {
             }
 
             setIsContestEndedModalOpen(true);
+            sessionStorage.setItem('contestOver', 'true');
         };
 
         socket.on('contestEnded', handleContestEnd);
@@ -103,7 +107,7 @@ const Problem = () => {
 
     const quitContest = () => {
         socket.emit("leaveContest", { roomName, userName: loggedinUser.username });
-        navigate('/profile');
+        navigate('/profile',{replace:true});
     };
 
     const getLanguageId = (language) => {

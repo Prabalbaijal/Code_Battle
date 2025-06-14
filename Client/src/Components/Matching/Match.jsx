@@ -75,7 +75,6 @@ const Match = () => {
     if (!socket) return;
     setOpponentName(opponentUsername); 
     socket.emit('playRequest', { opponentUsername });
-    toast.success(`Play request sent to ${opponentUsername}`);
   };
 
   const handleCloseModal = () => {
@@ -119,9 +118,9 @@ const handleAddFriend = async (friendUsername) => {
   }
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 text-gray-100 bg-gray-900">
-      {/* <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-md">
+      <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-md">
         <Header />
-      </div> */}
+      </div>
       
       <h3 className="mb-6 text-3xl font-bold">Online Users</h3>
       <input

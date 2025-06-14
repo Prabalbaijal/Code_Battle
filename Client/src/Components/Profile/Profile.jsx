@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLoggedinUser } from "../../redux/userSlice.js";
 import toast from "react-hot-toast";
+import Header from "../Header/Header.jsx";
 import "./Profile.css";
 
 const Profile = () => {
@@ -70,7 +71,7 @@ const Profile = () => {
 
   return (
     <div className="profile-container">
-      
+      <Header/>
 
       <div className="profile-main">
         <div className="profile-sidebar">

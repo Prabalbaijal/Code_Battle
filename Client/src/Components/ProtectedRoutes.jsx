@@ -1,14 +1,23 @@
-  import { Navigate, Outlet, useLocation } from "react-router-dom";
+  import { Navigate, Outlet} from "react-router-dom";
   import { useSelector } from "react-redux";
-  import Header from "./Header/Header";
 
-  export default function ProtectedRoute() {
-    const { loggedinUser } = useSelector((state) => state.user);
+ export default function ProtectedRoute({ adminOnly = false }) {
+  const { loggedinUser } = useSelector((state) => state.user);
 
-    return loggedinUser ? (
-    <>
-    <Header/>
-    <Outlet />
-    </>
-  ) : <Navigate to="/" replace />;
+  if (!loggedinUser) return <Navigate to="/" replace />;
+
+  // if route is adminOnly, but user is not admin — redirecting
+  if (adminOnly && !loggedinUser.isAdmin) {
+    return <Navigate to="/home" replace />;
   }
+
+  // if route is NOT adminOnly, but user is admin — redirecting
+  if (!adminOnly && loggedinUser.isAdmin) {
+    return <Navigate to="/add-question" replace />;
+  }
+  
+  return (
+      <Outlet />
+  );
+}
+

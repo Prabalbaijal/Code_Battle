@@ -34,7 +34,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
-  
+  isAdmin:{
+    type:Boolean,
+    default:false
+  },
   matchHistory: [
     {
       opponent: {

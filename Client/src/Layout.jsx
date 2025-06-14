@@ -2,9 +2,12 @@ import SocketHandler from "./SocketHandler.jsx";
 import { Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 import NotificationPanel from "./Components/NotificationPanel/NotificationPanel.jsx";
+import Header from "./Components/Header/Header.jsx";
 
 export default function Layout() {
     const { creatingRoom, waitingMessage } = useSelector((state) => state.ui);
+    const { loggedinUser } = useSelector((state) => state.user);
+    
   return (
     <>
       <SocketHandler />

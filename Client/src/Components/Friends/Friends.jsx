@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { FaGamepad, FaUser, FaCircle,FaSearch,FaUserPlus } from 'react-icons/fa';
+import { FaSearch,FaUserPlus } from 'react-icons/fa';
+import Header from '../Header/Header';
 
 
 const Friends = () => {
@@ -84,7 +85,9 @@ const Friends = () => {
   
   return (
     <section className="min-h-screen p-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-
+      <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-md">
+        <Header />
+      </div>
       <div className="flex flex-col items-center w-full p-6 pt-24 m-auto sm:max-w-[50vw]">
         <h1 className="mt-4 mb-6 text-3xl font-bold text-center dark:text-gray-100">
           Your Friends

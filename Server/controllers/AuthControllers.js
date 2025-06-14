@@ -117,6 +117,7 @@ export const login = async (req, res) => {
                 avatar:user.avatar,
                 level:user.level,
                 coins:user.coins,
+                isAdmin:user.isAdmin,
                 success: true
             })
 
@@ -143,6 +144,7 @@ export const getUser = async (req, res) => {
         avatar:user.avatar,
         level:user.level,
         coins:user.coins,
+        isAdmin:user.isAdmin,
         success: true
       });
     } catch (error) {

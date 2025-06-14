@@ -116,3 +116,43 @@ export const submitQuestion = async (req, res) => {
         res.status(500).json({ error: 'Error submitting code for evaluation' });
     }
 };
+
+export const addQuestion = async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      inputFormat,
+      outputFormat,
+      difficulty,
+      constraints,
+      examples,
+      testCases,
+      executionTimes,
+    } = req.body;
+
+    if (!title || !description || !inputFormat || !outputFormat || !difficulty || !testCases || !executionTimes) {
+      return res.status(400).json({ message: "Please fill all required fields" });
+    }
+
+    // Create and save the question
+    const question = new Question({
+      title,
+      description,
+      inputFormat,
+      outputFormat,
+      difficulty,
+      constraints,
+      examples,
+      testCases,
+      executionTimes,
+    });
+
+    await question.save();
+
+    res.status(201).json({ message: "Question added successfully", question });
+  } catch (err) {
+    console.error("Error adding question:", err.message);
+    res.status(500).json({ message: "Internal server error", error: err.message });
+  }
+};

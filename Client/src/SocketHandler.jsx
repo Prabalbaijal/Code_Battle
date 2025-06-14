@@ -12,7 +12,9 @@ const SocketHandler = () => {
 
   useEffect(() => {
     if (!socket || !loggedinUser) return;
-
+    socket.on('contestError',({message})=>{
+      toast.error(message)
+    })
     socket.on('playNotification', ({ roomName, initiator }) => {
       console.log("playnotification received",initiator)
       if (initiator !== loggedinUser.username) {
@@ -26,8 +28,14 @@ const SocketHandler = () => {
       dispatch(setCreatingRoom(false));
       dispatch(setWaitingMessage(''));
       dispatch(setRequestSentModal(false));
+      sessionStorage.removeItem('contestOver');
       navigate('/problem', { state: { roomName, endTime, problem } });
     });
+
+    socket.on("requestSent",({message})=>{
+      toast.success(message)
+    })
+
     socket.on("challengeCancelled", ({ initiator }) => {
       console.log("cancel received")
       dispatch(removeChallenge({ initiator })); // remove from challenge list
@@ -67,6 +75,8 @@ const SocketHandler = () => {
       socket.off('challengeRejected');
       socket.off('requestSent');
       socket.off('reconnectContest');
+      socket.off('contestError')
+      socket.off('requestSent')
     };
   }, [socket, loggedinUser, dispatch, navigate]);
 
