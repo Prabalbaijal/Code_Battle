@@ -13,6 +13,10 @@ const SocketHandler = () => {
   useEffect(() => {
     if (!socket || !loggedinUser) return;
     socket.on('contestError',({message})=>{
+      dispatch(clearChallenges());  
+      dispatch(setCreatingRoom(false));
+      dispatch(setWaitingMessage(''));
+      dispatch(setRequestSentModal(false));
       toast.error(message)
     })
     socket.on('playNotification', ({ roomName, initiator }) => {
@@ -20,6 +24,11 @@ const SocketHandler = () => {
       if (initiator !== loggedinUser.username) {
         dispatch(addChallenge({ roomName, initiator }));
       }
+    });
+    socket.on('roomCreating', () => {
+      dispatch(setCreatingRoom(true));
+      dispatch(setRequestSentModal(false))
+      dispatch(setWaitingMessage("Creating Room,DON'T REFRESH THE PAGE..."));
     });
 
     socket.on('startContest', ({ roomName, endTime, problem }) => {
@@ -77,6 +86,7 @@ const SocketHandler = () => {
       socket.off('reconnectContest');
       socket.off('contestError')
       socket.off('requestSent')
+      socket.off('roomCreating')
     };
   }, [socket, loggedinUser, dispatch, navigate]);
 

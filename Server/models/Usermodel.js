@@ -38,34 +38,6 @@ const userSchema = new mongoose.Schema({
     type:Boolean,
     default:false
   },
-  matchHistory: [
-    {
-      opponent: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-      result: {
-        type: String,
-        enum: ["win", "lose", "draw"],
-        required: true,
-      },
-      score: {
-        type: Number,
-        required: true,
-      },
-      date: {
-        type: Date,
-        default: Date.now,
-      },
-    },
-  ],
-  
-  questionsAttempted: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Question",
-    },
-  ],
   resetPasswordToken: {
     type: String,
   },

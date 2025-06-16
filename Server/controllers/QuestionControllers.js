@@ -1,31 +1,37 @@
 import Question from "../models/QuestionModel.js";
 import { User } from "../models/Usermodel.js";
 import axios from "axios";
+import mongoose from "mongoose";
+import { Contest } from "../models/ContestModel.js";
 
 export const getQuestion = async (user1, user2) => {
-    try {
-        // Fetch attempted questions by both users
-        console.log(user1)
-        console.log(user2)
-        const user1Data = await User.findOne({ username: user1 }).select("questionsAttempted");
-        const user2Data = await User.findOne({ username: user2 }).select("questionsAttempted");
+  try {
+    //  Get all contests where user1 or user2 participated
+    const pastContests = await Contest.find({
+      $or: [{ user1 }, { user2 }],
+    }).select("problemId");
 
-        if (!user1Data || !user2Data) {
-            throw new Error("One or both users not found");
-        }
+    // Step 2: Collect all previously seen problem IDs
+    const attemptedSet = new Set(pastContests.map(c => c.problemId.toString()));
 
-        const attemptedQuestions = [...user1Data.questionsAttempted, ...user2Data.questionsAttempted];
-        console.log(attemptedQuestions)
-        // Fetch a random question that has not been attempted
-        const question = await Question.findOne({
-            _id:{$nin : attemptedQuestions}
-        });
-        console.log(question.title)
-        return  question;
-    } catch (error) {
-        console.error("Error fetching problem:", error);
-        return null;
-    }
+    //  Pick a random question not attempted by either user
+    const question = await Question.aggregate([
+      {
+        $match: {
+          _id: {
+            $nin: Array.from(attemptedSet).map(id => new mongoose.Types.ObjectId(id)),
+          },
+        },
+      },
+      { $sample: { size: 1 } },
+    ]);
+
+    if (!question.length) return null;
+    return question[0];
+  } catch (error) {
+    console.error("Error fetching problem:", error);
+    return null;
+  }
 };
 
 export const submitQuestion = async (req, res) => {

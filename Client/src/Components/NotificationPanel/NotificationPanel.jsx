@@ -10,8 +10,9 @@ const NotificationPanel = () => {
 
   const acceptChallenge = (challenge) => {
     dispatch(setCreatingRoom(true));
-    dispatch(setWaitingMessage("Creating Room..."));
+    dispatch(setWaitingMessage("Creating Room.DON'T REFRESH THE PAGE..."));
     socket.emit("joinRoom", challenge.roomName);
+    socket.emit("roomCreationStarted", { to: challenge.initiator });
     dispatch(removeChallenge(challenge));
   };
 

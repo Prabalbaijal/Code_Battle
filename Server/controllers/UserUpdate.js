@@ -17,19 +17,6 @@ export const updateUserData = async (winnerUsername, loserUsername) => {
             winner.level = getLevelFromCoins(winner.coins);
             loser.level = getLevelFromCoins(loser.coins);
 
-            // Add contest result to match history
-            winner.matchHistory.push({
-                opponent: loser._id,
-                result: "win",
-                score: 50,
-            });
-
-            loser.matchHistory.push({
-                opponent: winner._id,
-                result: "lose",
-                score: -50,
-            });
-
             await winner.save();
             await loser.save();
 
@@ -59,25 +46,13 @@ export const updateUserDataOnNoWinner = async (user1Username, user2Username) => 
       user1.level = getLevelFromCoins(user1.coins);
       user2.level = getLevelFromCoins(user2.coins);
 
-      user1.matchHistory.push({
-        opponent: user2._id,
-        result: "draw",
-        score: -50,
-        date: new Date()
-      });
 
-      user2.matchHistory.push({
-        opponent: user1._id,
-        result: "draw",
-        score: -50,
-        date: new Date()
-      });
+      user1.save();
+      user2.save();
 
-      await Promise.all([user1.save(), user2.save()]);
-
-      console.log(`❌ No winner. Deducted coins: ${user1.username} (${user1.coins}), ${user2.username} (${user2.coins})`);
+      console.log(`No winner. Deducted coins: ${user1.username} (${user1.coins}), ${user2.username} (${user2.coins})`);
     } else {
-      console.log(`❌ User not found: ${user1Username} or ${user2Username}`);
+      console.log(`User not found: ${user1Username} or ${user2Username}`);
     }
   } catch (error) {
     console.error(`Error updating user data on no winner:`, error.message);

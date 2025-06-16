@@ -52,7 +52,7 @@ io.on('connection', (socket) => {
           socket.on('reconnectContest', async ({ roomName, username }) => {
             try {
               // Fetch contest without populating problem
-              const contest = await Contest.findOne({ roomName }).select("problemId endTime");
+              const contest = await Contest.findOne({ roomName,status:'active' }).select("problemId endTime");
               if (!contest) {
                 return socket.emit('contestError', { message: 'Contest not found.' });
               }
@@ -97,7 +97,7 @@ io.on('connection', (socket) => {
               $or: [{ user1: userName }, { user2: userName }],
               status: 'active'
             });
-            if (existing) return socket.emit('contestError', { message: "You already have an active contest." })
+            if (existing) return socket.emit('contestError', { message: "You already have an active contest." })  
             if (opponentSocketId) {
               const roomName = `${userName}-${opponentUsername}`;
 
@@ -125,6 +125,7 @@ io.on('connection', (socket) => {
             try {
               const existing = await Contest.findOne({ roomName, status: 'active' });
               if (existing) return socket.emit('contestError', { message: 'Contest already active.' });
+              
 
               const [user1, user2] = roomName.split('-');
               if (!user1 || !user2) return;
@@ -144,7 +145,7 @@ io.on('connection', (socket) => {
               // Fetch the unattempted problem
               const problem = await getQuestion(user1, user2);
               if (!problem) {
-                return socket.emit('contestError', { message: 'No unattempted problems available.' });
+                return io.to(roomName).emit('contestError', { message: 'No New problems are available for you.Please try after some time!!' });
               }
 
               // Store contest with `endTime`
@@ -182,7 +183,13 @@ io.on('connection', (socket) => {
               socket.emit('contestError', { message: 'Failed to start contest. Please try again.' });
             }
           });
+          socket.on("roomCreationStarted", ({ to }) => {
+            const targetSocket = unSocketMap.get(to);
 
+            if (targetSocket) {
+            targetSocket.emit("roomCreating");
+          }
+          });
 
 
           socket.on("cancelChallenge", ({ opponent, initiator }) => {
@@ -203,7 +210,7 @@ io.on('connection', (socket) => {
               // Fetch contest from DB
               const contest = await Contest.findOneAndUpdate(
                 { roomName, status: 'active' }, // Ensure contest is still active
-                { status: 'completed' }, // Mark contest as completed
+                { status: 'completed',winner: userName }, // Mark contest as completed
                 { new: false, session } // Return the old contest data before update
               );
               if (!contest) {
@@ -229,7 +236,7 @@ io.on('connection', (socket) => {
               });
 
               // Remove contest from DB
-              await Contest.findOneAndDelete({ roomName }, { session });
+              // await Contest.findOneAndDelete({ roomName }, { session });
               await session.commitTransaction(); // Commit all changes
               session.endSession();
               contestUsers.delete(user1);
@@ -247,17 +254,19 @@ io.on('connection', (socket) => {
             const session = await startSession(); // Start a session
             session.startTransaction();
             try {
+              const [userA ,userB]=roomName.split('-')
+              const winn=userName==userA?userB:userA
+
               // Fetch contest from DB
               const contest = await Contest.findOneAndUpdate(
                 { roomName, status: "active" },
-                { status: "completed" },
+                { status: "completed" ,winner : winn},
                 { new: false, session }
               );
               if (!contest) {
                 await session.abortTransaction();
                 return socket.emit('contestError', { message: 'Contest not found.' });
               }
-
               const { user1, user2 } = contest;
               const winner = userName === user1 ? user2 : user1;
 
@@ -276,7 +285,7 @@ io.on('connection', (socket) => {
               });
 
               // Remove contest from DB
-              await Contest.findOneAndDelete({ roomName }, { session });
+              // await Contest.findOneAndDelete({ roomName }, { session });
               await session.commitTransaction(); // Commit all changes
               session.endSession();
               contestUsers.delete(user1);

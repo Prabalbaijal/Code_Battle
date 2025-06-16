@@ -1,5 +1,5 @@
 import { User } from '../models/Usermodel.js'
-
+import { Contest } from '../models/ContestModel.js';
 
 export const recordAttempt=async (req, res) => {
     const { userId, questionId } = req.body;
@@ -21,36 +21,54 @@ export const recordAttempt=async (req, res) => {
     }
 }
 
-  export const getUserProfile = async (req, res) => {
-    try {
-        const userId = req.user.id;
+export const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
 
-        // Fetch user data and populate opponent details
-        const user = await User.findById(userId, "level coins matchHistory")
-            .populate({
-                path: "matchHistory.opponent",  // Populate opponent field
-                select: "username"  // Only fetch username
-            });
+    // Get user's basic info
+    const user = await User.findById(userId).select("level coins username");
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+    const username = user.username;
 
-        // Format matchHistory to ensure opponent's username is sent instead of ID
-        const formattedMatchHistory = user.matchHistory.map(match => ({
-            ...match.toObject(),
-            opponent: match.opponent?.username || "Unknown"  // Ensure username is returned
-        }));
+    // Get completed contests where this user played
+    const contests = await Contest.find({
+      status: "completed",
+      $or: [{ user1: username }, { user2: username }],
+    })
+      .sort({ endTime: -1 });
 
-        res.json({
-            level: user.level,
-            coins: user.coins,
-            matchHistory: formattedMatchHistory
-        });
-    } catch (error) {
-        console.error("Error fetching user profile:", error);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
+    // Format matchHistory with opponent's username
+    const formattedMatchHistory = contests.map((contest) => {
+      const isUser1 = contest.user1 === username;
+      const opponentUsername = isUser1 ? contest.user2 : contest.user1;
+      // console.log(contest)
+      const result =
+        contest.winner === null
+          ? "draw"
+          : contest.winner === username
+          ? "win"
+          : "lose";
+
+      const score = result === "win" ? 50 : result === "lose" ? -50 : 0;
+
+      return {
+        opponent: opponentUsername, 
+        result,
+        score,
+        date: contest.endTime || contest.startTime,
+      };
+    });
+
+    res.json({
+      level: user.level,
+      coins: user.coins,
+      matchHistory: formattedMatchHistory,
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 
 export const searchUsers = async (req, res) => {

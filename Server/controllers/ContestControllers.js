@@ -29,7 +29,7 @@ export const scheduleContestTimeout = (roomName, endTime) => {
             contestUsers.delete(user1);
             contestUsers.delete(user2);
             updateOnlineUsers()
-            await Contest.findOneAndDelete({ roomName });
+            await Contest.findOneAndUpdate({ roomName,status:'active' },{status:'completed'},{ new: false, session });
             console.log(`Contest ${roomName} ended due to timeout.`);
         }
     }, timeRemaining);
