@@ -31,6 +31,7 @@ const FriendRequests = () => {
   }, [loggedinUser.username]);
 
   const handleAction = async (requesterUsername, action) => {
+    toast.loading(`${action}ing friend request`,{id:'action'})
     try {
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
       await axios.post(`${BACKEND_URL}/api/friends/handleRequest`, {
@@ -40,14 +41,14 @@ const FriendRequests = () => {
       }, {
         withCredentials: true
       });
-      toast.success(`Friend request ${action}ed!`);
+      toast.success(`Friend request ${action}ed!`,{id: 'action'});
 
       setFriendRequests((prevRequests) =>
         prevRequests.filter((req) => req.requester.username !== requesterUsername)
       );
     } catch (error) {
       console.error(`Error ${action}ing friend request:`, error);
-      toast.error(`Failed to ${action} friend request.`);
+      toast.error(`Failed to ${action} friend request.`,{id:'action'});
     }
   };
 

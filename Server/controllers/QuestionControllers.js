@@ -7,10 +7,15 @@ import { Contest } from "../models/ContestModel.js";
 export const getQuestion = async (user1, user2) => {
   try {
     //  Get all contests where user1 or user2 participated
+    console.log(user1, user2)
     const pastContests = await Contest.find({
-      $or: [{ user1 }, { user2 }],
+      $or: [
+        { user1: user1 },
+        { user2: user1 },
+        { user1: user2 },
+        { user2: user2 }
+      ]
     }).select("problemId");
-
     // Step 2: Collect all previously seen problem IDs
     const attemptedSet = new Set(pastContests.map(c => c.problemId.toString()));
 
@@ -35,92 +40,92 @@ export const getQuestion = async (user1, user2) => {
 };
 
 export const submitQuestion = async (req, res) => {
-    const { source_code, language_id, testCases, executionTimes } = req.body;
-    const maxRetries = 5; // Number of retry attempts
-    const retryDelay = 2000; // Delay between retries in ms
+  const { source_code, language_id, testCases, executionTimes } = req.body;
+  const maxRetries = 5; // Number of retry attempts
+  const retryDelay = 2000; // Delay between retries in ms
 
-    try {
-        const results = [];
-        const timeLimit = executionTimes.find(et => et.language_id === language_id)?.timeLimit || 1; // Default to 1 sec if not specified
+  try {
+    const results = [];
+    const timeLimit = executionTimes.find(et => et.language_id === language_id)?.timeLimit || 1; // Default to 1 sec if not specified
 
-        for (let i = 0; i < testCases.length; i++) {
-            const testCase = testCases[i];
-            const submissionResponse = await axios.post(
-                'https://judge0-ce.p.rapidapi.com/submissions',
-                {
-                    source_code,
-                    language_id,
-                    stdin: testCase.input
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-                        'X-RapidAPI-Key': process.env.JUDGE0_API_KEY
-                    }
-                }
-            );
+    for (let i = 0; i < testCases.length; i++) {
+      const testCase = testCases[i];
+      const submissionResponse = await axios.post(
+        'https://judge0-ce.p.rapidapi.com/submissions',
+        {
+          source_code,
+          language_id,
+          stdin: testCase.input
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+            'X-RapidAPI-Key': process.env.JUDGE0_API_KEY
+          }
+        }
+      );
 
-            const token = submissionResponse.data.token;
-            let attempt = 0;
-            let resultResponse;
+      const token = submissionResponse.data.token;
+      let attempt = 0;
+      let resultResponse;
 
-            // Retry loop to check for final result
-            while (attempt < maxRetries) {
-                await new Promise(resolve => setTimeout(resolve, retryDelay));
-                
-                resultResponse = await axios.get(
-                    `https://judge0-ce.p.rapidapi.com/submissions/${token}`,
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-                            'X-RapidAPI-Key': process.env.JUDGE0_API_KEY
-                        }
-                    }
-                );
+      // Retry loop to check for final result
+      while (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
 
-                const status = resultResponse.data.status.description;
-                
-                if (status !== 'Processing') {
-                    break; // Exit loop if result is not in "Processing"
-                }
-                
-                attempt++;
+        resultResponse = await axios.get(
+          `https://judge0-ce.p.rapidapi.com/submissions/${token}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+              'X-RapidAPI-Key': process.env.JUDGE0_API_KEY
             }
-            const { stdout, stderr, status, compile_output, time } = resultResponse.data;
-            const actualOutput = stdout ? stdout.trim() : null;
-            console.log(actualOutput)
-            console.log(testCase.expectedOutput)
-            const executionTime = time ? parseFloat(time) : 0;
-            console.log(executionTime)
-            results.push({
-                expected: testCase.expectedOutput,
-                actual: actualOutput,
-                isCorrect: actualOutput === testCase.expectedOutput,
-                status,
-                time: executionTime,
-                compile_output,
-                error: stderr
-            });
+          }
+        );
 
-            // Check TLE only for the second test case(since it has larger test cases) (index 1)
-            if (i === 1 && executionTime > timeLimit) {
-                results[i].status = "Time Limit Exceeded";
-                results[i].isCorrect = false;
-            }
+        const status = resultResponse.data.status.description;
+
+        if (status !== 'Processing') {
+          break; // Exit loop if result is not in "Processing"
         }
 
-        const allPassed = results.every(result => result.isCorrect);
+        attempt++;
+      }
+      const { stdout, stderr, status, compile_output, time } = resultResponse.data;
+      const actualOutput = stdout ? stdout.trim() : null;
+      console.log(actualOutput)
+      console.log(testCase.expectedOutput)
+      const executionTime = time ? parseFloat(time) : 0;
+      console.log(executionTime)
+      results.push({
+        expected: testCase.expectedOutput,
+        actual: actualOutput,
+        isCorrect: actualOutput === testCase.expectedOutput,
+        status,
+        time: executionTime,
+        compile_output,
+        error: stderr
+      });
 
-        res.json({
-            allPassed,
-            results
-        });
-    } catch (error) {
-        console.error('Error in code submission:', error);
-        res.status(500).json({ error: 'Error submitting code for evaluation' });
+      // Check TLE only for the second test case(since it has larger test cases) (index 1)
+      if (i === 1 && executionTime > timeLimit) {
+        results[i].status = "Time Limit Exceeded";
+        results[i].isCorrect = false;
+      }
     }
+
+    const allPassed = results.every(result => result.isCorrect);
+
+    res.json({
+      allPassed,
+      results
+    });
+  } catch (error) {
+    console.error('Error in code submission:', error);
+    res.status(500).json({ error: 'Error submitting code for evaluation' });
+  }
 };
 
 export const addQuestion = async (req, res) => {

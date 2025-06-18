@@ -4,15 +4,43 @@ import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { FaSearch,FaUserPlus } from 'react-icons/fa';
 import Header from '../Header/Header';
+import { setRequestSentModal } from '../../redux/uiSlice';
 
 
 const Friends = () => {
   const [friends, setFriends] = useState([]);
+  const {socket}=useSelector((store)=>store.socket)
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading,setLoading]=useState(true)
+  const {requestSentModal,waitingMessage}=useSelector((state)=>state.ui)
   const { loggedinUser } = useSelector((store) => store.user);
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  const {onlineUsers}=useSelector(store=>store.user)
+   const [opponentName, setOpponentName] = useState('');
+  const onlineusers=onlineUsers && onlineUsers.filter((friend)=>{
+    return friend.inContest===false
+  }).map((f)=>{
+    return f.userName
+  })
+  // console.log(onlineusers)
+  const handlePlay = (opponentUsername) => {
+      if (!socket) return;
+      setOpponentName(opponentUsername); 
+      socket.emit('playRequest', { opponentUsername });
+    };
+  
+    const handleCloseModal = () => {
+      console.log(opponentName)
+      if (socket && loggedinUser) {
+        socket.emit("cancelChallenge", { 
+          opponent:opponentName ,
+          initiator: loggedinUser.username,
+        });
+      }
+      dispatch(setRequestSentModal(false));
+      setOpponentName('');
+    };
   
   useEffect(() => {
     const fetchFriends = async () => {
@@ -118,11 +146,11 @@ const Friends = () => {
               {searchResults.map((user) => (
                 <li key={user._id} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <img
-                      src={user.avatar}
-                      alt={user.username}
-                      className="w-10 h-10 rounded-full"
-                    />
+                    <div className={`avatar ${onlineusers?.includes(user.username) ? 'online' : '' }`}>
+                    <div className='w-10 rounded-full'>
+                        <img alt="userprofile" src={user?.avatar} />
+                    </div>
+                  </div>
                     <div>
                       <p className="font-semibold text-gray-800 dark:text-gray-100">
                         {user.fullname}
@@ -158,18 +186,21 @@ const Friends = () => {
                 >
                   <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
                     <div className="flex items-center space-x-4">
-                      <img
-                        src={friend.avatar}
-                        alt={friend.username}
-                        className="object-cover w-12 h-12 border-2 border-purple-300 rounded-full dark:border-purple-600"
-                      />
+                        <div className={`avatar ${onlineusers?.includes(friend.username) ? 'online' : '' }`}>
+                    <div className='w-12 rounded-full'>
+                        <img alt="userprofile" src={friend?.avatar} />
+                    </div>
+                  </div>
+                  
                       <div>
                         <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{friend.fullname}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">@{friend.username}</p>
                       </div>
                     </div>
-
-                    <button className="btn btn-info btn-sm" onClick={()=>{handleRemoveFriend(friend.username)}}>Remove Friend</button>
+                    <div className='flex justify-around'>    
+                    <button className="m-2 btn btn-success btn-sm" disabled={!onlineusers?.includes(friend.username)} onClick={()=>{handlePlay(friend.username)}}>Play</button>
+                    <button className="m-2 btn btn-info btn-sm" onClick={()=>{handleRemoveFriend(friend.username)}}>Remove Friend</button>
+                    </div>
                   </div>
                 </li>
               ))}
@@ -177,6 +208,26 @@ const Friends = () => {
           )}
         </div>
       </div>
+      {requestSentModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
+    <div className="p-6 text-center bg-gray-900 border border-gray-700 rounded-lg shadow-2xl w-80">
+      <h2 className="mb-3 text-xl font-semibold text-white">Waiting for Opponent...</h2>
+
+      <p className="text-gray-400">
+        {waitingMessage || "Waiting for the opponent to accept the match request."}
+        <br></br>
+        Don't refresh page without cancelling your request.
+      </p>
+
+      <button
+        onClick={handleCloseModal}
+        className="px-4 py-2 mt-4 text-white transition duration-200 bg-blue-600 rounded-lg hover:bg-blue-500"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
     </section>
   );
 };

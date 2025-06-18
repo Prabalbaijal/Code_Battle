@@ -16,8 +16,8 @@ export const sendrequest = async (req, res) => {
 
     const existing = await Friend.findOne({
       $or: [
-        { requester: sender._id, recipient: receiver._id },
-        { requester: receiver._id, recipient: sender._id },
+        { requester: sender._id, recipient: receiver._id, $or: [ {status:'accepted'},{status:'pending'} ] },
+        { requester: receiver._id, recipient: sender._id, $or: [ {status:'accepted'},{status:'pending'} ] },
       ],
     });
 
@@ -111,13 +111,13 @@ export const getFriends = async (req, res) => {
 };
 
 export const removeFriend = async (req, res) => {
-    console.log('remove')
+    //console.log('remove')
   const { friendUserName } = req.body
   const  userId  = req.user._id
 
   const friend= await User.findOne({username:friendUserName})
   const friendId=friend._id
-    console.log(friendId,userId)
+    //console.log(friendId,userId)
   try {
     const friendship = await Friend.findOneAndDelete({
       $or: [

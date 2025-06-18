@@ -103,6 +103,9 @@ const Header = () => {
               <Link to="/friendrequests" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
                 Friend Requests
               </Link>
+               <Link to="/leaderboard" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
+                LeaderBoard
+              </Link>
               <Link to="/profile" className="hover:text-gray-300" onClick={() => setIsSidebarOpen(false)}>
                 Profile
               </Link>
@@ -126,6 +129,7 @@ const Header = () => {
 
           <Link to="/friends" className="hover:text-gray-300">Friends</Link>
           <Link to="/friendrequests" className="hover:text-gray-300">Friend Requests</Link>
+          <Link to="/leaderboard" className="hover:text-gray-300">Leaderboard</Link>
         </nav>
         <div className="relative" ref={dropdownRef}>
           <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="focus:outline-none">

@@ -14,6 +14,7 @@ import ResetPassword from "./PasswordReset/ResetPassword";
 import Layout from "../Layout";
 import Error from "./Error";
 import AddQuestion from "./AddQuestion/AddQuestion";
+import Leaderboard from "./LeaderBoard/LeaderBoard";
 
 function RedirectToHome() {
   const { loggedinUser } = useSelector((store) => store.user);
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
           { path: "/friends", element: <Friends /> },
           { path: "/activecontests", element: <ActiveContests /> },
           { path: "/problem", element: <Problem /> },
+          { path: "/leaderboard", element: <Leaderboard/>}
         ],
       },
     ],

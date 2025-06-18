@@ -12,6 +12,8 @@ const Match = () => {
   const navigate = useNavigate();
   const dispatch=useDispatch();
   const {requestSentModal,waitingMessage}=useSelector((state)=>state.ui)
+  const [loadingFriends, setLoadingFriends] = useState(true);
+
 
   const [friends, setFriends] = useState([]);
   const [otherUsers, setOtherUsers] = useState([]);
@@ -32,11 +34,13 @@ const Match = () => {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
         });
-        console.log(response)
+        //console.log(response)
         setFriends(response.data.friends);
       } catch (error) {
         console.error('Error fetching friends:', error);
         toast.error('Failed to fetch friends');
+      }finally{
+        setLoadingFriends(false)
       }
     };
 
@@ -90,6 +94,7 @@ const Match = () => {
   };
 
 const handleAddFriend = async (friendUsername) => {
+  toast.loading("Sending Friend Request",{id:'sending'})
   try {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
     const response = await axios.post(`${BACKEND_URL}/api/friends/sendfriendrequest`, {
@@ -99,13 +104,13 @@ const handleAddFriend = async (friendUsername) => {
       withCredentials:true
     });
 
-    toast.success(response.data.message);
+    toast.success(response.data.message,{id:'sending'});
 
     // Disable button for this user
     setSentRequests((prev) => ({ ...prev, [friendUsername]: true }));
   } catch (error) {
     console.error(error);
-    toast.error(error.response?.data?.message || 'Failed to send friend request.');
+    toast.error(error.response?.data?.message || 'Failed to send friend request.',{id:'sending'});
   }
 };
 
@@ -116,6 +121,7 @@ const handleAddFriend = async (friendUsername) => {
       </div>
     );
   }
+  
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 text-gray-100 bg-gray-900">
       <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-md">
@@ -130,7 +136,10 @@ const handleAddFriend = async (friendUsername) => {
   value={searchTerm}
   onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
 />
-
+    {loadingFriends ? (
+        <p className="text-gray-400">Loading friends...</p>
+      ) : (
+        <>
       {/* Friends Section */}
       {onlineFriends.length > 0 ? (
         <div className="w-full max-w-md mb-6 bg-gray-800 rounded-lg shadow-lg">
@@ -189,12 +198,14 @@ const handleAddFriend = async (friendUsername) => {
       ) : (
         <p className="text-lg text-gray-400">No other users online.</p>
       )}
+      </>
+      )}
 
       {/* Request Sent Modal */}
       {requestSentModal && (
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
     <div className="p-6 text-center bg-gray-900 border border-gray-700 rounded-lg shadow-2xl w-80">
-      <h2 className="mb-3 text-xl font-semibold text-white">Waiting for Opponent...</h2>
+      <h2 className="mb-3 text-xl font+-semibold text-white">Waiting for Opponent...</h2>
 
       <p className="text-gray-400">
         {waitingMessage || "Waiting for the opponent to accept the match request."}

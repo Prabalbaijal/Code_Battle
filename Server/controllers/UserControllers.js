@@ -91,3 +91,33 @@ export const searchUsers = async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   };
+
+export const getLeaderboard = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Get top 50 leaderboard
+    const leaderboard = await User.find(
+      { isAdmin: { $ne: true } }, 
+      'username fullname coins level avatar'
+    )
+      .sort({ coins: -1 })
+      .limit(50);
+
+    // Get current user's data
+    const currentUser = await User.findById(userId).select('username fullname coins level avatar');
+
+    // Find user's rank by counting how many users have more coins
+    const higherRankedCount = await User.countDocuments({
+      isAdmin: { $ne: true },
+      coins: { $gt: currentUser.coins }
+    });
+
+    const currentUserRank = higherRankedCount + 1;
+
+    res.status(200).json({ leaderboard, rank:currentUserRank });
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    res.status(500).json({ message: "Failed to fetch leaderboard" });
+  }
+};

@@ -11,7 +11,8 @@ import axios from 'axios';
 const Problem = () => {
     const [language, setLanguage] = useState('javascript');
     const [code, setCode] = useState('');
-    const [darkMode, setDarkMode] = useState(false);
+    const [isSubmitted, setisSubmitted] = useState(false)
+    const [darkMode, setDarkMode] = useState(true);
     const [isContestEndedModalOpen, setIsContestEndedModalOpen] = useState(false);
     const [contestEndMessage, setContestEndMessage] = useState('');
     const [messageColor, setMessageColor] = useState('text-gray-700'); // Default
@@ -23,8 +24,8 @@ const Problem = () => {
     const navigate = useNavigate();
     const { roomName, endTime, problem } = location.state || {};
     if (!roomName || !problem) {
-    return <Navigate to="/match" replace />;
-}
+        return <Navigate to="/match" replace />;
+    }
     useEffect(() => {
         const contestOver = sessionStorage.getItem('contestOver') === 'true';
         if (contestOver || !roomName || !problem) {
@@ -36,6 +37,8 @@ const Problem = () => {
         if (!socket) return;
 
         const handleContestEnd = (data) => {
+            toast.dismiss('waiting')
+            
             console.log("Contest Ended event received:", data.winner);
 
             if (data.winner === loggedinUser.username) {
@@ -72,6 +75,7 @@ const Problem = () => {
     const toggleDarkMode = () => setDarkMode((prevMode) => !prevMode);
 
     const runCode = async () => {
+        setisSubmitted(true)
         const loadingToastId = toast.loading("Judging your code...");
         const submissionData = {
             source_code: code,
@@ -90,6 +94,7 @@ const Problem = () => {
             if (response.data.results[0].status.description === 'Accepted') {
                 if (response.data.allPassed) {
                     toast.success("Accepted");
+                    toast.loading('Wait a sec for result...',{id:'waiting'})
                     socket.emit('solveProblem', { roomName, userName: loggedinUser.username });
                 } else {
                     toast.error("Wrong answer!! Try Again.");
@@ -102,12 +107,14 @@ const Problem = () => {
             console.log(error)
             toast.dismiss(loadingToastId);
             toast.error("Compilation error!!");
+        } finally {
+            setisSubmitted(false)
         }
     };
 
     const quitContest = () => {
         socket.emit("leaveContest", { roomName, userName: loggedinUser.username });
-        navigate('/profile',{replace:true});
+        navigate('/profile', { replace: true });
     };
 
     const getLanguageId = (language) => {
@@ -122,7 +129,7 @@ const Problem = () => {
 
     return (
         <div className={`${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'} min-h-screen flex flex-col`}>
-            
+
             {/* Contest Ended Modal */}
             {isContestEndedModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
@@ -178,9 +185,13 @@ const Problem = () => {
                         </button>
                         <button
                             onClick={runCode}
-                            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+                            disabled={isSubmitted}
+                            className={`px-4 py-2 text-white rounded ${isSubmitted
+                                    ? 'bg-blue-300 cursor-not-allowed'
+                                    : 'bg-blue-500 hover:bg-blue-600'
+                                }`}
                         >
-                            Submit
+                            {isSubmitted ? 'Submitting...' : 'Submit'}
                         </button>
                     </div>
                 </div>
