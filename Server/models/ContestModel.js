@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const ContestSchema = new mongoose.Schema({
-    roomName: { type: String, required: true, unique: true },
+    roomName: { type: String, required: true },
     user1: { type: String, required: true },
     user2: { type: String, required: true },
     status: { type: String, enum: ['active', 'completed'], default: 'active' },

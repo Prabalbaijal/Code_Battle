@@ -1,3 +1,4 @@
+import { startSession } from "mongoose";
 import { Contest } from "../models/ContestModel.js";
 import { contestUsers, unSocketMap, updateOnlineUsers } from '../socket/socket.js'
 import { updateUserDataOnNoWinner } from './UserUpdate.js'
@@ -23,7 +24,9 @@ export const scheduleContestTimeout = (roomName, endTime) => {
                     })
                 }
             });
-            updateUserDataOnNoWinner(user1,user2)
+            const session=await startSession()
+            session.startTransaction()
+            await updateUserDataOnNoWinner(user1,user2,session)
 
             // Remove contest from DB
             contestUsers.delete(user1);

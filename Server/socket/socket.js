@@ -222,7 +222,7 @@ io.on('connection', (socket) => {
               const loserName = userName === user1 ? user2 : user1;
 
               // Update user data
-              await updateUserData(userName, loserName);
+              await updateUserData(userName, loserName,session);
 
               // Notify both users
               [user1, user2].forEach((user) => {
@@ -235,8 +235,6 @@ io.on('connection', (socket) => {
                 }
               });
 
-              // Remove contest from DB
-              // await Contest.findOneAndDelete({ roomName }, { session });
               await session.commitTransaction(); // Commit all changes
               session.endSession();
               contestUsers.delete(user1);
@@ -271,7 +269,7 @@ io.on('connection', (socket) => {
               const winner = userName === user1 ? user2 : user1;
 
               // Update user data
-              await updateUserData(winner, userName);
+              await updateUserData(winner, userName, session);
 
               // Notify both users
               [user1, user2].forEach((user) => {
@@ -284,8 +282,6 @@ io.on('connection', (socket) => {
                 }
               });
 
-              // Remove contest from DB
-              // await Contest.findOneAndDelete({ roomName }, { session });
               await session.commitTransaction(); // Commit all changes
               session.endSession();
               contestUsers.delete(user1);

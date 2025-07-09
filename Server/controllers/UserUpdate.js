@@ -1,11 +1,11 @@
 import { User } from "../models/Usermodel.js";
 
-export const updateUserData = async (winnerUsername, loserUsername) => {
+export const updateUserData = async (winnerUsername, loserUsername,session) => {
     try {
-        console.log(winnerUsername)
-        console.log(loserUsername)
-        const winner = await User.findOne({ username: winnerUsername });
-        const loser = await User.findOne({ username: loserUsername });
+        //console.log(winnerUsername)
+        //console.log(loserUsername)
+        const winner = await User.findOne({ username: winnerUsername }).session(session);
+        const loser = await User.findOne({ username: loserUsername }).session(session);
 
         if (winner && loser) {
             // Update coins
@@ -17,8 +17,8 @@ export const updateUserData = async (winnerUsername, loserUsername) => {
             winner.level = getLevelFromCoins(winner.coins);
             loser.level = getLevelFromCoins(loser.coins);
 
-            await winner.save();
-            await loser.save();
+            await winner.save({session});
+            await loser.save({session});
 
             console.log(`Updated winner (${winnerUsername}): coins=${winner.coins}, level=${winner.level}`);
             console.log(`Updated loser (${loserUsername}): coins=${loser.coins}, level=${loser.level}`);
@@ -27,16 +27,17 @@ export const updateUserData = async (winnerUsername, loserUsername) => {
         }
     } catch (error) {
         console.error("Error updating user data:", error);
+        throw error
     }
 };
 
 
 
-export const updateUserDataOnNoWinner = async (user1Username, user2Username) => {
+export const updateUserDataOnNoWinner = async (user1Username, user2Username,session) => {
   try {
     const [user1, user2] = await Promise.all([
-      User.findOne({ username: user1Username }),
-      User.findOne({ username: user2Username })
+      User.findOne({ username: user1Username }).session(session),
+      User.findOne({ username: user2Username }).session(session)
     ]);
 
     if (user1 && user2) {
@@ -47,8 +48,8 @@ export const updateUserDataOnNoWinner = async (user1Username, user2Username) => 
       user2.level = getLevelFromCoins(user2.coins);
 
 
-      user1.save();
-      user2.save();
+      user1.save({session});
+      user2.save({session});
 
       console.log(`No winner. Deducted coins: ${user1.username} (${user1.coins}), ${user2.username} (${user2.coins})`);
     } else {
@@ -56,6 +57,7 @@ export const updateUserDataOnNoWinner = async (user1Username, user2Username) => 
     }
   } catch (error) {
     console.error(`Error updating user data on no winner:`, error.message);
+    throw error
   }
 };
 

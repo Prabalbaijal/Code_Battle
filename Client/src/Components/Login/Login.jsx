@@ -144,6 +144,7 @@ export default function Login() {
                         <form onSubmit={handleForgotPassword} className="space-y-4">
                             <div>
                                 <input
+                                    required
                                     type="email"
                                     placeholder="Enter your email"
                                     className="w-full px-4 py-3 transition bg-gray-800 border border-gray-700 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
@@ -172,12 +173,14 @@ export default function Login() {
                                     <input
                                         type="text"
                                         placeholder="Full Name"
+                                        required
                                         className="w-full px-4 py-3 transition bg-gray-800 border border-gray-700 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                                         value={registeruser.fullname}
                                         onChange={(e) => setRegisterUser({ ...registeruser, fullname: e.target.value })}
                                     />
                                     <input
                                         type="email"
+                                        required
                                         placeholder="Email"
                                         className="w-full px-4 py-3 transition bg-gray-800 border border-gray-700 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                                         value={registeruser.email}
@@ -185,12 +188,14 @@ export default function Login() {
                                     />
                                     <input
                                         type="text"
+                                        required
                                         placeholder="Username"
                                         className="w-full px-4 py-3 transition bg-gray-800 border border-gray-700 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                                         value={registeruser.username}
                                         onChange={(e) => setRegisterUser({ ...registeruser, username: e.target.value })}
                                     />
                                     <input
+                                        required
                                         type="password"
                                         placeholder="Password"
                                         className="w-full px-4 py-3 transition bg-gray-800 border border-gray-700 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
@@ -198,6 +203,7 @@ export default function Login() {
                                         onChange={(e) => setRegisterUser({ ...registeruser, password: e.target.value })}
                                     />
                                     <input
+                                        required
                                         type="password"
                                         placeholder="Confirm Password"
                                         className="w-full px-4 py-3 transition bg-gray-800 border border-gray-700 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
@@ -207,6 +213,7 @@ export default function Login() {
                                     <div className="space-y-2">
                                         <label className="block text-sm text-gray-400">Avatar</label>
                                         <input
+                                            required
                                             type="file"
                                             onChange={handleFileChange}
                                             className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500/50 file:text-white hover:file:bg-blue-500/70"
@@ -223,6 +230,7 @@ export default function Login() {
                                 <form onSubmit={LoginSubmitHandler} className="space-y-4">
                                     <input
                                         type="text"
+                                        required
                                         placeholder="Username"
                                         className="w-full px-4 py-3 transition bg-gray-800 border border-gray-700 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                                         value={loginuser.username}
@@ -230,6 +238,7 @@ export default function Login() {
                                     />
                                     <input
                                         type="password"
+                                        required
                                         placeholder="Password"
                                         className="w-full px-4 py-3 transition bg-gray-800 border border-gray-700 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                                         value={loginuser.password}
