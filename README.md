@@ -1,6 +1,6 @@
 # ⚔️ Coding Battle - Real-Time 1v1 DSA Code Battle Platform
 
-**Live App:** [https://code-battle-1.onrender.com](https://code-battle-1.onrender.com)
+**Live App:** [https://code-battle-wheat.vercel.app](https://code-battle-wheat.vercel.app)
 
 **Coding Battle** is a real-time web application where users engage in **1 v/s 1 coding battles** by solving DSA problems with live code evaluation, scoring, and social features.
 
