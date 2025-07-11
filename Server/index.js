@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 2000;
 
 // CORS Configuration
 const corsOptions = {
-    origin: ["http://localhost:5173","https://code-battle-1.onrender.com"],
+    origin: ["http://localhost:5173","https://code-battle-1.onrender.com","https://code-battle-wheat.vercel.app"],
     credentials: true,
 };
 

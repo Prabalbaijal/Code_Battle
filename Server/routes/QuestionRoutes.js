@@ -4,7 +4,7 @@ import { addQuestion, submitQuestion } from '../controllers/QuestionControllers.
 
 const router = express.Router()
 
-router.route("/submit").post(submitQuestion)
+router.route("/submit").post(isAuthenticated,submitQuestion)
 router.route("/add-question").post(isAuthenticated,addQuestion)
 
 export default router
