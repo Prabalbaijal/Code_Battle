@@ -12,6 +12,10 @@
 - ⚙️ **Judge0 Integration** – Secure, sandboxed code execution with support for **4+ programming languages**, along with custom logic to handle:
   - Time Limit Exceeded (TLE)
   - Runtime Errors
+- 👥 **User Presence & Status** – Used **Socket.IO** to:
+  - Show **online/offline** status of users
+  - Display **in-contest** status in real time
+  - Handle **friend request acceptance/rejection** instantly
 - 🤝 **Social System** – Add friends, send/accept friend requests, and challenge your friends in coding battles.
 - 🏆 **Gamification** – Includes:
   - Coins and level system
