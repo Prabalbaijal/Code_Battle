@@ -6,7 +6,10 @@ import { updateUserDataOnNoWinner } from './UserUpdate.js'
 export const scheduleContestTimeout = (roomName, endTime) => {
     const timeRemaining = endTime - Date.now();
 
-    if (timeRemaining <= 0) return; // If already expired, exit.
+    if (timeRemaining <= 0){
+        endContestImmediately(roomName);
+         return; // If already expired, exit.
+    }
 
     setTimeout(async () => {
         const contest = await Contest.findOne({ roomName, status: "active" });
@@ -74,3 +77,44 @@ export const getActiveContests=async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 }
+const endContestImmediately = async (roomName) => {
+    const contest = await Contest.findOne({ roomName, status: "active" });
+    if (!contest) return;
+
+    const { user1, user2 } = contest;
+
+    [user1, user2].forEach((user) => {
+        const usersocket = unSocketMap.get(user);
+        if (usersocket) {
+            usersocket.emit('contestEnded', {
+                winner: 'Nobody',
+                message: 'Nobody won. Time Up!!'
+            });
+        }
+    });
+
+    const session = await startSession();
+    try {
+        session.startTransaction();
+
+        await updateUserDataOnNoWinner(user1, user2, session);
+
+        contestUsers.delete(user1);
+        contestUsers.delete(user2);
+        updateOnlineUsers();
+
+        await Contest.findOneAndUpdate(
+            { roomName, status: 'active' },
+            { status: 'completed' },
+            { session }
+        );
+
+        await session.commitTransaction();
+        console.log(`Contest ${roomName} ended (timeout or server recovery).`);
+    } catch (error) {
+        console.error("Error ending contest:", error);
+        await session.abortTransaction();
+    } finally {
+        session.endSession();
+    }
+};

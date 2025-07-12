@@ -7,17 +7,17 @@ const ProblemDescription = ({ question, darkMode }) => (
             <>
                 <div className="flex-1 mb-6">
                     <h2 className="mb-4 text-2xl font-bold">{question.title}</h2>
-                    <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
+                    <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} leading-relaxed whitespace-pre-line`}>
                         {question.description}
                     </p>
-                    <br/>
-                    <p>
-                        <strong>Input Format:</strong><br/>
+                    <br />
+                    <p className='whitespace-pre-line'>
+                        <strong>Input Format:</strong><br />
                         {question.inputFormat}
                     </p>
-                    <br/>
-                    <p>
-                        <strong>Output Format:</strong><br/>
+                    <br />
+                    <p className='whitespace-pre-line'>
+                        <strong>Output Format:</strong><br />
                         {question.outputFormat}
                     </p>
                 </div>
@@ -25,11 +25,20 @@ const ProblemDescription = ({ question, darkMode }) => (
                     <h3 className="mb-2 text-xl font-semibold">Examples</h3>
                     {question.examples.map((example, index) => (
                         <div key={index} className="mb-4">
-                            <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
-                                <strong>Input:</strong> <code>{example.input}</code><br />
-                                <strong>Output:</strong> <code>{example.output}</code><br />
-                                <strong>Explanation:</strong> {example.explanation}
-                            </p>
+                            <div className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
+                                <div className="mb-4">
+                                    <p className="font-semibold">Input:</p>
+                                    <pre className="p-2 text-white whitespace-pre-wrap bg-gray-900 rounded">{example.input}</pre>
+
+                                    <p className="mt-2 font-semibold">Output:</p>
+                                    <pre className="p-2 text-white whitespace-pre-wrap bg-gray-900 rounded">{example.output}</pre>
+
+                                    <p className="mt-2 font-semibold">Explanation:</p>
+                                    <p className="whitespace-pre-line">{example.explanation}</p>
+                                </div>
+
+                            </div>
+
                         </div>
                     ))}
                 </div>

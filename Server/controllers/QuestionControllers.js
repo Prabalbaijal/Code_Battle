@@ -95,10 +95,10 @@ export const submitQuestion = async (req, res) => {
       }
       const { stdout, stderr, status, compile_output, time } = resultResponse.data;
       const actualOutput = stdout ? stdout.trim() : null;
-      console.log(actualOutput)
-      console.log(testCase.expectedOutput)
+      //console.log(actualOutput)
+      //console.log(testCase.expectedOutput)
       const executionTime = time ? parseFloat(time) : 0;
-      console.log(executionTime)
+      //console.log(executionTime)
       results.push({
         expected: testCase.expectedOutput,
         actual: actualOutput,

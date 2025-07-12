@@ -81,7 +81,7 @@ io.on('connection', (socket) => {
               } else {
                 socket.emit('contestError', { message: 'User socket not found. Try again.' });
               }
-
+              
             } catch (error) {
               console.error('Error reconnecting contest:', error);
               socket.emit('contestError', { message: 'Failed to reconnect. Try again.' });
