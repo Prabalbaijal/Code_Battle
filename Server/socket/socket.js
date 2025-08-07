@@ -9,6 +9,7 @@ import { updateUserData } from '../controllers/UserUpdate.js';
 import { getQuestion } from '../controllers/QuestionControllers.js';
 import { scheduleContestTimeout } from '../controllers/ContestControllers.js';
 import { startSession } from 'mongoose';
+import socketAuth from '../middlewares/socket-auth.js';
 
 
 const app = express();
@@ -22,19 +23,14 @@ const io = new Server(server, {
   },
 });
 
+io.use(socketAuth)
+
 const contestUsers = new Set();
 const unSocketMap = new Map();
 
-io.on('connection', (socket) => {
-  const userId = socket.handshake.query.userId;
-
-  if (userId) {
-    const objectId = new mongoose.Types.ObjectId(userId);
-
-    User.findById(objectId)
-      .then(async (user) => {
-        if (user) {
-          const userName = user.username;
+io.on('connection',async (socket) => {
+          const {username,userId}=socket.user
+          const userName = username;
           unSocketMap.set(userName, socket);
 
           console.log(`User connected: userId=${userId}, socketId=${socket.id}, userName=${userName}`);
@@ -305,10 +301,6 @@ io.on('connection', (socket) => {
               updateOnlineUsers();
             }
           });
-        }
-      })
-      .catch((err) => console.log('Error fetching user:', err));
-  }
 });
 
 function updateOnlineUsers() {

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { FaSearch,FaUserPlus } from 'react-icons/fa';
+import {FaUserPlus } from 'react-icons/fa';
 import Header from '../Header/Header';
 import { setRequestSentModal } from '../../redux/uiSlice';
-
+import { useRef } from 'react';
 
 const Friends = () => {
   const [friends, setFriends] = useState([]);
@@ -14,6 +14,7 @@ const Friends = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading,setLoading]=useState(true)
   const {requestSentModal,waitingMessage}=useSelector((state)=>state.ui)
+  const debounceTimer = useRef(null);
   const { loggedinUser } = useSelector((store) => store.user);
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   const {onlineUsers}=useSelector(store=>store.user)
@@ -60,28 +61,42 @@ const Friends = () => {
 
     if (loggedinUser && loggedinUser._id) fetchFriends();
   }, [loggedinUser]);
+  
   useEffect(()=>{
     if(searchQuery===''){
       setSearchResults([])
     }
   },[searchQuery])
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-    toast.loading("Searching for users",{id: 'search-toast'})
-    try {
-      //console.log(searchQuery)
-      const res = await axios.get(`${BACKEND_URL}/api/users/search?query=${searchQuery}`, {
-        withCredentials: true,
-      });
-      toast.dismiss('search-toast')
-      setSearchResults(res.data.users);
-    } catch (error) {
-      // console.error('Search failed:', error);
-      toast.error(error.message,{id:'search-toast'});
-    }
-  };
+  const handleSearchChange = (e) => {
+  const query = e.target.value;
+  setSearchQuery(query); // update input immediately
 
+  if (debounceTimer.current) {
+    clearTimeout(debounceTimer.current);
+  }
+
+  debounceTimer.current = setTimeout(() => {
+    callSearchApi(query);
+  }, 400);
+};
+
+  
+  const callSearchApi = async (query) => {
+  if (!query.trim()) return;
+  toast.loading("Searching for users", { id: 'search-toast' });
+
+  try {
+    const res = await axios.get(`${BACKEND_URL}/api/users/search?query=${query}`, {
+      withCredentials: true,
+    });
+    toast.dismiss('search-toast');
+    setSearchResults(res.data.users);
+  } catch (error) {
+    toast.error(error.message, { id: 'search-toast' });
+  }
+};
+  
   const handleAddFriend = async (friendUsername) => {
     toast.loading('Sending Friend request',{id:'friend-request-toast'})
     try {
@@ -127,18 +142,12 @@ const Friends = () => {
             type="text"
             placeholder="Search by username to add friend..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchChange}
             className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 dark:bg-gray-800 dark:text-white"
           />
-          <button
-            onClick={handleSearch}
-            className="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700"
-          >
-            <FaSearch />
-          </button>
         </div>
 
-        {/* 🔍 Search Results */}
+        {/*  Search Results */}
         {searchResults.length > 0 && (
           <div className="w-full p-4 mb-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
             <h2 className="mb-2 text-xl font-semibold dark:text-white">Search Results</h2>

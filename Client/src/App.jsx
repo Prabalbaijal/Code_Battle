@@ -49,6 +49,7 @@ export default function App() {
     console.log("Creating a new socket connection...");
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
     const newSocket = io(`${BACKEND_URL}`, {
+      withCredentials:true,
       query: { userId: loggedinUser._id },
       reconnection: false,
     });
