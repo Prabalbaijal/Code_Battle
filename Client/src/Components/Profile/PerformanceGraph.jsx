@@ -22,31 +22,26 @@ const PerformanceGraph = () => {
         let currentCoins = 400;
         const contestMonths = new Set();
         const formattedData = [];
+        const sortedHistory=[...result.matchHistory].reverse()
 
-        if (result.matchHistory.length > 0) {
-          const firstMatchDate = result.matchHistory[0].date.split("T")[0];
-          formattedData.push({
-            date: firstMatchDate,
-            coins: currentCoins,
-            month: firstMatchDate.slice(0, 7),
-          });
-        }
+        sortedHistory.forEach((match) => {
+  currentCoins += match.score;
+  const matchMonth = match.date.split("T")[0].slice(0, 7);
+  contestMonths.add(matchMonth);
 
-        result.matchHistory.forEach((match) => {
-          currentCoins += match.score;
-          const matchMonth = match.date.split("T")[0].slice(0, 7);
-          contestMonths.add(matchMonth);
+  formattedData.push({
+    date: match.date.split("T")[0],
+    coins: currentCoins,
+    month: matchMonth,
+    result: match.result,
+    opponent: match.opponent?.username || "Unknown",
+  });
+});
 
-          formattedData.push({
-            date: match.date.split("T")[0],
-            coins: currentCoins,
-            month: matchMonth,
-            result: match.result,
-            opponent: match.opponent?.username || "Unknown",
-          });
-        });
-
-        setData(formattedData);
+setData([
+  { date: sortedHistory[0]?.date.split("T")[0], coins: 400, month: sortedHistory[0]?.date.slice(0, 7) }, // Starting point
+  ...formattedData
+]);
         setMonths([...contestMonths]);
         setSelectedMonth("");
         setTotalContests(result.matchHistory.length);

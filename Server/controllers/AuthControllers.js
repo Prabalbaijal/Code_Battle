@@ -5,6 +5,9 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from "crypto"
 import nodemailer from "nodemailer"
+import dotenv from 'dotenv'
+
+dotenv.config();
 
 export const register = async (req, res) => {
     try {
@@ -42,6 +45,7 @@ export const register = async (req, res) => {
         if (!avatarUrl) {
             return res.status(400).json({ message: "Avatar is required." });
         }
+         const verificationToken = crypto.randomBytes(32).toString("hex");
         
         const user = await User.create({
             fullname,
@@ -49,20 +53,38 @@ export const register = async (req, res) => {
             email,
             password: hashedPass,
             avatar:avatarUrl, 
-            createdAt: new Date()
+            createdAt: new Date(),
+            verificationToken,
+            verificationTokenExpires: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+            isVerified: false
         })
-
-        const createdUser = await User.findById(user._id).select("-password")
-        if (!createdUser) {
+        if (!user) {
             return res.status(500).json({
                 message: "Something went wrong while registering the user!!"
             })
         }
+        const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+        const verificationURL = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Verify your email",
+      html: `<p>Click <a href="${verificationURL}">here</a> to verify your email. Link expires in 24 hours.</p>`
+    };
+
+    await transporter.sendMail(mailOptions);
+
 
         return res.status(201).json({
-            message: "Account created successfully.",
+            message: "Account created.Please check your email to verify your account.",
             success: true,
-            user: createdUser
         })
     } catch (error) {
         console.error(error.message)
@@ -86,6 +108,12 @@ export const login = async (req, res) => {
                 message: "Invalid user!!",
                 success: false
             })
+        }
+        if (!user.isVerified) {
+            return res.status(403).json({ 
+                message: "Please verify your email before logging in." ,
+                success:false
+            });
         }
 
         const matchPassword = await bcrypt.compare(password, user.password)
@@ -197,7 +225,7 @@ export const forgotPassword = async (req, res) => {
             },
         });
 
-        const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+        const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: user.email,
@@ -213,18 +241,45 @@ export const forgotPassword = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+export const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired verification link" });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    await user.save();
+
+    res.json({ message: "Email verified successfully!" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 export const resetPassword = async (req, res) => {
-    console.log("inside")
+   // console.log("inside")
     try {
         const { token } = req.params;
         const { newPassword } = req.body;
+        console.log(token)
 
         const user = await User.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() }, // Ensure token is not expired
         });
-        console.log(user)
+        //console.log(user)
         if (!user) {
             return res.status(400).json({ message: "Invalid or expired token" });
         }

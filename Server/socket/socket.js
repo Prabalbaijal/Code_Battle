@@ -16,6 +16,8 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
+  pingInterval: 5000, 
+  pingTimeout: 3000 ,
   cors: {
     origin: ['http://localhost:5173', "https://code-battle-1.onrender.com","https://code-battle-wheat.vercel.app"],
     methods: ['GET', 'POST'],
@@ -29,6 +31,7 @@ const contestUsers = new Set();
 const unSocketMap = new Map();
 
 io.on('connection',async (socket) => {
+  try{
           const {username,userId}=socket.user
           const userName = username;
           unSocketMap.set(userName, socket);
@@ -301,7 +304,11 @@ io.on('connection',async (socket) => {
               updateOnlineUsers();
             }
           });
-});
+        }catch(err){
+          console.error(err)
+          socket.emit('Some error occured at server side!!')
+        }
+        });
 
 function updateOnlineUsers() {
   const onlineUsers = Array.from(unSocketMap.keys()).map(userName => ({

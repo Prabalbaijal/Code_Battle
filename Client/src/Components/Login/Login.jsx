@@ -106,7 +106,7 @@ export default function Login() {
                 
                 navigate("/home");
             } else {
-                toast.error("Login failed! Please try again.",{id:'logging-toast'});
+                toast.error(res.data.message,{id:'logging-toast'});
             }
         } catch (error) {
             if (error.response) {

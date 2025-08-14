@@ -9,12 +9,14 @@ import axios from 'axios';
 import { setLoggedinUser } from './redux/userSlice.js';
 import router from './Components/Routes.jsx';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function App() {
   const { loggedinUser } = useSelector((store) => store.user);
   const { socket } = useSelector((store) => store.socket);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
+  const [isConnected,setIsConnected]=useState(false)
 
   useEffect(() => {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
@@ -34,13 +36,10 @@ export default function App() {
   // EFFECT 1: Create socket when user logs in.
   useEffect(() => {
     if (!loggedinUser || loading) return; 
-
-    console.log("Checking existing socket before creating a new one...");
-
-    // Disconnect old socket if it exists
     if (socket) {
       console.log(" Disconnecting old socket before creating a new one...");
       socket.off('getOnlineUsers');
+      socket.off('disconnect');
       socket.close(); // Properly close old connection
       dispatch(disconnectSocket()); // Clear from Redux
     }
@@ -51,22 +50,36 @@ export default function App() {
     const newSocket = io(`${BACKEND_URL}`, {
       withCredentials:true,
       query: { userId: loggedinUser._id },
-      reconnection: false,
+      reconnection: true,
+    });
+    let toastId=null;
+    //  Store new socket in Redux
+      newSocket.on('connect', () => {
+      if (toastId) {
+        toast.success("Reconnected!", { id: toastId });
+        toastId = null;
+      }
     });
 
-    //  Store new socket in Redux
-    dispatch(setSocket(newSocket));
+    newSocket.on('disconnect', (reason) => {
+        if (loggedinUser) { // 🔹 only show toast if user is logged in
+      if (!toastId) {
+        toastId = toast.loading("Disconnected! Retrying...", { id: toastId });
+      }
+    }
+    });
 
+    dispatch(setSocket(newSocket));
     // Handle incoming events
     newSocket.on('getOnlineUsers', (onlineUsers) => {
       dispatch(setOnlineUsers(onlineUsers));
     });
 
-
     // Cleanup: Disconnect socket when user logs out or refreshes
     return () => {
       console.log("Cleaning up socket before unmount...");
       newSocket.off('getOnlineUsers');
+      newSocket.off('disconnect');
       newSocket.close();
       dispatch(disconnectSocket());
     };
@@ -77,6 +90,8 @@ export default function App() {
   // EFFECT 2: Cleanup socket when user logs out.
   useEffect(() => {
     if (!loggedinUser && socket) {
+      socket.io.opts.reconnection = false;
+      socket.off('disconnect');
       socket.close();
       dispatch(disconnectSocket());
     }

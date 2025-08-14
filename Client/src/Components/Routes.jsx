@@ -16,6 +16,7 @@ import Error from "./Error";
 import AddQuestion from "./AddQuestion/AddQuestion";
 import Leaderboard from "./LeaderBoard/LeaderBoard";
 import MultitabAlert from "./MultitabAlert";
+import EmailVerification from "./EmailVerification";
 
 function RedirectToHome() {
   const { loggedinUser } = useSelector((store) => store.user);
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
   { path: "/multi-tab-blocked",element: <MultitabAlert/>},
   { path: "/forgot-password", element: <ForgotPassword /> },
   { path: "/reset-password/:token", element: <ResetPassword /> },
+  { path: "/verify/:token",element: <EmailVerification/>},
   //User Protected Routes
   {
     element: <ProtectedRoute adminOnly={false}/>,

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import {FaUserPlus } from 'react-icons/fa';
 import Header from '../Header/Header';
 import { setRequestSentModal } from '../../redux/uiSlice';
 import { useRef } from 'react';
