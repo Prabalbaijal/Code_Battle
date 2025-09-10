@@ -93,7 +93,7 @@ async function updateOnlineUsers() {
  * 3) write DB no-winner result, clean Redis flags
  */
 subClient.on('pmessage', (pattern, channel, expiredKey) => {
-  console.log('🔥 Expired Event:', { pattern, channel, expiredKey });
+  console.log(' Expired Event:', { pattern, channel, expiredKey });
 });
 
 subClient.on('pmessage', async (_pattern, _channel, expiredKey) => {
@@ -267,7 +267,7 @@ io.on('connection', async (socket) => {
         }
 
         // Store contest with `endTime`
-        const contestDuration = 1 * 60000; // 30 minutes
+        const contestDuration = 30 * 60000; // 30 minutes
         const endTime = Date.now() + contestDuration;
 
         const contest = new Contest({
