@@ -1,59 +1,90 @@
 import { startSession } from "mongoose";
 import { Contest } from "../models/ContestModel.js";
-import { contestUsers, unSocketMap, updateOnlineUsers } from '../socket/socket.js'
+import {  updateOnlineUsers } from '../socket/socket.js'
 import { updateUserDataOnNoWinner } from './UserUpdate.js'
 
-export const scheduleContestTimeout = (roomName, endTime) => {
-    const timeRemaining = endTime - Date.now();
+// export const scheduleContestTimeout = (roomName, endTime) => {
+//     const timeRemaining = endTime - Date.now();
 
-    if (timeRemaining <= 0){
-        endContestImmediately(roomName);
-         return; // If already expired, exit.
-    }
+//     if (timeRemaining <= 0){
+//         endContestImmediately(roomName);
+//          return; // If already expired, exit.
+//     }
 
-    setTimeout(async () => {
-        const contest = await Contest.findOne({ roomName, status: "active" });
+//     setTimeout(async () => {
+//         const contest = await Contest.findOne({ roomName, status: "active" });
 
-        if (contest) {
-            const { user1, user2 } = contest;
+//         if (contest) {
+//             const { user1, user2 } = contest;
 
-            // Notify users
-            [user1, user2].forEach((user) => {
-                const usersocket=unSocketMap.get(user)
-                if (usersocket) {
-                    usersocket.emit('contestEnded',{
-                        winner:'Nobody',
-                        message:'Nobody won.Time Up!!'
-                    })
-                }
-            });
-            const session=await startSession()
-            session.startTransaction()
-            await updateUserDataOnNoWinner(user1,user2,session)
+//             // Notify users
+//             [user1, user2].forEach((user) => {
+//                 const usersocket=unSocketMap.get(user)
+//                 if (usersocket) {
+//                     usersocket.emit('contestEnded',{
+//                         winner:'Nobody',
+//                         message:'Nobody won.Time Up!!'
+//                     })
+//                 }
+//             });
+//             const session=await startSession()
+//             session.startTransaction()
+//             await updateUserDataOnNoWinner(user1,user2,session)
 
-            // Remove contest from DB
-            contestUsers.delete(user1);
-            contestUsers.delete(user2);
-            updateOnlineUsers()
-            await Contest.findOneAndUpdate({ roomName,status:'active' },{status:'completed'},{ new: false, session });
-            console.log(`Contest ${roomName} ended due to timeout.`);
-        }
-    }, timeRemaining);
+//             // Remove contest from DB
+//             contestUsers.delete(user1);
+//             contestUsers.delete(user2);
+//             updateOnlineUsers()
+//             await Contest.findOneAndUpdate({ roomName,status:'active' },{status:'completed'},{ new: false, session });
+//             console.log(`Contest ${roomName} ended due to timeout.`);
+//         }
+//     }, timeRemaining);
+// };
+
+export const scheduleContestTimeout = async (redisClient, roomName, endTime) => {
+  const ttl = endTime - Date.now();
+  if (ttl <= 0) {
+    // key expired: server expiry listener will not trigger (no key),
+    // so just leave it for immediate close logic handled where needed.
+    return;
+  }
+
+  // Keep a tiny payload (optional) – not used, but useful for debugging
+  const payload = JSON.stringify({ roomName, endTime });
+
+ 
+  const res = await redisClient.set(`contest:${roomName}`, payload, 'PX', ttl);
+  console.log(`Contest ${roomName} expiry set:`, res); // "OK" aayega
 };
 
-export const rescheduleAllTimeouts = async () => {
-    try {
-        const activeContests = await Contest.find({ status: "active" });
+// export const rescheduleAllTimeouts = async () => {
+//     try {
+//         const activeContests = await Contest.find({ status: "active" });
 
-        activeContests.forEach((contest) => {
-            scheduleContestTimeout(contest.roomName, contest.endTime);
-        });
+//         activeContests.forEach((contest) => {
+//             scheduleContestTimeout(contest.roomName, contest.endTime);
+//         });
 
-        console.log(`Rescheduled ${activeContests.length} contest timeouts.`);
-    } catch (error) {
-        console.error(" Error rescheduling contests:", error);
+//         console.log(`Rescheduled ${activeContests.length} contest timeouts.`);
+//     } catch (error) {
+//         console.error(" Error rescheduling contests:", error);
+//     }
+// };
+
+export const rescheduleAllTimeouts = async (redisClient) => {
+  try {
+    const activeContests = await Contest.find({ status: "active" });
+
+    for (const contest of activeContests) {
+      await scheduleContestTimeout(redisClient, contest.roomName, contest.endTime);
     }
+
+    console.log(`Rescheduled ${activeContests.length} contest timeouts.`);
+  } catch (error) {
+    console.error("Error rescheduling contests:", error);
+  }
 };
+
 export const getActiveContests=async (req, res) => {
     try {
         const { username } = req.body; // Get username from request body
