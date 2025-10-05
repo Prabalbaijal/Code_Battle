@@ -37,10 +37,12 @@ export const register = async (req, res) => {
         const hashedPass = await bcrypt.hash(password, 10)
         let avatarUrl = null;
         if (avatar) {
+            console.log("Starting upload...");
             const uploadResponse = await uploadOnCloudinary(avatar);
             if (uploadResponse) {
                 avatarUrl = uploadResponse.secure_url;
             }
+            console.log("Cloudinary upload done");
         }
         if (!avatarUrl) {
             return res.status(400).json({ message: "Avatar is required." });
@@ -78,9 +80,9 @@ export const register = async (req, res) => {
       subject: "Verify your email",
       html: `<p>Click <a href="${verificationURL}">here</a> to verify your email. Link expires in 24 hours.</p>`
     };
-
+    console.log("Preparing email...");
     await transporter.sendMail(mailOptions);
-
+    console.log("Mail sent!");
 
         return res.status(201).json({
             message: "Account created.Please check your email to verify your account.",
