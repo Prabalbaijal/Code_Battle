@@ -89,7 +89,7 @@ export const register = async (req, res) => {
     } catch (error) {
         console.error(error.message)
         return res.status(500).json({
-            message: 'Server Error',
+            message: error.message,
             success: false
         })
     }
