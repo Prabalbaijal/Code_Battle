@@ -1,4 +1,4 @@
-import {User} from '../models/Usermodel.js'
+import { User } from '../models/Usermodel.js'
 import { uploadOnCloudinary } from '../config/cloudinary.js'
 import validator from 'validator'
 import bcrypt from 'bcryptjs'
@@ -30,8 +30,8 @@ export const register = async (req, res) => {
         if (user1) {
             return res.status(400).json({ message: "Email already exists! Try a different one." })
         }
-        if(await User.findOne({username})){
-            return res.status(400).json({message:"Username already exists! Try another one."})
+        if (await User.findOne({ username })) {
+            return res.status(400).json({ message: "Username already exists! Try another one." })
         }
 
         const hashedPass = await bcrypt.hash(password, 10)
@@ -47,14 +47,14 @@ export const register = async (req, res) => {
         if (!avatarUrl) {
             return res.status(400).json({ message: "Avatar is required." });
         }
-         const verificationToken = crypto.randomBytes(32).toString("hex");
-        
+        const verificationToken = crypto.randomBytes(32).toString("hex");
+
         const user = await User.create({
             fullname,
             username,
             email,
             password: hashedPass,
-            avatar:avatarUrl, 
+            avatar: avatarUrl,
             createdAt: new Date(),
             verificationToken,
             verificationTokenExpires: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
@@ -66,23 +66,27 @@ export const register = async (req, res) => {
             })
         }
         const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false, // STARTTLS
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            },
+            tls: { rejectUnauthorized: false },
+            debug: true
+        });
 
         const verificationURL = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: "Verify your email",
-      html: `<p>Click <a href="${verificationURL}">here</a> to verify your email. Link expires in 24 hours.</p>`
-    };
-    console.log("Preparing email...");
-    await transporter.sendMail(mailOptions);
-    console.log("Mail sent!");
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: "Verify your email",
+            html: `<p>Click <a href="${verificationURL}">here</a> to verify your email. Link expires in 24 hours.</p>`
+        };
+        console.log("Preparing email...");
+        await transporter.sendMail(mailOptions);
+        console.log("Mail sent!");
 
         return res.status(201).json({
             message: "Account created.Please check your email to verify your account.",
@@ -112,9 +116,9 @@ export const login = async (req, res) => {
             })
         }
         if (!user.isVerified) {
-            return res.status(403).json({ 
-                message: "Please verify your email before logging in." ,
-                success:false
+            return res.status(403).json({
+                message: "Please verify your email before logging in.",
+                success: false
             });
         }
 
@@ -137,17 +141,17 @@ export const login = async (req, res) => {
             maxAge: 1 * 24 * 60 * 60 * 1000,
             httpOnly: true,
             sameSite: 'None',
-            secure:true,
+            secure: true,
         })
             .json({
                 _id: user._id,
                 email: user.email,
-                fullname:user.fullname,
-                username:user.username,
-                avatar:user.avatar,
-                level:user.level,
-                coins:user.coins,
-                isAdmin:user.isAdmin,
+                fullname: user.fullname,
+                username: user.username,
+                avatar: user.avatar,
+                level: user.level,
+                coins: user.coins,
+                isAdmin: user.isAdmin,
                 success: true
             })
 
@@ -162,35 +166,35 @@ export const login = async (req, res) => {
 
 export const getUser = async (req, res) => {
     try {
-      if (!req.user) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      const user=req.user;
-      res.status(200).json({
-        _id: user._id,
-        email: user.email,
-        fullname:user.fullname,
-        username:user.username,
-        avatar:user.avatar,
-        level:user.level,
-        coins:user.coins,
-        isAdmin:user.isAdmin,
-        success: true
-      });
+        if (!req.user) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+        const user = req.user;
+        res.status(200).json({
+            _id: user._id,
+            email: user.email,
+            fullname: user.fullname,
+            username: user.username,
+            avatar: user.avatar,
+            level: user.level,
+            coins: user.coins,
+            isAdmin: user.isAdmin,
+            success: true
+        });
     } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Internal Server Error" });
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
-  };
-  
+};
+
 
 export const logout = async (req, res) => {
     try {
-        return res.status(200).cookie("token", "", { 
-            maxAge: 0 ,
-            httpOnly:true,
-            sameSite:'None',
-            secure:true
+        return res.status(200).cookie("token", "", {
+            maxAge: 0,
+            httpOnly: true,
+            sameSite: 'None',
+            secure: true
         }).json({
             message: "Logged Out Successfully."
         })
@@ -220,11 +224,15 @@ export const forgotPassword = async (req, res) => {
 
         // Send Reset Email
         const transporter = nodemailer.createTransport({
-            service: "gmail",
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false, // STARTTLS
             auth: {
                 user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
+                pass: process.env.EMAIL_PASS
             },
+            tls: { rejectUnauthorized: false },
+            debug: true
         });
 
         const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
@@ -244,34 +252,34 @@ export const forgotPassword = async (req, res) => {
     }
 };
 export const verifyEmail = async (req, res) => {
-  try {
-    const { token } = req.params;
+    try {
+        const { token } = req.params;
 
-    const user = await User.findOne({
-      verificationToken: token,
-      verificationTokenExpires: { $gt: Date.now() }
-    });
+        const user = await User.findOne({
+            verificationToken: token,
+            verificationTokenExpires: { $gt: Date.now() }
+        });
 
-    if (!user) {
-      return res.status(400).json({ message: "Invalid or expired verification link" });
+        if (!user) {
+            return res.status(400).json({ message: "Invalid or expired verification link" });
+        }
+
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        user.verificationTokenExpires = undefined;
+        await user.save();
+
+        res.json({ message: "Email verified successfully!" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
     }
-
-    user.isVerified = true;
-    user.verificationToken = undefined;
-    user.verificationTokenExpires = undefined;
-    await user.save();
-
-    res.json({ message: "Email verified successfully!" });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
 };
 
 
 export const resetPassword = async (req, res) => {
-   // console.log("inside")
+    // console.log("inside")
     try {
         const { token } = req.params;
         const { newPassword } = req.body;
