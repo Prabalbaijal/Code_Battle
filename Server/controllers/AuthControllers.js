@@ -6,6 +6,9 @@ import jwt from 'jsonwebtoken'
 import crypto from "crypto"
 import nodemailer from "nodemailer"
 import dotenv from 'dotenv'
+import sgMail from "@sendgrid/mail"
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 dotenv.config();
 
@@ -65,27 +68,17 @@ export const register = async (req, res) => {
                 message: "Something went wrong while registering the user!!"
             })
         }
-        const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
-            secure: false, // STARTTLS
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            },
-            tls: { rejectUnauthorized: false },
-            debug: true
-        });
 
         const verificationURL = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
+        const msg = {
             to: user.email,
+            from: process.env.EMAIL_USER, // verified sender
             subject: "Verify your email",
             html: `<p>Click <a href="${verificationURL}">here</a> to verify your email. Link expires in 24 hours.</p>`
         };
+
         console.log("Preparing email...");
-        await transporter.sendMail(mailOptions);
+        await sgMail.send(msg)
         console.log("Mail sent!");
 
         return res.status(201).json({
@@ -219,35 +212,25 @@ export const forgotPassword = async (req, res) => {
         // Generate Reset Token
         const resetToken = crypto.randomBytes(32).toString("hex");
         user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = Date.now() + 3600000; // Token expires in 1 hour
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
         await user.save();
 
-        // Send Reset Email
-        const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
-            secure: false, // STARTTLS
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            },
-            tls: { rejectUnauthorized: false },
-            debug: true
-        });
-
+        // Send Reset Email via SendGrid
         const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
+        const msg = {
             to: user.email,
+            from: process.env.EMAIL_USER, // verified sender
             subject: "Password Reset Request",
             html: `<p>Click <a href="${resetURL}">here</a> to reset your password. This link is valid for 1 hour.</p>`,
         };
 
-        await transporter.sendMail(mailOptions);
-        res.json({ message: "Reset link sent to your email" });
+        console.log("Sending email via SendGrid...");
+        await sgMail.send(msg);
+        console.log("Email sent!");
 
+        res.json({ message: "Reset link sent to your email" });
     } catch (error) {
-        console.error(error);
+        console.error("SendGrid error:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
