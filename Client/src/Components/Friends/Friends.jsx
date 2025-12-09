@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 import Header from '../Header/Header';
 import { setRequestSentModal } from '../../redux/uiSlice';
 import { useRef } from 'react';
+import { FaUserPlus } from "react-icons/fa";
+
 
 const Friends = () => {
   const [friends, setFriends] = useState([]);
@@ -135,7 +137,7 @@ const Friends = () => {
           Your Friends
         </h1>
 
-        {/* 🔍 Search Section */}
+        {/*  Search Section */}
         <div className="flex w-full mb-6 space-x-2">
           <input
             type="text"
